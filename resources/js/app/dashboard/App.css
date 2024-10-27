@@ -1,0 +1,20 @@
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #c1bbdf;
+  border-radius: 40px;
+}
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.range-slider .range-slider__thumb{
+  background: #65c0cf
+}
+
+.range-slider .range-slider__range {
+  background: #65c0cf  
+}
