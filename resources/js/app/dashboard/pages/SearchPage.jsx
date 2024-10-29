@@ -9,40 +9,40 @@ const SearchPage = () => {
  
    const [propertyListing,setPropertyListing] = useState()
    const [searchParams,setSearchParams] = useSearchParams()
-     
+   
    useEffect(()=>{
-    let params = {}
+  let params = {}
 
-    searchParams.forEach((value,key)=>{
+  searchParams.forEach((value,key)=>{
 
-        params[key] = value;
-    })
+  params[key] = value;
+  })
 
-    Axios.get('/agent/property/listings/search', {params:params}).then(data=>{
-        setPropertyListing(data.data.data)
+  Axios.get('/agent/property/listings/search', {params:params}).then(data=>{
+  setPropertyListing(data.data.data)
  
-    }).catch(e=>{
+  }).catch(e=>{
 
-        console.log(e)
-    })
+  console.log(e)
+  })
 
   },[searchParams])
 
   if(!propertyListing?.data.length){
 
-    return <EmptyState title='Empty listings' subtitle='Your search key matches no listings in our database'/>
+  return <EmptyState title='Empty listings' subtitle='Your search key matches no listings in our database'/>
   }
   
   return (
-    <div className='h-full w-full px-5 pb-5 pt-3 overflow-scroll'>
-    <div className='mb-2'>
-        <h1 className='text-2xl font-bold'>Search</h1>
-        <p className='text-xs'>All search matches are available here</p>
-    </div>
-    
-      <Listings propertyListing={propertyListing?.data} pagination={propertyListing} setProperty={setPropertyListing}/>
-         
-    </div>
+  <div className='h-full w-full px-5 pb-5 pt-3 overflow-scroll'>
+  <div className='mb-2'>
+  <h1 className='text-2xl font-bold'>Search</h1>
+  <p className='text-xs'>All search matches are available here</p>
+  </div>
+  
+  <Listings propertyListing={propertyListing?.data} pagination={propertyListing} setProperty={setPropertyListing}/>
+   
+  </div>
   )
 }
 

@@ -10,7 +10,7 @@ import {navLinks} from '../../data/data'
 
 const Aside = ({setIsOpen}) => {
 
-    const handleCloseSideBar = ()=>{setIsOpen(false)}
+  const handleCloseSideBar = ()=>{setIsOpen(false)}
 
 	return (
 		<div className='h-full md:overflow-hidden overflow-auto flex flex-col bg-white'>

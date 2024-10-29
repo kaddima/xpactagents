@@ -2,7 +2,7 @@ import React from 'react'
 
 const UnPublishedProperty = () => {
   return (
-    <div>UnPublishedProperty</div>
+  <div>UnPublishedProperty</div>
   )
 }
 

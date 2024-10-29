@@ -16,10 +16,13 @@ use App\Http\Controllers\ListingController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::prefix('v1')->group(function () {
+	Route::middleware('auth:sanctum')->group(function () {
+		Route::get('/user', function (Request $request) {
+			return $request->user();
+		});
+	});
 
-Route::get('/listings', [ListingController::class,'listings']);
-Route::get('/listings/details', [ListingController::class,'propertyDetails']);
-;
+	Route::get('/listings', [ListingController::class, 'listings']);
+	Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
+});

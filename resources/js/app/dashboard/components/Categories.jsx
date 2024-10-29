@@ -6,24 +6,24 @@ import { categories } from "../data/data"
 
 const Categories = () => {
 
-    // const isMainPage = pathname === '/'
-    // if(!isMainPage){
-    //     return null
-    // }
+  // const isMainPage = pathname === '/'
+  // if(!isMainPage){
+  //   return null
+  // }
   return (
-    <Container>
-        <div className="pt-4 flex items-center justify-between overflow-x-auto">
-            {categories.map((item, i)=>{
+  <Container>
+    <div className="pt-4 flex items-center justify-between overflow-x-auto">
+      {categories.map((item, i)=>{
 
-                return (
-                    <CategoryBox key={i} 
-                    label={item.label}
-                    //selected={category === item.label}
-                    icon={item.icon}/>
-                )
-            })}
-        </div>
-    </Container>
+        return (
+          <CategoryBox key={i} 
+          label={item.label}
+          //selected={category === item.label}
+          icon={item.icon}/>
+        )
+      })}
+    </div>
+  </Container>
   )
 }
 

@@ -15,56 +15,56 @@ const mLocalizer = momentLocalizer(moment)
 
 const ColoredDateCellWrapper = ({ children }) =>
   React.cloneElement(React.Children.only(children), {
-    style: {
-      backgroundColor: 'lightblue',
-    },
+  style: {
+    backgroundColor: 'lightblue',
+  },
   })
 
 const CalenderEvent = ({eventLists}) => {
 
-    let events = useMemo(()=>{
+  let events = useMemo(()=>{
 
-      let arr = []
+    let arr = []
 
-        eventLists.map((value,i)=>{
+    eventLists.map((value,i)=>{
 
-          let obj =  {
-            id: i+1,
-            title: 'Property Tour',
-            start: new Date(value.date),
-            end: new Date(value.date),
-          }
+      let obj =  {
+      id: i+1,
+      title: 'Property Tour',
+      start: new Date(value.date),
+      end: new Date(value.date),
+      }
 
-          arr.push(obj)
-        })
+      arr.push(obj)
+    })
 
-        return arr
-    },[eventLists])
+    return arr
+  },[eventLists])
 
-    const { components, defaultDate, views } = useMemo(
-        () => ({
-          components: {
-            timeSlotWrapper: ColoredDateCellWrapper,
-          },
-          defaultDate: Date.now(),
-          //max: dates.add(dates.endOf(new Date(2015, 17, 1), 'day'), -1, 'hours'),
-          views: Object.keys(Views).map((k) => Views[k]),
-        }),
-        []
-      )
+  const { components, defaultDate, views } = useMemo(
+    () => ({
+      components: {
+      timeSlotWrapper: ColoredDateCellWrapper,
+      },
+      defaultDate: Date.now(),
+      //max: dates.add(dates.endOf(new Date(2015, 17, 1), 'day'), -1, 'hours'),
+      views: Object.keys(Views).map((k) => Views[k]),
+    }),
+    []
+    )
 
   return (
-         <Calendar
-          components={components}
-          //defaultDate={defaultDate}
-          events={events}
-          localizer={mLocalizer}
-          // max={30}
-          showMultiDayTimes
-          // step={60}
-          views={views}
-          className=''
-        />
+     <Calendar
+      components={components}
+      //defaultDate={defaultDate}
+      events={events}
+      localizer={mLocalizer}
+      // max={30}
+      showMultiDayTimes
+      // step={60}
+      views={views}
+      className=''
+    />
   )
 }
 

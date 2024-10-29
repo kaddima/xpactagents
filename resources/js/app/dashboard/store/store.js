@@ -5,11 +5,11 @@ import messageReducer from "./messageSlice"
 
 const store = configureStore({
 
-    reducer:{
-        main: mainReducer,
-        user:userReducer,
-        message:messageReducer
-    }
+  reducer:{
+  main: mainReducer,
+  user:userReducer,
+  message:messageReducer
+  }
 })
 
 export default store

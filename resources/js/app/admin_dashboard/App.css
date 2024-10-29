@@ -9,7 +9,7 @@
 }
 @media  screen and (max-width:800px) {
   .sidebar{
-    z-index: 10000000;
+  z-index: 10000000;
   }
 }
 
@@ -47,7 +47,7 @@
 }
 
 .slider > div{
-    display: none;
+  display: none;
 }
 
 .slider > div.active-slide{

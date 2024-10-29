@@ -12,19 +12,19 @@ const mix = require('laravel-mix');
  */
 
 mix .js('resources/js/app.js', 'public/js')
-    .js('resources/js/dashboard.js','public/js/dashboard_bundle.js')
-    .js('resources/js/admin.js','public/js/admin_bundle.js')
-    .js('resources/js/main.js','public/js/main_bundle.js')
-    .react()
-    .extract(['react'])
-    .postCss('resources/css/app.css', 'public/css', [
-        require('postcss-import'),
-        require('tailwindcss'),
-        require('postcss-nested'),
-        require('autoprefixer'),
-    ]);
+  .js('resources/js/dashboard.js','public/js/dashboard_bundle.js')
+  .js('resources/js/admin.js','public/js/admin_bundle.js')
+  .js('resources/js/main.js','public/js/main_bundle.js')
+  .react()
+  .extract(['react'])
+  .postCss('resources/css/app.css', 'public/css', [
+  require('postcss-import'),
+  require('tailwindcss'),
+  require('postcss-nested'),
+  require('autoprefixer'),
+  ]);
 
 if (mix.inProduction()) {
-    mix
-        .version();
+  mix
+  .version();
 }

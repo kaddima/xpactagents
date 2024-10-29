@@ -6,36 +6,36 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateToursTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
-    {
-        Schema::create('tours', function (Blueprint $table) {
-            $table->uuid("id")->primary();
-            $table->string('first_name')->nullable();
-            $table->string('last_name')->nullable();
-            $table->string('email')->unique();
-            $table->string("phone")->nullable();
-            $table->timestamp("date");
-            $table->text("notes");
-            $table->string("best_contact");
-            $table->uuid("property_id");
-            $table->tinyInteger("resolved")->default(0);
-            $table->uuid("agent_id");
-            $table->timestamps();
-        });
-    }
+	/**
+	 * Run the migrations.
+	 *
+	 * @return void
+	 */
+	public function up()
+	{
+		Schema::create('tours', function (Blueprint $table) {
+			$table->uuid("id")->primary();
+			$table->string('first_name')->nullable();
+			$table->string('last_name')->nullable();
+			$table->string('email')->unique();
+			$table->string("phone")->nullable();
+			$table->timestamp("date");
+			$table->text("notes");
+			$table->string("best_contact");
+			$table->uuid("property_id");
+			$table->tinyInteger("resolved")->default(0);
+			$table->uuid("agent_id");
+			$table->timestamps();
+		});
+	}
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('tours');
-    }
+	/**
+	 * Reverse the migrations.
+	 *
+	 * @return void
+	 */
+	public function down()
+	{
+		Schema::dropIfExists('tours');
+	}
 }

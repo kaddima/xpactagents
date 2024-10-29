@@ -25,74 +25,74 @@ import VerifyEmail from './pages/VerifyEmail';
 
 const Index = ()=>{
 
-    return <Navigate to={'/app'}/>
+  return <Navigate to={'/app'}/>
 }
 
 function App() {
 
-    const dispatch = useDispatch()
+  const dispatch = useDispatch()
 
-    useEffect(()=>{
+  useEffect(()=>{
 
-        axios.get('/logged-user').then(data=>{
+  axios.get('/logged-user').then(data=>{
 
-            if(data.data?.redirect){
+    if(data.data?.redirect){
 
-                location.href = '/dashboard'
-            }
-            dispatch(updateUserInfo(data.data.userInfo))
+    location.href = '/dashboard'
+    }
+    dispatch(updateUserInfo(data.data.userInfo))
 
-        }).catch(e=>{
+  }).catch(e=>{
 
-            console.log(e)
-        })
-        
+    console.log(e)
+  })
+  
 
-    },[])
+  },[])
 
-    return (
-        <div className={`white`}>
-            <BrowserRouter>
-                <div className='flex w-screen h-screen relative overflow-hidden'>
-                   
-                     <Login/>
-                     <Register/>
-                     <div id='spinner' className='fixed left-0 w-screen h-screen z-[9999] hidden' style={{backgroundColor:'rgba(0,0,0,0.1)'}}>
-                        <div className='absolute bottom-2 right-5'>
-                            <div className='w-10 h-10 md:w-16 md:h-16 rounded-full border-4 border-green-600 border-l-white animate-spin '>
-                            </div>
-                        </div>               
-                    </div> 
-                    
-                    <div className={`md:h-screen flex flex-col flex-1 bg-[#FAFAFD]
-                        md:max-h-screen overflow-hidden`}>
-
-                        <div className={`flex z-[40] bg-white w-full`}>
-                            <Navbar/>
-                        </div>
-                        
-                        
-                        <div className='border flex-1 overflow-hidden bg-white h-full w-full'>
-                             <Routes>
-                                <Route path='/' element={<ListingsPage/>}/>
-                                <Route path='/app/q-r' element={<MessageLayout/>}/>
-                                <Route path='/app' element={<ListingsPage/>}/>
-                                <Route path='/app/listings' element={<ListingsPage/>}/>
-                                <Route path='/app/favorites' element={<Favorites/>}/>
-                                <Route path='/app/property/:id' element={<PropertyDetails/>}/>
-                                <Route path='/app/tour/:id/checkout' element={<ScheduleTour/>}/>
-                                <Route path='/app/listings/search' element={<SearchPage/>}/>
-                                <Route path='/app/register/verify-email' element={<VerifyEmail/>}/>
-
-                                <Route path='*' element={<Index/>}/>
-                            </Routes>
-                        </div>
-                        <ToastContainer/>
-                    </div>          
-                </div>
-            </BrowserRouter>         
+  return (
+  <div className={`white`}>
+    <BrowserRouter>
+    <div className='flex w-screen h-screen relative overflow-hidden'>
+       
+       <Login/>
+       <Register/>
+       <div id='spinner' className='fixed left-0 w-screen h-screen z-[9999] hidden' style={{backgroundColor:'rgba(0,0,0,0.1)'}}>
+      <div className='absolute bottom-2 right-5'>
+        <div className='w-10 h-10 md:w-16 md:h-16 rounded-full border-4 border-green-600 border-l-white animate-spin '>
         </div>
-    );
+      </div>     
+      </div> 
+      
+      <div className={`md:h-screen flex flex-col flex-1 bg-[#FAFAFD]
+      md:max-h-screen overflow-hidden`}>
+
+      <div className={`flex z-[40] bg-white w-full`}>
+        <Navbar/>
+      </div>
+      
+      
+      <div className='border flex-1 overflow-hidden bg-white h-full w-full'>
+         <Routes>
+        <Route path='/' element={<ListingsPage/>}/>
+        <Route path='/app/q-r' element={<MessageLayout/>}/>
+        <Route path='/app' element={<ListingsPage/>}/>
+        <Route path='/app/listings' element={<ListingsPage/>}/>
+        <Route path='/app/favorites' element={<Favorites/>}/>
+        <Route path='/app/property/:id' element={<PropertyDetails/>}/>
+        <Route path='/app/tour/:id/checkout' element={<ScheduleTour/>}/>
+        <Route path='/app/listings/search' element={<SearchPage/>}/>
+        <Route path='/app/register/verify-email' element={<VerifyEmail/>}/>
+
+        <Route path='*' element={<Index/>}/>
+        </Routes>
+      </div>
+      <ToastContainer/>
+      </div>    
+    </div>
+    </BrowserRouter>   
+  </div>
+  );
 }
 
 export default App;

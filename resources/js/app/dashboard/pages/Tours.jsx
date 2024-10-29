@@ -95,9 +95,9 @@ const Tours = () => {
 	}
 	
   return (
-    <div className='w-full'>
-        <h1 className='text-2xl font-bold mb-8'>Tour requests</h1>
-        <div className='bg-white overflow-hidden py-5'>
+  <div className='w-full'>
+  <h1 className='text-2xl font-bold mb-8'>Tour requests</h1>
+  <div className='bg-white overflow-hidden py-5'>
 			<div className='w-[98vw] md:w-[80vw] px-3 mx-auto'>
 				<div className='mb-5'>
 					<h1 className='text-lg font-semibold'>Calender view</h1>
@@ -108,7 +108,7 @@ const Tours = () => {
 				</div>
 				
 			</div>  
-          
+    
 
 			<div className='mt-5'>
 				<div className='overflow-auto'>
@@ -151,9 +151,9 @@ const Tours = () => {
 				</div>	
 			</div>
    
-        </div>
-        
-    </div> 
+  </div>
+  
+  </div> 
   )
 }
 
