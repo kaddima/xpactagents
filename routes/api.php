@@ -1,8 +1,8 @@
 <?php
 
+use App\Http\Controllers\Api\AuthenticationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TourController;
 use App\Http\Controllers\ListingController;
 
 /*
@@ -17,12 +17,22 @@ use App\Http\Controllers\ListingController;
 */
 
 Route::prefix('v1')->group(function () {
+	//login route
+	Route::controller(AuthenticationController::class)->group(function(){
+		Route::post('/login', "login");
+		Route::post('/register', "register");
+	});
+	
+	/**user must be authenticated to access this routes */
 	Route::middleware('auth:sanctum')->group(function () {
-		Route::get('/user', function (Request $request) {
-			return $request->user();
-		});
+		Route::post('/logout', [AuthenticationController::class, "logout"]);
 	});
 
-	Route::get('/listings', [ListingController::class, 'listings']);
-	Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
+	
+Route::get('/listings', [ListingController::class, 'listings']);
+Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
+
 });
+
+Route::get('/listings', [ListingController::class, 'listings']);
+Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
