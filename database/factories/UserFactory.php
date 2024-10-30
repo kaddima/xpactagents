@@ -23,6 +23,7 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
+            "id"=>$this->faker->uuid(),
             'first_name' => $this->faker->name(),
             'last_name'=> $this->faker->name(),
             'is_agent'=> 0,

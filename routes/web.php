@@ -34,8 +34,6 @@ Route::post('/change-password', [PasswordResetController::class, 'changePassword
 
 Route::post('/resend-verification-email', [EmailVerificationController::class, 'ResendEmail']);
 Route::post('/verify-email-token', [EmailVerificationController::class, 'verifyEmailToken']);
-
-
 Route::post('/signin', [LoginController::class, 'store']);
 Route::post('/create-account', [RegisterController::class, 'store']);
 Route::get('/logout', [LoginController::class, 'logout']);
