@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Services\EmailService;
 use App\Services\HelperServices;
 use App\Services\UserService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use stdClass;
 
-class AuthenticationController extends Controller
+class AuthenticationController extends BaseController
 {
-	use HelperServices;
+	use HelperServices, EmailService;
+
 	protected $userService;
 
 	public function __construct(UserService $userService)
@@ -41,7 +43,7 @@ class AuthenticationController extends Controller
 		// Validate the request
 		$validator = Validator::make($formdata, $rules, $messages);
 		if ($validator->fails()) {
-			return response()->json(['errors' => $validator->errors()], 401);
+			return $this->sendError($validator->errors());
 		}
 
 		// Determine registration type and adjust rules accordingly
@@ -53,7 +55,7 @@ class AuthenticationController extends Controller
 		// Validate req
 		$validator = Validator::make($formdata, $rules);
 		if ($validator->fails()) {
-			return response()->json(['errors' => $validator->errors()], 401);
+			return $this->sendError($validator->errors());
 		}
 
 		// Prepare data for user creation
@@ -74,34 +76,15 @@ class AuthenticationController extends Controller
 		// Create the user
 		$user = $this->userService->create($column_value);
 
-		// Prepare email message
-		$subject = 'Email Verification';
-		$message = <<<EMAIL
-					<div style="margin-top:10px">
-							<h1 style="font-size:18px; font-weight:bold;">Confirm your registration</h1>
-							<div style="margin-top:10px;">
-									<p style="margin: 0;padding:0;">Welcome to Xpact Agent</p>
-									<p style="margin: 0;padding:0;">Here is your account activation code</p>
-							</div>
-							<h1>$token</h1>
-							<div>
-									<h4>Security tips</h4>
-									<ul style="padding-left: 20px;">
-											<li>Never give your password to anyone</li>
-											<li>Never call any phone number or personal details for anyone claiming to be XpactAgent support.</li>
-									</ul>
-							</div>
-							<p style="font-size:13px;">This step is to ensure that your email address is not used without your consent. You can ignore this email if this was not triggered by you</p>
-							<div style="color: rgb(129, 122, 122);">
-									<p style="margin: 0;padding:0;">XpactAgent Team</p>
-									<span>This is an automated message please do not reply</span>
-							</div>
-					</div>
-EMAIL;
+		$mail_data = new stdClass;
+		$mail_data->email = $req->email;
+		$mail_data->token = $token;
+		$mail_data->subject = "Email Verification";
+		
+		//send email
+		$this->sendOTPEmailVerification($mail_data);
 
-		// Mailer::sendMail($formdata['email'], $message, $subject, true);
-
-		return response()->json(['data' => $column_value, 'token' => $token]);
+		return $this->sendResponse(['token' => $token],"Account created successfully");
 	}
 
 	/**
@@ -116,7 +99,7 @@ EMAIL;
 		]);
 
 		if ($validator->fails()) {
-			return response()->json(['errors' => $validator->errors()]);
+			return $this->sendError($validator->errors());
 		}
 
 		$user = $this->userService->getUserByEmail(
@@ -124,18 +107,18 @@ EMAIL;
 
 		if ($user && Hash::check($req->input('password'), $user->password)) {
 			$token = $user->createToken('api_access_token')->plainTextToken;
-			return response()->json(['token' => $token,]);
+			return $this->sendResponse(['token' => $token,]);
 		}
-		return response()->json(['error' => "Unauthorized"], 401);
+		return $this->sendError("Unauthorized");
 	}
 
 	/** Logout logic-- deletes user api token */
 	public function logout(Request $req)
 	{
 		if (!$req->user()) {
-			return response()->json(["message" => "Unauthoriedddd"], 401);
+			return $this->sendError("Unauthorized");
 		}
 		$req->user()->tokens()->delete();
-		return response()->json(['message' => "logout successful"]);
+		return $this->sendResponse(null,"logout successful");
 	}
 }
