@@ -26,4 +26,8 @@ trait HelperServices
 
     return $email;
   }
+
+  public function generateOTP(){
+    return rand(100000, 999999);
+  }
 }

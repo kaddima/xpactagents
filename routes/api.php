@@ -17,10 +17,11 @@ use App\Http\Controllers\ListingController;
 */
 
 Route::prefix('v1')->group(function () {
-	//login route
+	// Authentication route
 	Route::controller(AuthenticationController::class)->group(function(){
 		Route::post('/login', "login");
 		Route::post('/register', "register");
+		Route::post('/register/resend-otp', "resendOTPEmail");
 	});
 	
 	/**user must be authenticated to access this routes */

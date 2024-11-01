@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Services\EmailService;
 use App\Services\HelperServices;
-use App\Services\UserService;
+use App\Repository\UserRepository;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -14,17 +14,18 @@ class AuthenticationController extends BaseController
 {
 	use HelperServices, EmailService;
 
-	protected $userService;
+	protected $userRepository;
 
-	public function __construct(UserService $userService)
+	public function __construct(UserRepository $userRepository)
 	{
-		$this->userService = $userService;
+		$this->userRepository = $userRepository;
 	}
 
 	public function register(Request $req)
 	{
-		$token = rand(100000, 999999);
+		$token = $this->generateOTP();
 		$formdata = $req->all();
+
 		// Define validation rules
 		$rules = [
 			'email' => 'required|email|unique:users',
@@ -50,7 +51,7 @@ class AuthenticationController extends BaseController
 		if ($req->input('reg_type') == 'user') {
 			$rules['first_name'] = 'required';
 			$rules['last_name'] = 'required';
-			$rules['phone'] = 'required|min:11';
+			$rules['phone'] = 'required|min:11|regex:/^[0-9]+$/';
 		}
 		// Validate req
 		$validator = Validator::make($formdata, $rules);
@@ -74,18 +75,57 @@ class AuthenticationController extends BaseController
 		}
 
 		// Create the user
-		$user = $this->userService->create($column_value);
+		$this->userRepository->create($column_value);
 
 		$mail_data = new stdClass;
 		$mail_data->email = $req->email;
 		$mail_data->token = $token;
 		$mail_data->subject = "Email Verification";
-		
+
 		//send email
 		$this->sendOTPEmailVerification($mail_data);
 
-		return $this->sendResponse(['token' => $token],"Account created successfully");
+		return $this->sendResponse(['token' => $token], "Account created successfully");
 	}
+
+	public function resendOTPEmail(Request $request)
+	{
+		$token = $this->generateOTP();
+
+		$formdata = $request->all();
+		$validator = Validator::make($formdata, ['email' => 'required|email']);
+
+		if ($validator->fails()) {
+			return $this->sendError($validator->errors());
+		}
+
+		// Check if the user exists
+		$user = $this->userRepository->findByEmail($this->normalizeEmail($formdata["email"]));
+		if (!$user) {
+			return $this->sendError(['email' => 'No account found with this email address.'], 404);
+		}
+
+
+		$this->userRepository->updateByEmail(
+			$this->normalizeEmail($formdata["email"]),
+			['activation_code' => Hash::make($token)]
+		);
+
+		$mail_data = new stdClass;
+		$mail_data->email = $request->email;
+		$mail_data->token = $token;
+		$mail_data->subject = "Email Verification";
+
+		// Send email and handle exceptions
+		try {
+			$this->sendOTPEmailVerification($mail_data);
+		} catch (\Exception $e) {
+			return $this->sendError(['email' => 'Failed to send verification email. Please try again.'], 500);
+		}
+
+		return $this->sendResponse(['token' => $token], "OTP resent successfully");
+	}
+
 
 	/**
 	 * Handles login functionalities for the api
@@ -102,8 +142,9 @@ class AuthenticationController extends BaseController
 			return $this->sendError($validator->errors());
 		}
 
-		$user = $this->userService->getUserByEmail(
-			$this->normalizeEmail($req->get("email")));
+		$user = $this->userRepository->findByEmail(
+			$this->normalizeEmail($req->get("email"))
+		);
 
 		if ($user && Hash::check($req->input('password'), $user->password)) {
 			$token = $user->createToken('api_access_token')->plainTextToken;
@@ -119,6 +160,6 @@ class AuthenticationController extends BaseController
 			return $this->sendError("Unauthorized");
 		}
 		$req->user()->tokens()->delete();
-		return $this->sendResponse(null,"logout successful");
+		return $this->sendResponse(null, "logout successful");
 	}
 }
