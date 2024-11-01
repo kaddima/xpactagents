@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Services\EmailService;
 use App\Services\HelperServices;
 use App\Repository\UserRepository;
+use App\Services\AuthService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
@@ -17,18 +18,15 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AuthenticationController extends BaseController
 {
-	use HelperServices, EmailService;
+	protected $authService;
 
-	protected $userRepository;
-
-	public function __construct(UserRepository $userRepository)
+	public function __construct(AuthService $authService)
 	{
-		$this->userRepository = $userRepository;
+		$this->authService = $authService;
 	}
 
 	public function register(Request $req)
 	{
-		$token = $this->generateOTP();
 		$formdata = $req->all();
 
 		// Define validation rules
@@ -44,7 +42,6 @@ class AuthenticationController extends BaseController
 			'reg_type.required' => 'The registration type is required. Please specify either user or agent.',
 			'reg_type.in' => 'The registration type must be either user or agent.'
 		];
-
 
 		// Validate the request
 		$validator = Validator::make($formdata, $rules, $messages);
@@ -63,72 +60,21 @@ class AuthenticationController extends BaseController
 		if ($validator->fails()) {
 			throw new ValidationException($validator);
 		}
+		$this->authService->register($validator->validated());
 
-		// Prepare data for user creation
-		$column_value = [
-			'email' => $this->normalizeEmail($formdata['email']),
-			'password' => Hash::make($formdata['password']), // Hash the password
-			'activation_code' => Hash::make($token)
-		];
-
-		if ($req->input('reg_type') == 'user') {
-			$column_value['first_name'] = $formdata['first_name'];
-			$column_value['last_name'] = $formdata['last_name'];
-			$column_value['phone'] = $formdata['phone'];
-		} else {
-			$column_value['is_agent'] = 1;
-		}
-
-		// Create the user
-		$this->userRepository->create($column_value);
-
-		$mail_data = new stdClass;
-		$mail_data->email = $req->email;
-		$mail_data->token = $token;
-		$mail_data->subject = "Email Verification";
-
-		//send email
-		$this->sendOTPEmailVerification($mail_data);
-
-		return $this->sendResponse(null,"Account created successfully");
+		return $this->sendResponse(null, "Account created successfully");
 	}
 
 	public function resendOTPEmail(Request $request)
 	{
-		$token = $this->generateOTP();
-
 		$formdata = $request->all();
 		$validator = Validator::make($formdata, ['email' => 'required|email']);
 
 		if ($validator->fails()) {
 			throw new ValidationException($validator);
 		}
-
-		// Check if the user exists
-		$user = $this->userRepository->findByEmail($this->normalizeEmail($formdata["email"]));
-		if (!$user) {
-			throw new ModelNotFoundException("User not found: Email not associated with an account");
-		}
-
-
-		$this->userRepository->updateByEmail(
-			$this->normalizeEmail($formdata["email"]),
-			['activation_code' => Hash::make($token)]
-		);
-
-		$mail_data = new stdClass;
-		$mail_data->email = $request->email;
-		$mail_data->token = $token;
-		$mail_data->subject = "Email Verification";
-
-		// Send email and handle exceptions
-		try {
-			$this->sendOTPEmailVerification($mail_data);
-		} catch (\Exception $e) {
-			return $this->sendError(['email' => 'Failed to send verification email. Please try again.'], 500);
-		}
-
-		return $this->sendResponse(['token' => $token], "OTP resent successfully");
+		$this->authService->resendOTPEmail($validator->validated());
+		return $this->sendResponse(null, "OTP resent successfully");
 	}
 
 
@@ -147,16 +93,8 @@ class AuthenticationController extends BaseController
 			Log::warning('Validation failed: ' . json_encode($validator->errors()));
 			throw new ValidationException($validator);
 		}
-
-		$user = $this->userRepository->findByEmail(
-			$this->normalizeEmail($req->get("email"))
-		);
-
-		if ($user && Hash::check($req->input('password'), $user->password)) {
-			$token = $user->createToken('api_access_token')->plainTextToken;
-			return $this->sendResponse(['token' => $token,]);
-		}
-		throw new AuthenticationException("Invalid username or password");
+		$token = $this->authService->login($validator->validated());
+		return $this->sendResponse(['token' => $token]);
 	}
 
 	/** Logout logic-- deletes user api token */
