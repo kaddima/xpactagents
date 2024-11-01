@@ -5,10 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Services\EmailService;
 use App\Services\HelperServices;
 use App\Repository\UserRepository;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use stdClass;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class AuthenticationController extends BaseController
 {
@@ -44,7 +49,7 @@ class AuthenticationController extends BaseController
 		// Validate the request
 		$validator = Validator::make($formdata, $rules, $messages);
 		if ($validator->fails()) {
-			return $this->sendError($validator->errors());
+			throw new ValidationException($validator);
 		}
 
 		// Determine registration type and adjust rules accordingly
@@ -56,7 +61,7 @@ class AuthenticationController extends BaseController
 		// Validate req
 		$validator = Validator::make($formdata, $rules);
 		if ($validator->fails()) {
-			return $this->sendError($validator->errors());
+			throw new ValidationException($validator);
 		}
 
 		// Prepare data for user creation
@@ -85,7 +90,7 @@ class AuthenticationController extends BaseController
 		//send email
 		$this->sendOTPEmailVerification($mail_data);
 
-		return $this->sendResponse(['token' => $token], "Account created successfully");
+		return $this->sendResponse(null,"Account created successfully");
 	}
 
 	public function resendOTPEmail(Request $request)
@@ -96,13 +101,13 @@ class AuthenticationController extends BaseController
 		$validator = Validator::make($formdata, ['email' => 'required|email']);
 
 		if ($validator->fails()) {
-			return $this->sendError($validator->errors());
+			throw new ValidationException($validator);
 		}
 
 		// Check if the user exists
 		$user = $this->userRepository->findByEmail($this->normalizeEmail($formdata["email"]));
 		if (!$user) {
-			return $this->sendError(['email' => 'No account found with this email address.'], 404);
+			throw new ModelNotFoundException("User not found: Email not associated with an account");
 		}
 
 
@@ -139,7 +144,8 @@ class AuthenticationController extends BaseController
 		]);
 
 		if ($validator->fails()) {
-			return $this->sendError($validator->errors());
+			Log::warning('Validation failed: ' . json_encode($validator->errors()));
+			throw new ValidationException($validator);
 		}
 
 		$user = $this->userRepository->findByEmail(
@@ -150,15 +156,12 @@ class AuthenticationController extends BaseController
 			$token = $user->createToken('api_access_token')->plainTextToken;
 			return $this->sendResponse(['token' => $token,]);
 		}
-		return $this->sendError("Unauthorized");
+		throw new AuthenticationException("Invalid username or password");
 	}
 
 	/** Logout logic-- deletes user api token */
 	public function logout(Request $req)
 	{
-		if (!$req->user()) {
-			return $this->sendError("Unauthorized");
-		}
 		$req->user()->tokens()->delete();
 		return $this->sendResponse(null, "logout successful");
 	}

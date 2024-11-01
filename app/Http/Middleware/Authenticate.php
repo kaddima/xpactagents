@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Support\Facades\Log;
 
 class Authenticate extends Middleware
 {
@@ -19,12 +21,4 @@ class Authenticate extends Middleware
 		}
 	}
 
-	protected function unauthenticated($request, array $guards)
-	{
-		if ($request->expectsJson()) {
-			return response()->json(['message' => 'Unauthorized'], 401);
-		}
-		//return redirect()->guest(route('login'));
-
-	}
 }
