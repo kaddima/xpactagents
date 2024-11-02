@@ -39,7 +39,8 @@ class User extends Authenticatable
 		'password',
 		'is_agent',
 		'activation_code',
-		'creator_id'
+		'creator_id',
+		'otp_expires_at'
 	];
 
 

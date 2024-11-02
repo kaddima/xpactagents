@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function () {
 		Route::post('/login', "login");
 		Route::post('/register', "register");
 		Route::post('/register/resend-otp', "resendOTPEmail");
+		Route::post('/register/verify-email', "verifyEmail");
 	});
 	
 	/**user must be authenticated to access this routes */

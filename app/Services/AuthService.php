@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundException;
 use App\Repository\UserRepository;
+use Carbon\Carbon;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
@@ -18,6 +21,10 @@ class AuthService
     $this->userRepository = $userRepository;
   }
 
+  /**
+   * Creates a new user acount
+   * 
+   */
   public function register($data)
   {
     $token = $this->generateOTP();
@@ -26,7 +33,8 @@ class AuthService
     $column_value = [
       'email' => $this->normalizeEmail($data['email']),
       'password' => Hash::make($data['password']), // Hash the password
-      'activation_code' => Hash::make($token)
+      'activation_code' => Hash::make($token),
+      'otp_expires_at' => Carbon::now()->addMinutes(1)
     ];
 
     if ($data['reg_type'] == 'user') {
@@ -37,7 +45,7 @@ class AuthService
       $column_value['is_agent'] = 1;
     }
     // Create the user
-    //$this->userRepository->create($data);
+    $this->userRepository->create($column_value);
 
     $mail_data = new \stdClass;
     $mail_data->email = $data['email'];
@@ -48,20 +56,26 @@ class AuthService
     $this->sendOTPEmailVerification($mail_data);
   }
 
+  /**
+   * Generates new otp for the account
+   */
   public function resendOTPEmail($data)
   {
     $token = $this->generateOTP();
 
     // Check if the user exists
-		$user = $this->userRepository->findByEmail($this->normalizeEmail($data["email"]));
-		if (!$user) {
-			throw new NotFoundException("User not found: Email not associated with an account");
-		}
+    $user = $this->userRepository->findByEmail($this->normalizeEmail($data["email"]));
+    if (!$user) {
+      throw new NotFoundException("User not found: Email not associated with an account");
+    }
 
     $this->userRepository->updateByEmail(
-			$this->normalizeEmail($data["email"]),
-			['activation_code' => Hash::make($token)]
-		);
+      $this->normalizeEmail($data["email"]),
+      [
+        'activation_code' => Hash::make($token),
+        "otp_expires_at" => Carbon::now()->addMinutes(3)
+      ]
+    );
 
     $mail_data = new \stdClass;
     $mail_data->email = $data['email'];
@@ -72,19 +86,42 @@ class AuthService
     $this->sendOTPEmailVerification($mail_data);
   }
 
-  	/**
-	 * Handles login functionalities for the api
-	 */
-	public function login($data)
-	{
-		$user = $this->userRepository->findByEmail(
-			$this->normalizeEmail($data["email"])
-		);
+  /**
+   * Verifies the email using the provide token
+   */
+  public function verifyEmailOTP(array $data)
+  {
+    $user = $this->userRepository->findByEmail($this->normalizeEmail($data['email']));
 
-		if ($user && Hash::check($data['password'], $user->password)) {
-			return $user->createToken('api_access_token')->plainTextToken;
-		}
-		throw new AuthenticationException("Invalid username or password");
-	}
+    if (
+      !$user ||
+      !Hash::check($data['otp'], $user->activation_code) ||
+      Carbon::now()->greaterThan($user->otp_expires_at)
+    ) {
+      throw ValidationException::withMessages(["email_verification"=>"Invalid or expired token."]);
+    }
 
+    $user->email_verified_at = now();
+    $user->email_verify = 1; // Clear the token
+    $user->otp_expires_at = null; // Clear the expiration
+    $user->activation_code = null; // Clear the expiration
+    $user->save();
+   
+    return $user->createToken("api_access_token")->plainTextToken;
+  }
+
+  /**
+   * Handles login functionalities for the api
+   */
+  public function login($data)
+  {
+    $user = $this->userRepository->findByEmail(
+      $this->normalizeEmail($data["email"])
+    );
+
+    if ($user && Hash::check($data['password'], $user->password)) {
+      return $user->createToken('api_access_token')->plainTextToken;
+    }
+    throw new AuthenticationException("Invalid username or password");
+  }
 }
