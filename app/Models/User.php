@@ -42,9 +42,7 @@ class User extends Authenticatable
 		'creator_id',
 		'otp_expires_at'
 	];
-
-
-
+	
 	protected $table = 'users';
 
 	/**

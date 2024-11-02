@@ -29,7 +29,7 @@ class OTPEmailVerification extends Mailable
      */
     public function build()
     {
-        return $this->subject($this->data->subject)
+        return $this->subject("Email Verification")
         ->view('emails.auth.otpverify')
         ->with(["token"=>$this->data->token]);
     }

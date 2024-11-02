@@ -3,22 +3,29 @@
 namespace App\Services;
 
 use App\Exceptions\NotFoundException;
+use App\Repository\PasswordResetRepository;
 use App\Repository\UserRepository;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use stdClass;
 
 class AuthService
 {
   use HelperServices, EmailService;
 
   protected $userRepository;
+  protected $passwordResetRepo;
 
-  public function __construct(UserRepository $userRepository)
-  {
+  public function __construct(
+    UserRepository $userRepository,
+    PasswordResetRepository $passwordResetRepo
+  ) {
     $this->userRepository = $userRepository;
+    $this->passwordResetRepo = $passwordResetRepo;
   }
 
   /**
@@ -50,7 +57,6 @@ class AuthService
     $mail_data = new \stdClass;
     $mail_data->email = $data['email'];
     $mail_data->token = $token;
-    $mail_data->subject = "Email Verification";
 
     //send email
     $this->sendOTPEmailVerification($mail_data);
@@ -73,14 +79,13 @@ class AuthService
       $this->normalizeEmail($data["email"]),
       [
         'activation_code' => Hash::make($token),
-        "otp_expires_at" => Carbon::now()->addMinutes(3)
+        "otp_expires_at" => Carbon::now()->addMinutes(env('TOKEN_EXP'))
       ]
     );
 
     $mail_data = new \stdClass;
     $mail_data->email = $data['email'];
     $mail_data->token = $token;
-    $mail_data->subject = "Email Verification";
 
     //send email
     $this->sendOTPEmailVerification($mail_data);
@@ -98,7 +103,7 @@ class AuthService
       !Hash::check($data['otp'], $user->activation_code) ||
       Carbon::now()->greaterThan($user->otp_expires_at)
     ) {
-      throw ValidationException::withMessages(["email_verification"=>"Invalid or expired token."]);
+      throw ValidationException::withMessages(["email_verification" => "Invalid or expired token."]);
     }
 
     $user->email_verified_at = now();
@@ -106,7 +111,7 @@ class AuthService
     $user->otp_expires_at = null; // Clear the expiration
     $user->activation_code = null; // Clear the expiration
     $user->save();
-   
+
     return $user->createToken("api_access_token")->plainTextToken;
   }
 
@@ -123,5 +128,63 @@ class AuthService
       return $user->createToken('api_access_token')->plainTextToken;
     }
     throw new AuthenticationException("Invalid username or password");
+  }
+
+  public function sendPasswordResetToken($data)
+  {
+    //get the user
+    $email = $this->normalizeEmail($data["email"]);
+    $user = $this->userRepository->findByEmail($email);
+    if (!$user) {
+      throw new NotFoundException("Invalid email address");
+    }
+
+    //generate token
+    $token = $this->generateOTP();
+
+    try{
+      $email_data = new stdClass;
+      $email_data->email = $user->email;
+      $email_data->token = $token;
+  
+      //send password reset token mail
+      $this->sendPasswordResetTokenMail($email_data);
+
+      $this->passwordResetRepo->create(
+        [
+          "token" => Hash::make($token),
+          "email" => $user->email,
+          "token_expires_at" => Carbon::now()->addMinutes(env('TOKEN_EXP'))
+        ]
+      );
+    }catch(Exception $e){
+      throw $e;
+    }
+
+    return $email;
+  }
+
+  public function resetPassword($data)
+  {
+    $email = $this->normalizeEmail($data["email"]);
+    $user = $this->userRepository->findByEmail($email);
+    if (!$user) {
+      throw new NotFoundException("Invalid email address");
+    }
+
+    $passwordReset = $this->passwordResetRepo->findByEmail($user->email);
+    
+    if (
+      !$passwordReset ||
+      !Hash::check($data['token'], $passwordReset->token) ||
+      Carbon::now()->greaterThan($passwordReset->token_expires_at)
+    ) {
+      throw ValidationException::withMessages(["Password_reset" => "Invalid or expired token."]);
+    }
+
+    $passwordReset->delete();
+
+    $user->password = $data['password'];
+    $user->save();
   }
 }
