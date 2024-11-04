@@ -107,11 +107,11 @@ class RegisterController extends Controller
     </div>
 EMAIL;
 
-      // Mailer::sendMail($data['email'],$message,$subject,true);
+       //Mailer::sendMail($formdata['email'],$message,$subject,true);
 
         //return redirect()->intended('register')->with('success',true);
 
-        return json_encode(['data'=>$column_value,'token'=>$token]);
+        return json_encode(['status'=>1,'data'=>1]);
 
     }
 }

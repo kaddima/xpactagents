@@ -3,8 +3,8 @@ import $ from 'jquery'
 
 export const showLoading = ()=>{
 
-  //display spinner
-  $('#spinner').fadeIn()
+      //display spinner
+      $('#spinner').fadeIn()
 
 }
 

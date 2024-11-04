@@ -41,6 +41,10 @@ class TourController extends Controller
 
         $agent_id = auth()->user()['id'];
 
+        if($request->has('agent_id')){
+            $agent_id = $request->get('agent_id');
+        }
+
         $tours = Tour::where(['agent_id'=>$agent_id,'resolved'=>0])->get();
 
         return json_encode(['data'=>$tours]);

@@ -31,9 +31,9 @@ class PasswordResetController extends Controller
 
         $email = $request->get('email');
 
-        $url = route('resetpassword.get',['token'=>$token]);
+        $url = "https://xpactagents.com/app/reset-password/".$token;
 
-        DB::table('password_resets')->insert([
+        DB::table('password_resets')->updateOrInsert(['email'=>$email],[
             'email' => $email,
             'token' => $token,
             'created_at' => Carbon::now()
@@ -41,10 +41,10 @@ class PasswordResetController extends Controller
 
         //set up email message and url to send to user
         $message = <<<EMAIL
-        <div style="width:80%;padding: 20px 10px;margin: auto;" class="border">
+        
         <div style="text-align: center">
             <h2 style="font-size: 2rem;font-weight: bold; margin-bottom: 12px;opacity: .8">Password Reset</h2>
-            <p>You have requested to reset your password on xpactagent.com.
+            <p>You have requested to reset your password on xpactagents.com.
             Please click the link below to reset your password.</p>
 
             <a href="$url" style="background: #007bff; padding: .5em;
@@ -54,12 +54,12 @@ class PasswordResetController extends Controller
                 this email. Only a person with access to your email can reset your account password</p>
             </div>
         </div>
-    </div>
+    
 EMAIL;
 
-        Mailer::sendMail($email,$message,'Password Reset');
+       // Mailer::sendMail($email,$message,'Password Reset');
 
-       return back()->withInput()->with('message', 'We have e-mailed your password reset link!');
+       return json_encode(['status'=>1]);
     }
 
     public function showResetPasswordForm($token){
@@ -71,17 +71,15 @@ EMAIL;
     {
         $request->validate([
             'password' => 'required|string|min:6',
-            'verify' => 'required|same:password'
+            'c_password' => 'required|same:password'
         ]);
 
         $updatePassword = DB::table('password_resets')
-            ->where([
-                'token' => $request->get('token')
-            ])
+            ->where(['token' => $request->get('token')])
             ->first();
 
         if(!$updatePassword){
-            return back()->withInput()->with('error', 'Invalid token!');
+            return json_encode(['status'=>0,'error'=>'Invalid token! ']);
         }
 
 
@@ -90,7 +88,7 @@ EMAIL;
 
         DB::table('password_resets')->where(['email'=> $updatePassword->email])->delete();
 
-        return redirect('/signin')->with('message', 'Your password has been changed!');
+        return json_encode(['status'=>1]);
     }
 
     public function changePassword(Request $request){

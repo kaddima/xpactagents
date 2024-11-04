@@ -14,22 +14,22 @@ const TableRow = ({data,index,onResolve})=>{
 
    
 	return (
-		  <tr className='py-3'>
+		  <tr className=''>
 			  <td className='hidden md:block text-center border-b-1 border-b-gray-300 py-3'>
-				  <span className='text-sm block text-gray-700'>{index}</span>
+				  <span className='text-sm block'>{index}</span>
 			  </td>
 			   <td className='text-center border-b-1 border-b-gray-300'>
-				  <span className='text-sm text-center block text-gray-700'>{data.first_name} {data.last_name}</span>
+				  <span className='text-sm text-center block'>{data.first_name} {data.last_name}</span>
 			  </td>
 			   <td className='text-center border-b-1 border-b-gray-300'>
-				  <span className='text-sm text-center block text-gray-700'>{data.phone}</span>
+				  <span className='text-sm text-center block '>{data.phone}</span>
 			  </td>
 			  <td className='text-center border-b-1 border-b-gray-300'>
-				  <span className='text-sm text-center block text-gray-700'>{data.date && format(parseISO(data.date),'eee, dd MMM Y')}</span>
+				  <span className='text-sm text-center block '>{data.date && format(parseISO(data.date), 'eee, dd MMM Y')}</span>
 			  </td>
 			  <td className='text-center border-b-1 border-b-gray-300'>
-				  <span className='text-sm text-center block text-gray-700'>
-					  {format(new Date(data.date), 'h:mm a')}
+				  <span className='text-sm text-center block '>
+				 	 {format(parseISO(data.date), 'h:mm a')}
 				  </span>
 			  </td>
   
@@ -76,7 +76,7 @@ const Tours = () => {
 	useEffect(()=>{
 
 			Axios.get('/tours/agent/all').then((data)=>{
-				setTourList(data.data.data)
+				setTourList(data.data?.data)
 				//console.log(data.data)
 			}).catch(e=>{
 				console.log(e)
@@ -87,7 +87,7 @@ const Tours = () => {
 	if(!tourList.length){
 
 		return (
-			<div className='w-full h-full bg-white'>
+			<div className='w-full h-full  '>
 				<EmptyState title='No tour requests' subtitle='All tour request will be listed on this page'/>
 			</div>
 			
@@ -95,9 +95,9 @@ const Tours = () => {
 	}
 	
   return (
-  <div className='w-full'>
-  <h1 className='text-2xl font-bold mb-8'>Tour requests</h1>
-  <div className='bg-white overflow-hidden py-5'>
+    <div className='w-full'>
+        <h1 className='text-2xl font-bold mb-8'>Tour requests</h1>
+        <div className='  overflow-hidden py-5'>
 			<div className='w-[98vw] md:w-[80vw] px-3 mx-auto'>
 				<div className='mb-5'>
 					<h1 className='text-lg font-semibold'>Calender view</h1>
@@ -108,7 +108,7 @@ const Tours = () => {
 				</div>
 				
 			</div>  
-    
+          
 
 			<div className='mt-5'>
 				<div className='overflow-auto'>
@@ -121,7 +121,7 @@ const Tours = () => {
 						</div>
 						
 						<div className='overflow-auto'>
-							<table className='w-full table-auto border-separate text-slate-500'>
+							<table className='w-full table-auto text-slate-500'>
 								<thead>
 									<tr className='text-sm'>
 										<th className='hidden md:block w-[5%]'>S/N</th>
@@ -151,9 +151,9 @@ const Tours = () => {
 				</div>	
 			</div>
    
-  </div>
-  
-  </div> 
+        </div>
+        
+    </div> 
   )
 }
 

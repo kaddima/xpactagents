@@ -29,7 +29,25 @@ class LoginController extends Controller
 
         $credentials = $request->only('email','password');
 
-        if($valid){
+
+         // check if the user is available
+         $userDetails = DB::table('users')
+         ->where(['email'=>$credentials['email']])
+         ->first();
+     
+        if(isset($userDetails)){
+
+            //check if the password is correct if so
+            if (Hash::check($credentials['password'],$userDetails->password) && 
+                ($userDetails->block == 1)){
+
+                $valid = 0;
+                $error[] = 'This account has been suspended';
+            }
+
+        }
+
+        if($valid == 1){
 
             if (Auth::attempt($credentials,true)){
 

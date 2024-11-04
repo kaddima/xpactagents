@@ -78,9 +78,6 @@ class CompleteRegistration extends Controller
 
         $data = $request->all();
 
-        $file = request()->file('photoId');
-        $name = $file->getClientOriginalName();
-
         $column = [
             'first_name'=>$data['firstname'],
             'last_name'=>$data['lastname'],
@@ -90,16 +87,13 @@ class CompleteRegistration extends Controller
             'address'=>$data['address'],
             'dob'=>$data['dob'],
             'gender'=>$data['gender'],
-            'phone'=>$data['phone'],
-            'photo_id'=>$name
+            'phone'=>$data['phone']
+            
 
         ];
 
         DB::table('users')->where(['id'=>$user_id])
             ->update($column);
-
-        // upload the image to public directory
-        $file->move(public_path('uploads'),$name);
 
         return back()->with('success',true);
 

@@ -5,70 +5,70 @@ import { hideLoading, showLoading } from '../../utility/loading'
 import Axios from '../../utility/axios'
 
 const Listings = ({propertyListing=[],pagination=false,setProperty=()=>{}}) => {
-  const [showMore,setShowMore] = useState(pagination)
-  const [searchParams,setSearchParams] = useSearchParams()
+    const [showMore,setShowMore] = useState(pagination)
+    const [searchParams,setSearchParams] = useSearchParams()
 
-  let params = useMemo(()=>{
+    let params = useMemo(()=>{
 
-  let param = {}
+        let param = {}
 
-  searchParams.forEach((value,key)=>{
+        searchParams.forEach((value,key)=>{
 
-    param[key] = value;
-  })
+            param[key] = value;
+        })
 
 
-  return param
+        return param
 
-  },[searchParams])
+    },[searchParams])
 
-  const onshowMore = (url)=>{
+    const onshowMore = (url)=>{
 
-  //parse the url
-  let link  = new URL(url)
-  let path = link.pathname
-  let pageParam = link.searchParams.get('page')
+        //parse the url
+        let link  = new URL(url)
+        let path = link.pathname
+        let pageParam = link.searchParams.get('page')
 
-   showLoading()
+       showLoading()
 
-  Axios.get(path, {params:{...params,page:pageParam}}).then(data=>{
+        Axios.get(path, {params:{...params,page:pageParam}}).then(data=>{
 
-    setProperty(prev=>{
-    let appendedListing = {data : prev.data.concat(data.data.data.data)}
-    return {...data.data.data, ...appendedListing}
-    })
-  }).catch(e=>{
+            setProperty(prev=>{
+                let appendedListing = {data : prev.data.concat(data.data.data.data)}
+                return {...data.data.data, ...appendedListing}
+            })
+        }).catch(e=>{
 
-    console.log(e)
-  }).finally(()=>{
+            console.log(e)
+        }).finally(()=>{
 
-    hideLoading()
-  })
+            hideLoading()
+        })
 
-  }
+    }
 
-  useEffect(()=>{
-  setShowMore(pagination)
-  },[pagination])
+    useEffect(()=>{
+        setShowMore(pagination)
+    },[pagination])
 
   return (
-  <div className='w-full'>
-  <div className='grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mt-5'>
-   {propertyListing?.map((v,i)=>{
+    <div className='w-full'>
+        <div className='grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4 mt-5'>
+         {propertyListing?.map((v,i)=>{
+                              
+              return (
+              <Link key={i} to={`/app/property/${v.id}`} className='hover:shadow-lg border dark:border-slate-800 rounded-xl overflow-hidden'>
+                <PropertyCard key={i} data={v}/>
+              </Link>
+              )
+          })} 
+        </div>
+        {showMore?.next_page_url && <div className='mt-5 mb-3'>
+            <h1 className='text-center mb-3 font-semibold'>Continue exploring our listings</h1>
+            <button onClick={()=>onshowMore(showMore?.next_page_url)} className='block max-w-[150px] bg-black text-white text-sm font-semibold mx-auto px-5 py-2 rounded border border-black'>Show more</button>
+        </div>}
         
-    return (
-    <Link key={i} to={`/app/property/${v.id}`} className='hover:shadow-lg border rounded-xl overflow-hidden'>
-    <PropertyCard key={i} data={v}/>
-    </Link>
-    )
-    })} 
-  </div>
-  {showMore?.next_page_url && <div className='mt-5 mb-3'>
-    <h1 className='text-center mb-3 font-semibold'>Continue exploring our listings</h1>
-    <button onClick={()=>onshowMore(showMore?.next_page_url)} className='block max-w-[150px] bg-black text-white text-sm font-semibold mx-auto px-5 py-2 rounded border border-black'>Show more</button>
-  </div>}
-  
-  </div>
+    </div>
   )
 }
 

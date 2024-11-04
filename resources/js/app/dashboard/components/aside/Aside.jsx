@@ -10,28 +10,18 @@ import {navLinks} from '../../data/data'
 
 const Aside = ({setIsOpen}) => {
 
-  const handleCloseSideBar = ()=>{setIsOpen(false)}
+    const handleCloseSideBar = ()=>{setIsOpen(false)}
 
 	return (
-		<div className='h-full md:overflow-hidden overflow-auto flex flex-col bg-white'>
-				<div className='mr-5'>
-					<a href="/" 
-					className="items-center ml-3 flex text-xl 
-					font-extrabold tracking-tight cursor-pointer dark:text-white  text-slate-900">
-						
-						<div className='w-40 h-24'>
-							<img src='/images/logo/Logo.svg' alt="" className='w-full'/>
-						</div>
-					</a>
-				</div>
-				<div>
+		<div className='h-full md:overflow-hidden overflow-auto flex flex-col  '>
+			<div>
 				<div className='mt-2 space-y-3 overflow-auto'>
 					
 					<div className="">
 						<NavLink 
 							to={`/dashboard`} 
 							onClick={handleCloseSideBar}
-							className={`flex space-x-2 items-center text-slate-600 py-2 pl-5 text-sm font-semibold hover:bg-slate-100 relative`}
+							className={`flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative`}
 						>
 							<span className='text-xl'><MdDashboard/></span>
 							<div>
@@ -43,8 +33,8 @@ const Aside = ({setIsOpen}) => {
 						<NavLink 
 							to={`/dashboard/create-property`} 
 							onClick={handleCloseSideBar}
-							className="flex space-x-2 items-center bg-theme-color transition-all text-white py-2 pl-5 text-sm font-semibold hover:opacity-95 relative"
-							style={({isActive})=>(isActive ? {background : `rgb(241 245 249)`,color:'rgb(71 85 105)'} : {} )}
+							className={({isActive})=>isActive ? 'flex space-x-2 items-center bg-theme-color transition-all text-white py-3 pl-5 text-sm font-semibold hover:opacity-95 relative dark:bg-slate-800':'flex space-x-2 items-center bg-theme-color transition-all text-white py-3 pl-5 text-sm font-semibold hover:opacity-95 relative'}
+							
 						>
 							<span className='text-xl'><MdOutlineCreateNewFolder/></span>
 							<div>
@@ -58,8 +48,7 @@ const Aside = ({setIsOpen}) => {
 								to={`/dashboard/${link.name.toLowerCase().replace(/(\/)|\s/,'-')}`} 
 								key={link.name}
 								onClick={handleCloseSideBar}
-								className="flex space-x-2 items-center text-slate-600 py-2 pl-5 text-sm font-semibold hover:bg-slate-100 relative"
-								style={({isActive})=>(isActive ? {background : `rgb(241 245 249)`} : {} )}
+								className={({isActive})=>isActive ? 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800' : 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}
 							>
 								<span className='text-xl'>{link.icon}</span>
 								<div>
@@ -71,18 +60,14 @@ const Aside = ({setIsOpen}) => {
 										</p>
 									)}
 								</div>
-								{link.name.toLowerCase() == 'appointments' && (
-									<div className='w-5 h-5 rounded-full text-center text-white font-bold bg-theme-color'>
-										<span>{appointmentsCount}</span>
-									</div>
-									)}
+								
 							</NavLink>	
 						</div>	
 					))}
 				</div>
 
 				<div className='w-full '>
-					<a href="/logout" className="mt-3 py-2 pl-5 flex space-x-2 items-center text-slate-600 text-sm font-semibold hover:bg-gray-100">
+					<a href="/logout" className="mt-3 py-2 pl-5 flex space-x-2 items-center text-sm font-semibold hover:bg-gray-100 dark:hover:bg-slate-800">
 						<span className='text-xl'><MdOutlineLogout/></span>
 						<p>Logout</p>
 					</a>

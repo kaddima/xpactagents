@@ -3,8 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
+require __DIR__ . '/../../../Business/mailer.php';
+use Business\Mailer;
 
 class AccountController extends Controller
 {
@@ -12,98 +17,32 @@ class AccountController extends Controller
 
         $user_id = auth()->user()->id;
 
-        //if accessed from admin page...specific user data
-        $id = @$request->get('user_id');
-
-
-        $user = DB::table('users')
-            ->where(['id'=>isset($id)?$id:$user_id])
-            ->first();
-
-        if(isset($id)){
-
-            return json_encode(['data'=>
-                [
-                'user'=>$user
-                ]
-            ]);
+        if($request->has('user_id')){
+            $user_id = $request->get('user_id');
         }
 
-        return json_encode(['data'=>
-            [
+        $user = User::find($user_id);
 
-                'user'=>$user
-
-            ]
-        ]);
+        return json_encode(['data'=>$user]);
     }
 
-    /**This returns users, agents and other data onc the application loads */
-    public function getGeneralDataAgent(){
-
-        $admin_id = auth()->user()['id'];
-
-        //get all Admins
-        $users = DB::table('users')
-        ->get();
-
-        //get all agents
-        $agents = DB::table('agents')
-        ->get();
-
-        //get all agents
-        $appointments = DB::table('appointments')
-        ->where('resolved','0')
-        ->limit(12)
-        ->get();
-
-        //get count for rent,land,house for sell,short-let
-        $forSellCount  = DB::table('property')
-            ->where('category', 'sell')
-            ->count();
-
-        $rentCount  = DB::table('property')
-        ->where('category', 'rent')
-        ->count();
-
-        $landCount  = DB::table('property')
-        ->where('category', 'land')
-        ->count();
-
-        $short_letCount  = DB::table('property')
-        ->where('category', 'short_let')
-        ->count();
-
-        $propertyCount  = DB::table('property')
-        ->count();
-
-        return json_encode([
-            'status'=>1,
-            'data'=>[
-                'users'=>$users,
-                'agents'=>$agents,
-                'agentsCount'=>count($agents),
-                'forSellCount'=>$forSellCount,
-                'rentCount'=>$rentCount,
-                'landCount'=>$landCount,
-                'shortLetCount'=>$short_letCount,
-                'propertyCount'=>$propertyCount,
-                'appointments'=>$appointments
-
-            ]
-        ]);
-
-    }
-
-    public function generalAgentData(){
+    public function generalAgentData(Request $request){
 
         if(auth()->check()){
 
             $agent_id = auth()->user()['id'];
 
-           $profile = User::find($agent_id);
+            if($request->has('agent_id')){
 
-           $obj = new \stdClass();
+                $agent_id = $request->get('agent_id');
+            }
+
+            //favorite properties
+            $favorite_properties = DB::table('favorites')->where('user_id',auth()->user()->id)->get();
+            
+            $profile = User::find($agent_id);
+
+            $obj = new \stdClass();
 
             //get count for rent,land,house for sell,short-let
             $forSellCount  = DB::table('property')
@@ -148,7 +87,8 @@ class AccountController extends Controller
                 'status'=>1,
                 'data'=>[
                     'profile'=>$profile,
-                    'propertyDetails'=>$obj
+                    'propertyDetails'=>$obj,
+                    'favorites'=>$favorite_properties
 
                 ]
             ]);
@@ -244,12 +184,6 @@ class AccountController extends Controller
                 ]);
         }
 
-
-
-
-
-
-
     }
 
     public function updateAccount(Request $request){
@@ -279,7 +213,7 @@ class AccountController extends Controller
 
             $file = $request->file('photo');
 
-            $name = $file->getClientOriginalName();
+            $name = str_replace(' ', '-',$file->getClientOriginalName());
             $size = $file->getSize();
             $target = $upload_dir.$name;
 
@@ -375,4 +309,225 @@ class AccountController extends Controller
         return json_encode(['data'=>$currentUser]);
     }
 
+    public function adminUsersOverview(){
+
+        if(Auth::check() && Auth::user()->is_admin == 1){
+
+                //get the current User
+            $currentUser = Auth::user();
+
+            if($currentUser->is_admin == 1){
+
+                $obj = new \stdClass();
+
+                //get count for rent,land,house for sell,short-let
+                $usersCount  = DB::table('users')
+                    ->count();
+    
+                $agentsCount  = DB::table('users')
+                    ->where(['is_agent'=>'1',])
+                    ->count();
+
+                $adminsCount = DB::table('users')
+                ->where(['is_admin'=>'1',])
+                ->count();
+
+                $regularUsersCount = DB::table('users')
+                ->where(['is_agent'=>'0',])
+                ->count();
+
+                $recentUsers = DB::table('users')
+                    ->orderBy('created_at','desc')
+                    ->limit(6)
+                    ->get();
+
+                $obj->usersCount  = $usersCount ;
+                $obj->agentsCount = $agentsCount;
+                $obj->adminsCount = $adminsCount;
+                $obj->regularUsersCount = $regularUsersCount;
+                $obj->recentUsers = $recentUsers;
+    
+
+                return json_encode(['data'=>$obj]);
+            }
+        }
+        
+    }
+
+    public function adminUsersRegular(){
+        
+        if(Auth::check() && Auth::user()->is_admin == 1){
+
+            $users = User::where('is_agent', 0)
+                ->paginate(20);
+
+            return json_encode(['data'=>$users]);
+        }
+    }
+
+    public function verificationRequest(){
+        
+        if(Auth::check() && Auth::user()->is_admin == 1){
+
+            $requests = DB::table('id_verify')->where('status', 0)
+                ->paginate(12);
+
+            return json_encode(['data'=>$requests]);
+        }
+    }
+
+    public function verificationResponse(Request $req){
+
+        $currentUser = Auth::user();
+        $email = $req->get('email');
+        $type = $req->get('type');
+        $user_id = $req->get('user_id');
+        $img = $req->get('doc_img');
+
+        $message = '';
+        $subject = '';
+        
+        if(Auth::check() && Auth::user()->is_admin == 1){
+
+            if(strtolower($type) == 'verify'){
+
+                DB::table('users')
+                    ->where('id',$user_id)
+                    ->update(['id_verified'=>1]);
+
+                DB::table('id_verify')
+                    ->where('user_id',$user_id)
+                    ->update(['status'=>1]);
+
+                $subject = 'Verification Request Approved';
+                $message = <<<EMAIL
+                <div style="margin-top:10px">
+                <p>Dear user, your account has been reviewed and found to comply with our community
+                guidelines.Your verification request was approved successfully. A verification badge will now appear next 
+                to your name as a verified agent.</p>
+                
+            </div>
+EMAIL;
+
+
+            }else if(strtolower($type) == 'deny'){
+
+                //directory to upload image
+                $upload_dir = public_path('uploads/users/'.$user_id.'/profile-photo/'.$img);
+                
+                if(file_exists($upload_dir)){
+                    //delete the doc img uploaded
+                    unlink($upload_dir);
+
+                }
+                
+                DB::table('users')
+                ->where('id',$user_id)
+                ->update(['id_verified'=>0]);
+
+                DB::table('id_verify')
+                    ->where('user_id',$user_id)
+                    ->delete();
+
+                $subject = 'Verification Request Approved';
+                $message = <<<EMAIL
+                <div style="margin-top:10px">
+                <p>Dear user, we are sorry to inform you that your account wasn't verified because 
+                it doesn't meet the criteria for verification</p>
+            </div>
+EMAIL;
+        
+            }
+
+            //Mailer::sendMail($email,$message,$subject,true);
+
+            return json_encode(['status'=>1]);
+        }
+    }
+
+
+    public function adminUsersAgent(){
+        
+        if(Auth::check() && Auth::user()->is_admin == 1){
+
+            $users = User::where('is_agent', 1)
+                ->paginate(20);
+
+            return json_encode(['data'=>$users]);
+        }
+    }
+
+    public function searchUser(Request $request){
+
+        $search_type = $request->get('search_type');
+        $q = $request->get('q');
+
+        $q = explode(' ', trim($q));
+
+        if(count($q) > 1){
+            
+            if($search_type == 'agent'){
+
+                $users = DB::table('users')
+                ->where(['is_agent'=>1,'first_name'=>$q[0],'last_name'=>$q[1]])
+                ->paginate(20);
+
+           }else if($search_type == 'admin'){
+                $users = DB::table('users')
+                ->where(['is_admin'=>1,'first_name'=>$q[0],'last_name'=>$q[1]])
+                ->paginate(20);
+           }else if($search_type == 'all'){
+                $users = DB::table('users')
+                ->where(['first_name'=>$q[0],'last_name'=>$q[1]])
+                ->paginate(20);
+                
+            }else{
+               $users = DB::table('users')
+                    ->where(['is_agent'=>0,'first_name'=>$q[0],'last_name'=>$q[1]])
+                   ->paginate(20);
+           }
+        }else{
+
+            if($search_type == 'agent'){
+
+                $users = DB::table('users')
+                ->where('is_agent', 1)
+                ->where(function (Builder $query) use ($q){
+                    $query->where('first_name', 'LIKE', "%{$q[0]}%")
+                    ->orWhere('last_name','LIKE', "%{$q[0]}%");
+                })->paginate(20);
+
+           }else if($search_type == 'admin'){
+
+                $users = DB::table('users')
+                ->where('is_admin', 1)
+                ->where(function (Builder $query) use ($q){
+                    $query->where('first_name', 'LIKE', "%{$q[0]}%")
+                    ->orWhere('last_name','LIKE', "%{$q[0]}%");
+                })->paginate(20);
+
+            }else if($search_type == 'all'){
+
+                $users = DB::table('users')
+                ->where(function (Builder $query) use ($q){
+                    $query->where('first_name', 'LIKE', "%{$q[0]}%")
+                    ->orWhere('last_name','LIKE', "%{$q[0]}%");
+                })->paginate(20);
+
+            }else{
+
+               $users = DB::table('users')
+                   ->where('is_agent', 0)
+                   ->where(function (Builder $query) use ($q){
+                       $query->where('first_name', 'LIKE', "%{$q[0]}%")
+                       ->orWhere('last_name','LIKE', "%{$q[0]}%");
+                   })
+                   ->paginate(20);
+           }
+        }
+    
+        return json_encode(['data'=>$users]);
+    }
+
 }
+

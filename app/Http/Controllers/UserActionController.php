@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use App\Models\User;
 
 class UserActionController extends Controller
@@ -18,25 +19,6 @@ class UserActionController extends Controller
                 return $this->updateUser($data);
                 break;
 
-            case 'block':
-               return  $this->blockUser($data);
-                break;
-
-            case 'delete':
-               return $this->deleteUser($data['user_id']);
-                break;
-
-            case 'update_agent':
-                return  $this->updateAgent($data);
-                    break;
-
-            case 'delete_agent':
-                return  $this->deleteAgent($data);
-                    break;
-
-            case 'delete_statement':
-                return  $this->deleteStatement($data);
-                    break;
 
             default:
                 break;
@@ -77,6 +59,7 @@ class UserActionController extends Controller
 
         $user_id = auth()->user()['id'];
         $photoPattern = '#^(image/)[^\s\n<]+$#i';
+        $filename = pathInfo($request->get('file_name'))['filename'].".jpg";
 
         $file = $request->file('image');
 
@@ -88,11 +71,11 @@ class UserActionController extends Controller
 
         $imageName = $file->getClientOriginalName();
         $size = $file->getSize();
-        $target = $upload_dir.$imageName;
+        $target = $upload_dir.$filename;
 
 
-        if ((floatval($size)/1000) > 1500){
-            $error = 'file too large -- 1.5Mb and below';
+        if ((floatval($size)/1000) > 700){
+            $error = 'file too large -- 700kb and below';
             $status = 0;
         }elseif (!preg_match($photoPattern,$file->getMimeType())){
             $error = 'please upload only images';
@@ -106,19 +89,19 @@ class UserActionController extends Controller
         if($status == 1){
 
             // upload the photo to server
-            $file->move($upload_dir,$imageName);
+            $file->move($upload_dir,$filename);
 
             //insert the photo to database
 
             $columnValue = [
-                'photo'=>$imageName
+                'photo'=>$filename
             ];
 
             DB::table('users')
                 ->where('id',$user_id)
                 ->update($columnValue);
 
-            return json_encode(['status'=>$status, 'error'=>$error,'photos'=>$imageName]);
+            return json_encode(['status'=>$status, 'error'=>$error,'photos'=>$filename]);
 
 
         }
@@ -126,205 +109,151 @@ class UserActionController extends Controller
         return json_encode(['status'=>$status, 'error'=>$error]);
     }
 
-    public function blockUser($data){
+    public function blockUser(Request $request){
 
-        //admin id
-        $id = auth()->user()['id'];
+        $user_id = $request->get('user_id');
 
-        $user = DB::table('users')
-        ->where(['id'=>$data['user_id']])
-        ->first(['id','block']);
-
-        $user_id = $user->id;
-
-        if ($user->block == 0){
-            DB::table('users')
-                ->where(['id'=>$user_id])
-                ->update(['block'=>1]);
-        }else{
-
-            DB::table('users')
-                ->where(['id'=>$user_id])
-                ->update(['block'=>0]);
-        }
-
-
-        $users = DB::table('users')
-            ->where(['creator_id'=>$id])
-            ->get();
-
-        return json_encode(['status'=>1, 'data'=>$users]);
-
-    }
-
-    public function deleteUser($user_id){
-        //admin id
-        $id = auth()->user()['id'];
-
-        //delete users
-        DB::table('users')
-            ->where(['id'=>$user_id])
-            ->delete();
-
-        // get all users belonging to the admin
-        $users = DB::table('users')
-            ->get();
-
-        return json_encode(['status'=>1, 'data'=>$users]);
-    }
-
-    public function creditAccount($data){
-
-        $user_id = $data['user_id'];
-        $ref_no = mt_rand(1000000000000000000,9000000000000000000);
-
-        //get the users first and last name
         $user = DB::table('users')
         ->where(['id'=>$user_id])
-        ->first(['f_name','l_name','email']);
+        ->first(['id','block','is_agent']);
 
-        //get the user's account details
-        $accountDetails = DB::table('accounts')
-                ->where(['user_id'=>$user_id])
-                ->first();
+        if($user->is_agent == 1){
 
-        //add the credit amount to the account balance
-        $new_balance = $data['amount'] + $accountDetails->account_balance;
+            if ($user->block == 0){
+                DB::table('users')
+                    ->where(['id'=>$user_id])
+                    ->update(['block'=>1]);
+                //unpublish agent property
+                DB::table('property')
+                ->where('creator_id',$user_id)
+                ->update(['published'=>0]);
+            }else{
+    
+                DB::table('users')
+                    ->where(['id'=>$user_id])
+                    ->update(['block'=>0]);
 
-        $sendersAcct = mt_rand(1000000000,99999999999);
+                //publish agents properties    
+                DB::table('property')
+                ->where('creator_id',$user_id)
+                ->update(['published'=>1]);
+            }
+        }else{
 
+             if ($user->block == 0){
+                DB::table('users')
+                ->where(['id'=>$user_id])
+                ->update(['block'=>1]);
+            }else{
 
-        $date = date('d-M-Y');
-        $time = date('h:ia');
+                DB::table('users')
+                    ->where(['id'=>$user_id])
+                    ->update(['block'=>0]);
+            }
+        }
 
-        //update the user's account
-        DB::table('accounts')
-                ->where(['user_id'=>$user_id])
-                ->update(['account_balance'=>$new_balance,
-                'prev_balance'=>$accountDetails->account_balance]);
-
-        //log the transaction into admin_credit
-        // DB::table('admin_credit')
-        // ->insert(['admin_id'=>auth()->user()->id,
-        //         'account_number'=>$accountDetails->account_number,
-        //         'amount'=>$data['amount'],
-        //         'sender'=>$data['sender'],
-        //         'description'=>$data['description']]);
-
-
-           // insert the credit transaction into the users transaction
-           $column_value = ['user_id'=>$data['user_id'],
-           'beneficiary_name'=>$data['sender'],
-           'transaction_type'=>'credit',
-           'transfer_type'=>'international-transfer',
-           'account_number'=>$sendersAcct,
-           'account_type'=>'Current',
-           'transfer_amount'=>$data['amount'],
-           'description'=>$data['description'],
-           'otp'=>00,
-           'ref_no'=>$ref_no,
-           'creator_id'=>auth()->user()->id,
-           'balance'=>$new_balance,
-           'success'=>1,
-           'currency'=>'USD'
-       ];
-
-         //log the transaction
-          DB::table('transaction')
-          ->insert($column_value);
-
-         $message = '
-         <div>
-
-            <p>Dear <b>'. $user->f_name.' '.$user->l_name.'</b></p>
-            <h4 style="padding-top: 3px; font-weight: bold">Bank Electronic Notification Service</h4>
-            <p>We wish to inform you that a Credit Transaction occurred on your account with us</p>
-
-            <h4 style="padding-top: 3px; font-weight: bold">Transaction Notification</h4>
-
-            <div style="width: 90%">
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Account Number </p>
-                    <span style="display: inline; width: 50%;">:'. $sendersAcct.'</span>
-                </div>
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Sender</p>
-                    <span style="display: inline; width: 50%;text-transform: capitalize">:'.$data['sender'].'</span>
-                </div>
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Description</p>
-                    <span style="display: inline; width: 50%;">: '.$data['description'].'</span>
-                </div>
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Amount</p>
-                    <span style="display: inline; width: 50%;">: $'.number_format($data['amount']).'</span>
-                </div>
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Date</p>
-                    <span style="display: inline; width: 50%;">:'.$date.'</span>
-                </div>
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Time</p>
-                    <span style="display: inline; width: 50%;">:'. $time.'</span>
-                </div>
-
-                <p>The balances on this account are as follows </p>
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Current Balance</p>
-                    <span style="display: inline; width: 50%;">: $'.number_format($new_balance).'</span>
-                </div>
-                <div style="width: 100%;">
-                    <p style="width: 50%; display: inline-block">Available Balance</p>
-                    <span style="display: inline; width: 50%;">: $'.number_format($new_balance).'</span>
-                </div>
-
-                <p>Thanks for choosing Fabkuwait Bank</p>
-            </div>
-
-        </div>';
-        $subject = 'Transaction Alert [Credit:]';
-
-        //send the mail
-       //Mailer::sendMail($user->email,$message,$subject);
-
-      //get the updated user account
-        $accountDetails = DB::table('accounts')
-        ->where(['user_id'=>$user_id])
-        ->first();
-
-      return json_encode(['status'=>1,'data'=>[
-        'account'=>$accountDetails
-      ]]);
-
+        return json_encode(['status'=>1]);
 
     }
 
-    public function userQuestions($data){
+    public function deleteUser(Request $request){
 
-        $user_id = $data['user_id'];
+        $user_id = $request->get('user_id');
 
-        //get all questions to this user
-        $questions = DB::table('question')
-                ->where(['user_id'=>$user_id])
-                ->get();
+        $user = DB::table('users')
+        ->where(['id'=>$user_id])
+        ->first(['id','block','is_agent']);
 
-        return json_encode(['status'=>1, 'data'=>$questions]);
-    }
+        if($user->is_agent == 1){
 
-    public function addQuestion($data){
+            try{
+                //directory to upload image
+                $upload_dir = public_path('uploads/users/'.$user_id.'/');
+                //delete all agent folder containing property images
+                \File::deleteDirectory($upload_dir);
 
-        DB::table('question')
-            ->insert(['user_id'=>$data['user_id'],
-            'question'=>$data['question'],
-            'answer'=>$data['answer']]);
+                //delete the agents messages
+                //start with property of interest poi
+                $pois = DB::table('property_of_interest')
+                    ->where('agent_id',$user_id)
+                    ->get();
 
-        //return all quqestions
+                 // delete the agents tours
+                DB::table('tours')
+                ->where('agent_id',$user_id)
+                ->delete();
 
-        $questions = DB::table('question')
-                ->where(['user_id'=>$data['user_id']])
-                ->get();
+                //delete the agents favorite
+                DB::table('favorites')
+                    ->where('user_id',$user_id)
+                    ->delete();
 
-        return json_encode(['status'=>1,'data'=>$questions]);
+                // delete the agents properties
+                $properties = DB::table('property')
+                ->where('creator_id',$user_id)
+                ->delete();  
+
+                foreach($pois as $poi){
+
+                    
+                    DB::beginTransaction();
+                    // DB::transaction(function () {
+                            //delete the property from property interestorss table
+                        DB::table('property_interestors')
+                            ->where('property_id',$poi->property_id)
+                            ->delete();
+                        
+                        //get the conversation id for this property
+                        $conversation_id = DB::table('conversations')
+                            ->where('property_id',$poi->property_id)
+                            ->first('id');
+    
+                        //delete messages with the conversation id
+                        DB::table('messages')
+                            ->where('conversation_id',$conversation_id->id)
+                            ->delete();
+    
+                        //delete the conversation with property
+                        DB::table('conversations')
+                            ->where('property_id',$poi->property_id)
+                            ->delete();
+    
+                    // });
+                    
+                    
+                }
+    
+                DB::table('property_of_interest')
+                    ->where('agent_id',$user_id)
+                    ->delete();
+
+                //delete users
+                DB::table('users')
+                ->where(['id'=>$user_id])
+                ->delete();    
+
+                DB::commit();    
+
+            }catch(\Exception $e){
+
+                $error = 'Connection Failed! '.$e->getMessage() .' FILE: '.
+                    $e->getFile().' on LINE: '.$e->getLine();
+                trigger_error($error, E_USER_ERROR);
+
+                DB::rollBack();
+            }
+
+        }else{
+
+            //delete users
+             DB::table('users')
+            ->where(['id'=>$user_id])
+            ->delete();
+        }
+
+        
+
+        return json_encode(['status'=>1]);
     }
 
     public function updateAgent($data){
@@ -389,4 +318,69 @@ class UserActionController extends Controller
 
         return json_encode(['data'=>$appointments]);
     }
+
+    public function verifyIdentification(Request $request){
+
+        $currentUser = auth()->user();
+        $photoPattern = '#^(image/)[^\s\n<]+$#i';
+
+        $file = $request->file('image');
+
+        $error = '';
+        $status = 1;
+
+        //directory to upload image
+        $upload_dir = public_path('uploads/users/'.$currentUser->id.'/profile-photo/');
+
+        $imageName = str_replace(' ', '-',$file->getClientOriginalName()) ;
+        $size = $file->getSize();
+        $target = $upload_dir.$imageName;
+
+
+        if ((floatval($size)/1000) > 700){
+            $error = 'file too large -- 700kb and below';
+            $status = 0;
+        }elseif (!preg_match($photoPattern,$file->getMimeType())){
+            $error = 'please upload only images';
+            $status = 0;
+        }elseif (file_exists($target)){
+            $error = 'File already exist';
+            $status = 0;
+
+        }
+
+        if($status == 1){
+
+            if($currentUser->id_verified == 0){
+
+                // upload the photo to server
+                $file->move($upload_dir,$imageName);
+
+                //update the users id_verify to 2 "pending verification"
+                DB::table('users')
+                    ->where('id',$currentUser->id)
+                    ->update(['id_verified'=>2]);
+
+                //insert the photo to database
+
+                $columnValue = [
+                    'user_id'=>$currentUser->id,
+                    'image'=>$imageName,
+                    'fullname'=>$request->get('fullname'),
+                    'doc_type'=>$request->get('doc_type')
+                ];
+
+                DB::table('id_verify')
+                    ->insert($columnValue);
+
+                return json_encode(['status'=>$status, 'error'=>$error]);
+
+            }
+
+           
+        }
+
+        return json_encode(['status'=>$status, 'error'=>$error]);
+    }
+
 }

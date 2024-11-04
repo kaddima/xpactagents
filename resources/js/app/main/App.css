@@ -3,10 +3,20 @@
   font-size: 16px;
 }
 
+.dark .rdrCalendarWrapper{
+  color: white;
+  background-color: #080B10;
+}
+
+.dark .rdrCalendarWrapper button span{
+  color: rgb(148 163 184);
+  
+}
+
 @media (max-width:480px){
 
   .rdrCalendarWrapper{
-  font-size: 12px;
+    font-size: 12px;
   }
 }
 
@@ -29,4 +39,41 @@
 
 .range-slider .range-slider__range {
   background: #65c0cf  
+}
+
+.animation-bell{
+  animation: bell 1s 1s both infinite;
+}
+
+.notification{
+  position: absolute;
+  z-index: 1;
+  background-color: #ff4927;
+  top: -6px;
+  right: -6px;
+  width: 12px;
+  height: 12px;
+  line-height: 30px;
+  border-radius: 50%;
+  animation: zoom 3s 3s both infinite ease-in-out;
+}
+
+@keyframes bell {
+
+  0% {transform: rotate(0);}
+  10% {transform: rotate(30deg);}
+  20% {transform: rotate(0);}
+  80% {transform: rotate(0);}
+  90% {transform: rotate(-30deg);}
+  100% {transform: rotate(0);}
+  
+  
+}
+
+@keyframes zoom {
+  0% {opacity: 0; transform: scale(0);}
+  10% {opacity: 1; transform: scale(1);}
+  50% {opacity: 0;}
+  51% {opacity: 0;}
+  100% {opacity: 0; transform: scale(0);}
 }

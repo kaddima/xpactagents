@@ -4,72 +4,72 @@ import {IoMdClose} from "react-icons/io"
 import Button from "../Button"
 
 const Modal = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  title,
-  body,
-  disabled,
-  footer,
-  btnLabel='Sign in'
+    isOpen,
+    onClose,
+    onSubmit,
+    title,
+    body,
+    disabled,
+    footer,
+    btnLabel='Sign in'
 
 }) => {
 
-  const [showModal,setShowModal] = useState(isOpen)
+    const [showModal,setShowModal] = useState(isOpen)
 
-  const handleClose = useCallback(()=>{
+    const handleClose = useCallback(()=>{
 
-  if(disabled) return
+        if(disabled) return
 
-  setShowModal(false)
+        setShowModal(false)
 
-  setTimeout(()=>{onClose()},300)
-  },[disabled,onClose])
+        setTimeout(()=>{onClose()},300)
+    },[disabled,onClose])
 
-  useEffect(()=>{
+    useEffect(()=>{
 
-  setShowModal(isOpen)
-  
-  },[isOpen])
+        setShowModal(isOpen)
+        
+    },[isOpen])
 
 
-  if(!isOpen){
-  return null
-  }
+    if(!isOpen){
+        return null
+    }
 
   return (
-  <div className="fixed z-50 flex justify-center items-center overflow-x-hidden overflow-y-auto inset-0
-  outline-none focus:outline-none bg-neutral-800/70">
-  <div className="relative w-full md:w-4/6 lg:w-3/6 xl:w-2/5 my-6 h-full lg:h-auto md:h-auto mx-auto">
-    <div className={`duration-300 h-full ${showModal ? 'translate-y-0 opacity-100' :'translate-y-full opacity-0'}`}>
-    <div className="p-6 h-full md:h-auto rounded-lg shadow-lg relative bg-white space-y-5">
-      <div className="rounded-t">
-      <button
-      onClick={handleClose} 
-      className="float-right relative z-30">
-        <IoMdClose size={18}/>  
-      </button>
-      <div className="clear-both"></div>
-      <div className="text-lg font-semibold">
-        {title}
-      </div>
-       </div>
+    <div className="fixed z-50 flex justify-center items-center overflow-x-hidden inset-0
+    outline-none focus:outline-none bg-neutral-800/70">
+        <div className="relative w-full md:w-4/6 lg:w-3/6 xl:w-2/5 my-6 h-full lg:h-auto md:h-auto mx-auto dark:bg-main-dark-bg bg-white">
+            <div className={`duration-300 h-full ${showModal ? 'translate-y-0 opacity-100' :'translate-y-full opacity-0'}`}>
+                <div className="p-6 h-full md:max-h-[95vh] rounded-lg shadow-lg relative   space-y-5 overflow-scroll">
+                    <div className="rounded-t">
+                        <button
+                        onClick={handleClose} 
+                        className="float-right relative z-30">
+                            <IoMdClose size={18}/>    
+                        </button>
+                        <div className="clear-both"></div>
+                        <div className="text-lg font-semibold">
+                            {title}
+                        </div>
+                     </div>
 
-      {/* BODY */}
-      <div className="pt-2">
-      {body}
-      </div>
+                      {/* BODY */}
+                    <div className="pt-2">
+                        {body}
+                    </div>
 
-      {/* FOOTER */}
-      <div>
-      {footer}
-      </div>
+                    {/* FOOTER */}
+                    <div>
+                        {footer}
+                    </div>
+                </div>
+                    
+            </div>
+        </div>
+        
     </div>
-      
-    </div>
-  </div>
-  
-  </div>
   )
 }
 
