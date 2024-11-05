@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthenticationController;
+use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
@@ -26,6 +27,8 @@ Route::prefix('v1')->group(function () {
 		Route::post('/password/send-reset-token', 'sendPasswordResetToken');
 		Route::post('/password/reset', 'resetPassword');
 	});
+
+
 	
 	/**user must be authenticated to access this routes */
 	Route::middleware('auth:sanctum')->group(function () {
@@ -33,7 +36,7 @@ Route::prefix('v1')->group(function () {
 	});
 
 	
-Route::get('/listings', [ListingController::class, 'listings']);
+Route::get('/listings', [PropertyController::class, 'getProperties']);
 Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
 
 });

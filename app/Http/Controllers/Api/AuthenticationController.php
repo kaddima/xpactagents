@@ -3,10 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Services\AuthService;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
-
-use Illuminate\Validation\ValidationException;
 
 class AuthenticationController extends BaseController
 {

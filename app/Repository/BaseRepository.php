@@ -24,9 +24,9 @@ class BaseRepository implements RepositoryInterface
   /**
    * returns paginated records for model collection
    */
-  public function getAll(int $num_of_records = 25): LengthAwarePaginator
+  public function getAll(array $column_value, int $num_of_records = 25): LengthAwarePaginator
   {
-    return $this->model->paginate($num_of_records);
+    return $this->model->where($column_value)->paginate($num_of_records);
   }
 
   public function findById($id): ?Model
@@ -39,7 +39,7 @@ class BaseRepository implements RepositoryInterface
    */
   public function update($id, array $data): bool
   {
-    return $this->model->where('id',$id)->update($data);
+    return $this->model->where('id', $id)->update($data);
   }
 
   /**
@@ -48,5 +48,13 @@ class BaseRepository implements RepositoryInterface
   public function delete($id): bool
   {
     return $this->model->destroy($id);
+  }
+
+  /**
+   * Returns a new query builder instance for the model.
+   */
+  public function getQuery()
+  {
+    return $this->model->newQuery();
   }
 }

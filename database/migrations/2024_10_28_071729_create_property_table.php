@@ -27,7 +27,7 @@ class CreatePropertyTable extends Migration
             $table->string("location")->nullable();
             $table->string("lga")->nullable();
             $table->string("state")->nullable();
-            $table->string("property_type")->default("{}");
+            $table->string("property_type")->nullable();
             $table->string("size")->nullable();
             $table->tinyInteger("published")->default(0);
             $table->string("duration")->nullable();
