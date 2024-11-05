@@ -19,7 +19,7 @@ use App\Http\Controllers\ListingController;
 
 Route::prefix('v1')->group(function () {
 	// Authentication route
-	Route::controller(AuthenticationController::class)->group(function(){
+	Route::controller(AuthenticationController::class)->group(function () {
 		Route::post('/login', "login");
 		Route::post('/register', "register");
 		Route::post('/register/resend-otp', "resendOTPEmail");
@@ -28,16 +28,19 @@ Route::prefix('v1')->group(function () {
 		Route::post('/password/reset', 'resetPassword');
 	});
 
+	Route::get('/listings', [PropertyController::class, 'getProperties']);
+	Route::get('/listings/{id}', [ListingController::class, 'propertyDetails']);
 
-	
 	/**user must be authenticated to access this routes */
 	Route::middleware('auth:sanctum')->group(function () {
 		Route::post('/logout', [AuthenticationController::class, "logout"]);
 	});
 
-	
-Route::get('/listings', [PropertyController::class, 'getProperties']);
-Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
+
+	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
+		Route::post('/listings', [PropertyController::class, 'create']);
+		Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
+	});
 
 });
 

@@ -32,4 +32,8 @@ class PropertyController extends BaseController
 
 		return $this->sendResponse($this->propertyService->getProperties($data,true));
 	}
+
+	public function create(Request $request){
+		return response()->json(['data'=>1]);
+	}
 }
