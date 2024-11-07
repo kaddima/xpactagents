@@ -31,7 +31,7 @@ class BaseRepository implements RepositoryInterface
 
   public function findById($id): ?Model
   {
-    return $this->model->find($id);
+    return $this->model->findorFail($id);
   }
 
   /**
