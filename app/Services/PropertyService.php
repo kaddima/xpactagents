@@ -35,7 +35,13 @@ class PropertyService
     // Handle pagination
     $perPage = isset($filters['limit']) ? (int)$filters['limit'] : 25; // Default to 25
     $page = isset($filters['page']) ? (int)$filters['page'] : 1; // Default to page 1
-
+    
     return new PropertyCollection($query->paginate($perPage, ['*'], 'page', $page));
+  }
+
+  public function create(array $data, $currentUser){
+    $data['creator_id'] = $currentUser->id;
+    $model = $this->propertyRepo->create($data);
+    return $model->id;
   }
 }

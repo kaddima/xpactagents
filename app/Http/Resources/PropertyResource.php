@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Log;
 
 class PropertyResource extends JsonResource
 {
@@ -29,8 +30,9 @@ class PropertyResource extends JsonResource
 			'duration'=>$this->duration,
 			'size'=>$this->size,
 			'published'=>$this->published,
-			'image'=>json_decode($this->images),
-			'property_fact'=>json_decode($this->property_fact)
+			'images'=>$this->images,
+			'property_fact'=>$this->property_fact,
+			'amenities'=> $this->amenities
 		];
 	}
 }

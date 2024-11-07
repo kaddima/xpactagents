@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Property extends Model
@@ -46,6 +47,81 @@ class Property extends Model
 		static::creating(function ($model) {
 			$model->id = (string) Str::uuid(); // Generate a UUID
 		});
+
+		static::saving(function ($model) {
+			// Loop through all attributes and convert them to lowercase
+			foreach (['property_type','other_category','category','duration'] as $key) {
+				// Apply strtolower only to string values that are not numeric
+				if (isset($model->{$key})) {
+					$model->{$key} = strtolower($model->{$key});
+				}
+			}
+		});
+	}
+
+	/**
+	 * json decode the images.
+	 *
+	 * @param  string  $value
+	 * @return void
+	 */
+	public function getImagesAttribute($value)
+	{
+		return json_decode($value);
+	}
+
+	/**
+	 * convert the Image to json before storing.
+	 *
+	 * @param  string  $value
+	 * @return void
+	 */
+	public function setImagesAttribute($value)
+	{
+		$this->attributes['image'] = json_encode($value);
+	}
+
+	/**
+	 * json decode the amenities.
+	 *
+	 * @param  string  $value
+	 * @return void
+	 */
+	public function getAmenitiesAttribute($value)
+	{
+		return json_decode($value,true);
+	}
+
+	/**
+	 * json decode the property_fact.
+	 *
+	 * @param  string  $value
+	 * @return void
+	 */
+	public function getPropertyFactAttribute($value)
+	{
+		return json_decode($value,true);
+	}
+
+	/**
+	 * convert the property_fact to json before storing.
+	 *
+	 * @param  string  $value
+	 * @return void
+	 */
+	public function setPropertyFactAttribute($value)
+	{
+		$this->attributes['property_fact'] = json_encode($value);
+	}
+	/**
+	 * convert the amenities to json before storing.
+	 *
+	 * @param  string  $value
+	 * @return void
+	 */
+	public function setAmenitiesAttribute($value)
+	{
+		$this->attributes['amenities'] = json_encode($value);
 	}
 
 	// Scope for published properties
@@ -105,7 +181,7 @@ class Property extends Model
 				}
 
 				// Other filters can be added here
-				$column_value[$key] = $value;
+				$column_value[$key] = is_string($value) && !is_numeric($value) ? strtolower($value) : $value;
 			}
 		}
 
@@ -118,6 +194,6 @@ class Property extends Model
 			}
 		}
 
-		return $query;
+		return $query->orderBy('created_at', 'desc');
 	}
 }

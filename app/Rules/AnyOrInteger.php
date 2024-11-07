@@ -1,5 +1,5 @@
 <?php
-namespace App\Validation;
+namespace App\Rules;
 use Illuminate\Contracts\Validation\Rule;
 
 class AnyOrInteger implements Rule

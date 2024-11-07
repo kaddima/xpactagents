@@ -104,7 +104,7 @@ class Handler extends ExceptionHandler
         'data' => null,
         'status' => false,
         'error' => 'Server Error',
-        'message' => 'An unexpected error occurred.',
+        'message' => 'An unexpected error occurred: '. $exception->getMessage() .'Line: '.$exception->getLine(),
       ], 500);
     }
 

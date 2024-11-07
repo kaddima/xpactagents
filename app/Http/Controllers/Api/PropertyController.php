@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Rules\ValidationRules;
 use App\Services\PropertyService;
-use App\Validation\AnyOrInteger;
 use Illuminate\Http\Request;
 
 class PropertyController extends BaseController
@@ -17,23 +16,16 @@ class PropertyController extends BaseController
 
 	public function getProperties(Request $request)
 	{
-		$data = $this->validate($request, [
-			'beds' => ["nullable", new AnyOrInteger()],
-			'baths' => ["nullable", new AnyOrInteger()],
-			'toilets' => 'nullable|integer|min:1|max:10',
-			'category' => 'nullable|string|max:255',
-			'property_type'=>'nullable|string',
-			'amount' => 'nullable|numeric',
-			'lga' => 'nullable|string|max:255',
-			'state' => 'nullable|string|max:255',
-			'page' => 'nullable|integer|min:1',
-			'limit' => 'nullable|integer|min:1',
-		]);
-
-		return $this->sendResponse($this->propertyService->getProperties($data,true));
+		$data = $this->validate($request, ValidationRules::propertyFiltersRules());
+		return $this->sendResponse($this->propertyService->getProperties($data));
 	}
 
 	public function create(Request $request){
-		return response()->json(['data'=>1]);
+		/**Validate the request data */
+		$data = $this->validate($request, ValidationRules::storeProductRules());
+		/**Get the current signed user */
+		$currentUser = $request->user();
+		$productId = $this->propertyService->create($data, $currentUser);
+		return $this->sendResponse(['productId'=>$productId], "Product created successfully");
 	}
 }
