@@ -53,11 +53,19 @@ class ValidationRules
     ];
   }
 
-  public static function propertyUploadValidation()
+  public static function uploadPropertyImageRules()
+  {
+    return [
+      'property_id' => "required|uuid",
+      'image' => 'required|image|mimes:jpg,jpeg,png|max:700'
+    ];
+  }
+  public static function deletePropertyImageRules($property_id)
   {
     return [
       'property_id'=>"required|uuid",
-      'image' => 'required|image|mimes:jpg,jpeg,png|max:700'
+      'image_ids' => 'required|array', // Ensure 'image_ids' is an array
+      'image_ids.*' => 'exists:property_images,id,property_id,' . $property_id, // Validate each ID exists in the property_images table and belongs to the given property_id
     ];
   }
 }

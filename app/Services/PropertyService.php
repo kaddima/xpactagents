@@ -9,14 +9,17 @@ use App\Repository\PropertyRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class PropertyService
 {
   protected $propertyRepo;
   protected $propertyImageRepo;
-  public function __construct(PropertyRepository $propertyRepo,
-   PropertyImageRepo $propertyImageRepo)
-  {
+  public function __construct(
+    PropertyRepository $propertyRepo,
+    PropertyImageRepo $propertyImageRepo
+  ) {
     $this->propertyRepo = $propertyRepo;
     $this->propertyImageRepo = $propertyImageRepo;
   }
@@ -84,7 +87,31 @@ class PropertyService
     $path = $file->store("{$currentUser->id}/{$property->id}");
 
     //save the path to the database
-    $this->propertyImageRepo->create(['property_id'=>$property_id, "image_path"=>$path]);
+    $this->propertyImageRepo->create(['property_id' => $property_id, "image_path" => $path]);
     return $path;
+  }
+
+  public function deletePropertyImage($data, $currentUser)
+  {
+    try {
+      // The findById method will automatically throw an exception if the property is not found
+      $property = $this->propertyRepo->findById($data['property_id']);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("Property not found");
+    }
+    if ($property->creator_id !== $currentUser->id) {
+      throw new AuthorizationException("You are not authorized to update this property");
+    }
+
+    $images = $this->propertyImageRepo->whereIn("id", $data['image_ids']);
+
+    DB::transaction(function () use ($images) {
+      foreach ($images as $image) {
+        // Delete the image from storage
+        Storage::disk('public')->delete($image->image_path);
+        // Delete the image record from the database
+        $image->delete();
+      }
+    });
   }
 }

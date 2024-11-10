@@ -52,10 +52,20 @@ class PropertyController extends BaseController
 		//get the authenticated user
 		$currentUser = $request->user();
 		//validate the data
-		$data = $this->validate($request, ValidationRules::propertyUploadValidation());
+		$data = $this->validate($request, ValidationRules::uploadPropertyImageRules());
 		$file = $request->file("image");
 
 		$path = $this->propertyService->uploadFile($file, $data['property_id'], $currentUser);
 		return $this->sendResponse(['path' => $path], "File uploaded successfully");
+	}
+
+	public function deletePropertyImages(Request $request){
+		//get the authenticated user
+		$currentUser = $request->user();
+		//validate the data
+		$data = $this->validate($request, ValidationRules::deletePropertyImageRules($request->input('property_id')));
+
+		$this->propertyService->deletePropertyImage($data,$currentUser);
+		return $this->sendResponse(null,"File deleted");
 	}
 }

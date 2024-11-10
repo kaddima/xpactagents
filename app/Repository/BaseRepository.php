@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Repository\RepositoryInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -48,6 +49,10 @@ class BaseRepository implements RepositoryInterface
   public function delete($id): bool
   {
     return $this->model->destroy($id);
+  }
+
+  public function whereIn($column, array $data):Collection{
+    return $this->model->whereIn($column, $data)->get();
   }
 
   /**

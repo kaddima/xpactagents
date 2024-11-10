@@ -28,8 +28,8 @@ Route::prefix('v1')->group(function () {
 		Route::post('/password/reset', 'resetPassword');
 	});
 
-	Route::get('/listings', [PropertyController::class, 'getProperties']);
-	Route::get('/listings/{id}', [ListingController::class, 'propertyDetails']);
+	Route::get('/properties', [PropertyController::class, 'getProperties']);
+	Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);
 
 	/**user must be authenticated to access this routes */
 	Route::middleware('auth:sanctum')->group(function () {
@@ -38,10 +38,16 @@ Route::prefix('v1')->group(function () {
 
 
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
-		Route::post('/listings', [PropertyController::class, 'create']);
-		Route::post('/listings/upload', [PropertyController::class, 'uploadFile']);
-		Route::put('/listings/{id}', [PropertyController::class, 'update']);
-		Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
+		//POST METHODS
+		Route::post('/properties', [PropertyController::class, 'create']);
+		Route::post('/properties/images', [PropertyController::class, 'uploadFile']);
+		
+		//PUT METHODS
+		Route::put('/properties/{id}', [PropertyController::class, 'update']);
+		
+		//DELETE METHODS
+		//Route::delete('/properties/{id}', [PropertyController::class, 'delete']);
+		Route::delete('/properties/images', [PropertyController::class, 'deletePropertyImages']);
 	});
 
 });
