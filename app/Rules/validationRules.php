@@ -4,7 +4,7 @@ namespace App\Rules;
 
 class ValidationRules
 {
-  public static function storeProductRules($isUpdate=false)
+  public static function storeProductRules($isUpdate = false)
   {
     return [
       'name' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Required name
@@ -14,13 +14,13 @@ class ValidationRules
       'bathrooms' => 'nullable|integer|min:0', // Bathrooms should be a non-negative integer
       'toilets' => 'nullable|integer|min:0', // Toilets should be a non-negative integer
       'description' => 'nullable|string', // Optional description
-      'duration' => ['nullable','string',new CaseInsensitiveIn(['month','day','year','week'])], // Limited options for duration
+      'duration' => ['nullable', 'string', new CaseInsensitiveIn(['month', 'day', 'year', 'week'])], // Limited options for duration
       'lga' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Optional LGA
-      'category' => $isUpdate ? ['nullable','string','max:255',new CaseInsensitiveIn(['sell','rent','land','short_let'])] :
-       ['required','string','max:255',new CaseInsensitiveIn(['sell','rent','land','shortlet'])], // Limited options for property category
-      'property_type' => ['nullable','string','max:255',new CaseInsensitiveIn(['duplex','condo','apartment','bungalow','mansion'])], // Required property type
+      'category' => $isUpdate ? ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['sell', 'rent', 'land', 'short_let'])] :
+        ['required', 'string', 'max:255', new CaseInsensitiveIn(['sell', 'rent', 'land', 'shortlet'])], // Limited options for property category
+      'property_type' => ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['duplex', 'condo', 'apartment', 'bungalow', 'mansion'])], // Required property type
       'state' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Required state
-      'other_category' => ['nullable','string','max:255',new CaseInsensitiveIn(['beach','modern','pool','countryside','islands','lake','castle','camping','estate','golfing','mansion','lux'])], // Optional other category
+      'other_category' => ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['beach', 'modern', 'pool', 'countryside', 'islands', 'lake', 'castle', 'camping', 'estate', 'golfing', 'mansion', 'lux'])], // Optional other category
       'amenities' => 'array', // Amenities should be an array
       'amenities.*.amenities' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Each amenity should have a required string field
       'property_fact' => 'nullable|array', // Property facts should be an array
@@ -50,6 +50,14 @@ class ValidationRules
       'state' => 'nullable|string|max:255',
       'page' => 'nullable|integer|min:1',
       'limit' => 'nullable|integer|min:1',
+    ];
+  }
+
+  public static function propertyUploadValidation()
+  {
+    return [
+      'property_id'=>"required|uuid",
+      'image' => 'required|image|mimes:jpg,jpeg,png|max:700'
     ];
   }
 }

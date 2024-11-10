@@ -28,6 +28,6 @@ class CheckAgentOrAdmin
     }
 
     // If not authorized, return a 403 Forbidden response
-    return response()->json(['message' => 'Forbidden'], 403);
+    return response()->json(['message' => 'Forbidden: operation for agent accounts'], 403);
   }
 }

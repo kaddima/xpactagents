@@ -39,6 +39,7 @@ Route::prefix('v1')->group(function () {
 
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
 		Route::post('/listings', [PropertyController::class, 'create']);
+		Route::post('/listings/upload', [PropertyController::class, 'uploadFile']);
 		Route::put('/listings/{id}', [PropertyController::class, 'update']);
 		Route::delete('/properties/{id}', [PropertyController::class, 'destroy']);
 	});
