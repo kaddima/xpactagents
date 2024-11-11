@@ -80,7 +80,7 @@ class Handler extends ExceptionHandler
           'data' => null,
           'status' => false,
           'error' => 'Authorization Error',
-          'message' => 'You do not have permission to perform this action.',
+          'message' => $exception->getMessage(),
         ], 403);
       }
       if ($exception instanceof ValidationException) {

@@ -32,7 +32,7 @@ class PropertyController extends BaseController
 		return $this->sendResponse(['productId' => $productId], "Product created successfully");
 	}
 
-	public function update(Request $request, $id)
+	public function updateProperty(Request $request, $id)
 	{
 		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
 		if ($validator->fails()) {
@@ -41,7 +41,7 @@ class PropertyController extends BaseController
 
 		$data = $this->validate($request, ValidationRules::storeProductRules(true));
 
-		$data['id'] = $id;
+		$data['property_id'] = $id;
 		$currentUser = $request->user();
 		$this->propertyService->updateProperty($data, $currentUser);
 		return $this->sendResponse([], "Property updated");
@@ -59,13 +59,46 @@ class PropertyController extends BaseController
 		return $this->sendResponse(['path' => $path], "File uploaded successfully");
 	}
 
-	public function deletePropertyImages(Request $request){
+	public function deletePropertyImages(Request $request)
+	{
 		//get the authenticated user
 		$currentUser = $request->user();
 		//validate the data
 		$data = $this->validate($request, ValidationRules::deletePropertyImageRules($request->input('property_id')));
 
-		$this->propertyService->deletePropertyImage($data,$currentUser);
-		return $this->sendResponse(null,"File deleted");
+		$this->propertyService->deletePropertyImage($data, $currentUser);
+		return $this->sendResponse(null, "File deleted");
+	}
+
+	public function deleteProperty(Request $request, $id)
+	{
+		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
+		if ($validator->fails()) {
+			throw new ValidationException($validator);
+		}
+		$this->propertyService->deleteProperty($id, $request->user());
+		return $this->sendResponse(null, "Property deleted");
+	}
+
+	public function addFavorite(Request $request, $id)
+	{
+		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
+		if ($validator->fails()) {
+			throw new ValidationException($validator);
+		}
+
+		$this->propertyService->addFavoriteProperty($id, $request->user());
+		return $this->sendResponse(null, "Property added to favorite");
+	}
+
+	public function removeFavorite(Request $request, $id)
+	{
+		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
+		if ($validator->fails()) {
+			throw new ValidationException($validator);
+		}
+
+		$this->propertyService->removeFavoriteProperty($id, $request->user());
+		return $this->sendResponse(null, "Property deleted from favorite");
 	}
 }

@@ -50,7 +50,7 @@ class Property extends Model
 
 		static::saving(function ($model) {
 			// Loop through all attributes and convert them to lowercase
-			foreach (['property_type','other_category','category','duration'] as $key) {
+			foreach (['property_type', 'other_category', 'category', 'duration'] as $key) {
 				// Apply strtolower only to string values that are not numeric
 				if (isset($model->{$key})) {
 					$model->{$key} = strtolower($model->{$key});
@@ -89,7 +89,7 @@ class Property extends Model
 	 */
 	public function getAmenitiesAttribute($value)
 	{
-		return json_decode($value,true);
+		return json_decode($value, true);
 	}
 
 	/**
@@ -100,7 +100,7 @@ class Property extends Model
 	 */
 	public function getPropertyFactAttribute($value)
 	{
-		return json_decode($value,true);
+		return json_decode($value, true);
 	}
 
 	/**
@@ -195,5 +195,26 @@ class Property extends Model
 		}
 
 		return $query->orderBy('created_at', 'desc');
+	}
+
+	/**
+	 * Get the user that owns the property.
+	 */
+	public function author()
+	{
+		return $this->belongsTo(User::class, 'creator_id');
+	}
+
+	/**
+	 * Get the images for the property.
+	 */
+	public function propertyImages()
+	{
+		return $this->hasMany(PropertyImage::class);
+	}
+
+	public function favorites()
+	{
+		return $this->belongsToMany(User::class, "favorites");
 	}
 }

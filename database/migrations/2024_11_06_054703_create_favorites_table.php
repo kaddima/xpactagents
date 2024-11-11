@@ -14,10 +14,8 @@ class CreateFavoritesTable extends Migration
     public function up()
     {
         Schema::create('favorites', function (Blueprint $table) {
-            $table->id();
             $table->uuid("user_id");
             $table->uuid("property_id");
-            $table->timestamps();
         });
     }
 

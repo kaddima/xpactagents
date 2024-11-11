@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\PropertyCollection;
+use App\Models\PropertyImage;
+use App\Repository\FavoriteRepositiory;
 use App\Repository\PropertyImageRepo;
 use App\Repository\PropertyRepository;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -16,13 +18,44 @@ class PropertyService
 {
   protected $propertyRepo;
   protected $propertyImageRepo;
+  protected $favoriteRepo;
+
   public function __construct(
     PropertyRepository $propertyRepo,
-    PropertyImageRepo $propertyImageRepo
+    PropertyImageRepo $propertyImageRepo,
+    FavoriteRepositiory $favoriteRepo
   ) {
     $this->propertyRepo = $propertyRepo;
     $this->propertyImageRepo = $propertyImageRepo;
+    $this->favoriteRepo = $favoriteRepo;
   }
+
+  /**
+   * Check if the property exists and if the current user is authorized to access it.
+   *
+   * @param string $propertyId
+   * @param object $currentUser
+   * @throws NotFoundException
+   * @throws AuthorizationException
+   */
+  private function checkPropertyOwnership($propertyId, $currentUser)
+  {
+    try {
+      // Try to find the property by ID
+      $property = $this->propertyRepo->findById($propertyId);
+    } catch (ModelNotFoundException $e) {
+      // Property not found, throw NotFoundException
+      throw new NotFoundException("Property not found");
+    }
+
+    // Check if the current user is the creator of the property
+    if ($property->creator_id !== $currentUser->id) {
+      throw new AuthorizationException("You are not authorized to perform this action on this property");
+    }
+
+    return $property;
+  }
+
 
   public function create(array $data, $currentUser)
   {
@@ -58,15 +91,7 @@ class PropertyService
 
   public function updateProperty($data, $currentUser)
   {
-    try {
-      // The findById method will automatically throw an exception if the property is not found
-      $property = $this->propertyRepo->findById($data["id"]);
-    } catch (ModelNotFoundException $e) {
-      throw new NotFoundException("Property not found");
-    }
-    if ($property->creator_id !== $currentUser->id) {
-      throw new AuthorizationException("You are not authorized to update this property");
-    }
+    $property = $this->checkPropertyOwnership($data['property_id'], $currentUser);
     $property->update($data);
 
     return $property;
@@ -74,15 +99,7 @@ class PropertyService
 
   public function uploadFile(UploadedFile $file, $property_id, $currentUser)
   {
-    try {
-      // The findById method will automatically throw an exception if the property is not found
-      $property = $this->propertyRepo->findById($property_id);
-    } catch (ModelNotFoundException $e) {
-      throw new NotFoundException("Property not found");
-    }
-    if ($property->creator_id !== $currentUser->id) {
-      throw new AuthorizationException("You are not authorized to update this property");
-    }
+    $property = $this->checkPropertyOwnership($property_id, $currentUser);
 
     $path = $file->store("{$currentUser->id}/{$property->id}");
 
@@ -93,15 +110,7 @@ class PropertyService
 
   public function deletePropertyImage($data, $currentUser)
   {
-    try {
-      // The findById method will automatically throw an exception if the property is not found
-      $property = $this->propertyRepo->findById($data['property_id']);
-    } catch (ModelNotFoundException $e) {
-      throw new NotFoundException("Property not found");
-    }
-    if ($property->creator_id !== $currentUser->id) {
-      throw new AuthorizationException("You are not authorized to update this property");
-    }
+    $this->checkPropertyOwnership($data['property_id'], $currentUser);
 
     $images = $this->propertyImageRepo->whereIn("id", $data['image_ids']);
 
@@ -113,5 +122,63 @@ class PropertyService
         $image->delete();
       }
     });
+  }
+
+  public function addFavoriteProperty($property_id, $currentUser)
+  {
+    try {
+      // Try to find the property by ID
+      $property = $this->propertyRepo->findById($property_id);
+    } catch (ModelNotFoundException $e) {
+      // Property not found, throw NotFoundException
+      throw new NotFoundException("Property not found");
+    }
+
+    if ($property->published == 0) {
+      throw new AuthorizationException("Property is not published");
+    }
+    // Check if the property is already favorited by the current user
+    if ($currentUser->favorites->contains($property)) {
+      throw new AuthorizationException("This property is already in your favorites");
+    }
+
+    // Attach the property to the user's favorites list
+    $currentUser->favorites()->attach($property_id);
+  }
+
+  public function removeFavoriteProperty($property_id, $currentUser)
+  {
+    try {
+      // Try to find the property by ID
+      $property = $this->propertyRepo->findById($property_id);
+    } catch (ModelNotFoundException $e) {
+      // Property not found, throw NotFoundException
+      throw new NotFoundException("Property not found");
+    }
+
+    // Check if the property is already favorited by the current user
+    if (!$currentUser->favorites->contains($property)) {
+      throw new AuthorizationException("This property is not in your favorites");
+    }
+
+    // detach the property from the user's favorites list
+    $currentUser->favorites()->detach($property_id);
+  }
+
+  public function deleteProperty($property_id, $currentUser)
+  {
+    $property = $this->checkPropertyOwnership($property_id, $currentUser);
+
+    foreach ($property->propertyImages as $image) {
+      
+      if (Storage::exists($image->image_path)) {
+        Storage::disk('public')->delete($image->image_path);
+      }
+      $image->delete();
+    }
+    
+    $property->favorites()->detach();
+
+    $property->delete();
   }
 }

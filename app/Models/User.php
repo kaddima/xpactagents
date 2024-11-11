@@ -42,7 +42,7 @@ class User extends Authenticatable
 		'creator_id',
 		'otp_expires_at'
 	];
-	
+
 	protected $table = 'users';
 
 	/**
@@ -75,7 +75,7 @@ class User extends Authenticatable
 	{
 		$this->attributes['password'] = bcrypt($password);
 	}
-	
+
 	protected static function boot()
 	{
 		parent::boot();
@@ -83,5 +83,15 @@ class User extends Authenticatable
 		static::creating(function ($model) {
 			$model->id = (string) Str::uuid(); // Generate a UUID
 		});
+	}
+
+	public function properties()
+	{
+		return $this->hasMany(Property::class, "creator_id");
+	}
+
+	public function favorites()
+	{
+		return $this->belongsToMany(Property::class, 'favorites');
 	}
 }

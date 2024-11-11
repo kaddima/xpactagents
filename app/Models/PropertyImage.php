@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PropertyImage extends Model
 {
 	use HasFactory;
+	protected $table = 'property_images';
 	/**
 	 * prevent automatic timestamps management
 	 */
@@ -23,5 +24,13 @@ class PropertyImage extends Model
 			$model->created_at = now(); // Generate a UUID
 		});
 
+	}
+
+		/**
+	 * Get the property that owns the images.
+	 */
+	public function property()
+	{
+		return $this->belongsTo(Property::class);
 	}
 }
