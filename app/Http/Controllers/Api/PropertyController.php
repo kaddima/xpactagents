@@ -22,6 +22,15 @@ class PropertyController extends BaseController
 		return $this->sendResponse($this->propertyService->getProperties($data));
 	}
 
+	public function getPropertyDetails(Request $request, $id)
+	{
+		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
+		if ($validator->fails()) {
+			throw new ValidationException($validator);
+		}
+		return $this->sendResponse($this->propertyService->propertyDetails($id));
+	}
+
 	public function create(Request $request)
 	{
 		/**Validate the request data */

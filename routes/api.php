@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\PropertyController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
 
@@ -29,7 +28,7 @@ Route::prefix('v1')->group(function () {
 	});
 
 	Route::get('/properties', [PropertyController::class, 'getProperties']);
-	Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);
+	Route::get('/properties/{id}', [PropertyController::class, 'getPropertyDetails']);
 
 	/**user must be authenticated to access this routes */
 	Route::middleware('auth:sanctum')->group(function () {
@@ -44,9 +43,7 @@ Route::prefix('v1')->group(function () {
 		Route::controller(PropertyController::class)->group(function () {
 			Route::post('/properties', 'create');
 			Route::post('/properties/images', 'uploadFile');
-
 			Route::put('/properties/{id}', 'updateProperty');
-
 			Route::delete('/properties/{id}',  'deleteProperty');
 			Route::delete('/properties/images', 'deletePropertyImages');
 		});

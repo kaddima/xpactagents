@@ -15,12 +15,14 @@ class PropertyCollection extends ResourceCollection
 	public function toArray($request)
 	{
 		return [
-			'data' => $this->collection->toArray(),
+			'data' => $this->collection->map(function ($property) {
+				return new PropertyResource($property,true); // Wrap each property with PropertyResource
+		}),
 			"meta"=>[
 				'total'=>$this->total(),
 				'currentPage'=>$this->currentPage(),
 				'lastPage'=>$this->lastPage(),
-				'perPage'=>$this->perpage(),
+				'perPage'=>$this->perPage(),
 				'hasMorePage'=>$this->hasMorePages(),
 				'nextPageUrl'=>$this->nextPageUrl(),
 				'prevPageUrl'=>$this->previousPageUrl()

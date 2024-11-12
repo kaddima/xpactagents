@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\PropertyCollection;
+use App\Http\Resources\PropertyResource;
 use App\Models\PropertyImage;
 use App\Repository\FavoriteRepositiory;
 use App\Repository\PropertyImageRepo;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use PhpParser\Node\Stmt\TryCatch;
 
 class PropertyService
 {
@@ -86,7 +88,24 @@ class PropertyService
     $perPage = isset($filters['limit']) ? (int)$filters['limit'] : 25; // Default to 25
     $page = isset($filters['page']) ? (int)$filters['page'] : 1; // Default to page 1
 
-    return new PropertyCollection($query->paginate($perPage, ['*'], 'page', $page));
+    $dataCollection = $query->paginate($perPage, ['*'], 'page', $page);
+    return new PropertyCollection($dataCollection);
+  }
+
+  public function propertyDetails($property_id,$published = true){
+    $query = $this->propertyRepo->getQuery();
+
+    if($published){
+      $query = $query->published();
+    }
+
+    try{
+      $property = $query->findOrFail($property_id);
+    }catch(ModelNotFoundException $e){
+      throw new NotFoundException("Property not found");
+    }
+
+    return new PropertyResource($property);  
   }
 
   public function updateProperty($data, $currentUser)
