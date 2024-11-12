@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
 			Route::post('/properties', 'create');
 			Route::post('/properties/images', 'uploadFile');
 			Route::put('/properties/{id}', 'updateProperty');
+			Route::put('/properties/{id}/published/{published}', 'publishedStatus');
 			Route::delete('/properties/{id}',  'deleteProperty');
 			Route::delete('/properties/images', 'deletePropertyImages');
 		});

@@ -11,6 +11,7 @@ use Illuminate\Validation\ValidationException;
 class PropertyController extends BaseController
 {
 	protected $propertyService;
+	
 	public function __construct(PropertyService $propertyService)
 	{
 		$this->propertyService = $propertyService;
@@ -50,9 +51,9 @@ class PropertyController extends BaseController
 
 		$data = $this->validate($request, ValidationRules::storeProductRules(true));
 
-		$data['property_id'] = $id;
+		$id;
 		$currentUser = $request->user();
-		$this->propertyService->updateProperty($data, $currentUser);
+		$this->propertyService->updateProperty($data, $id, $currentUser);
 		return $this->sendResponse([], "Property updated");
 	}
 
@@ -109,5 +110,22 @@ class PropertyController extends BaseController
 
 		$this->propertyService->removeFavoriteProperty($id, $request->user());
 		return $this->sendResponse(null, "Property deleted from favorite");
+	}
+
+	public function publishedStatus(Request $request, $id, $published)
+	{
+		$data = ["id" => $id, 'published' => $published];
+		$validator = Validator::make(
+			$data,
+			["id" => "required|uuid", "published" => "required|string|in:true,false"],
+			["in" => "Only true or fals is accepted"]
+		);
+
+		if ($validator->fails()) {
+			throw new ValidationException($validator);
+		}
+
+		$this->propertyService->updateProperty(['published' => ($published == 'true') ? 1 : 0], $id, $request->user());
+		return $this->sendResponse(["published" => $published], "Published status changed");
 	}
 }

@@ -57,8 +57,7 @@ class PropertyService
 
     return $property;
   }
-
-
+  
   public function create(array $data, $currentUser)
   {
     $data['creator_id'] = $currentUser->id;
@@ -108,9 +107,9 @@ class PropertyService
     return new PropertyResource($property);  
   }
 
-  public function updateProperty($data, $currentUser)
+  public function updateProperty($data, $property_id, $currentUser)
   {
-    $property = $this->checkPropertyOwnership($data['property_id'], $currentUser);
+    $property = $this->checkPropertyOwnership($property_id, $currentUser);
     $property->update($data);
 
     return $property;
