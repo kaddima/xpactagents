@@ -5,13 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\Rules\ValidationRules;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class PropertyController extends BaseController
 {
 	protected $propertyService;
-	
+
 	public function __construct(PropertyService $propertyService)
 	{
 		$this->propertyService = $propertyService;
@@ -25,10 +27,7 @@ class PropertyController extends BaseController
 
 	public function getPropertyDetails(Request $request, $id)
 	{
-		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
-		if ($validator->fails()) {
-			throw new ValidationException($validator);
-		}
+		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
 		return $this->sendResponse($this->propertyService->propertyDetails($id));
 	}
 
@@ -44,10 +43,7 @@ class PropertyController extends BaseController
 
 	public function updateProperty(Request $request, $id)
 	{
-		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
-		if ($validator->fails()) {
-			throw new ValidationException($validator);
-		}
+		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
 
 		$data = $this->validate($request, ValidationRules::storeProductRules(true));
 
@@ -82,20 +78,15 @@ class PropertyController extends BaseController
 
 	public function deleteProperty(Request $request, $id)
 	{
-		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
-		if ($validator->fails()) {
-			throw new ValidationException($validator);
-		}
+		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
+
 		$this->propertyService->deleteProperty($id, $request->user());
 		return $this->sendResponse(null, "Property deleted");
 	}
 
 	public function addFavorite(Request $request, $id)
 	{
-		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
-		if ($validator->fails()) {
-			throw new ValidationException($validator);
-		}
+		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
 
 		$this->propertyService->addFavoriteProperty($id, $request->user());
 		return $this->sendResponse(null, "Property added to favorite");
@@ -103,10 +94,7 @@ class PropertyController extends BaseController
 
 	public function removeFavorite(Request $request, $id)
 	{
-		$validator = Validator::make(["id" => $id], ["id" => "required|uuid"]);
-		if ($validator->fails()) {
-			throw new ValidationException($validator);
-		}
+		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
 
 		$this->propertyService->removeFavoriteProperty($id, $request->user());
 		return $this->sendResponse(null, "Property deleted from favorite");
@@ -115,17 +103,51 @@ class PropertyController extends BaseController
 	public function publishedStatus(Request $request, $id, $published)
 	{
 		$data = ["id" => $id, 'published' => $published];
-		$validator = Validator::make(
+		$this->validateParams(
 			$data,
 			["id" => "required|uuid", "published" => "required|string|in:true,false"],
-			["in" => "Only true or fals is accepted"]
+			["in" => "Only true or false is accepted"]
 		);
-
-		if ($validator->fails()) {
-			throw new ValidationException($validator);
-		}
 
 		$this->propertyService->updateProperty(['published' => ($published == 'true') ? 1 : 0], $id, $request->user());
 		return $this->sendResponse(["published" => $published], "Published status changed");
+	}
+
+	public function agentProperties(Request $request, $agent_id)
+	{
+		$currentAgent = $request->user();
+		$data = $this->validateParams(
+			['agent_id' => $agent_id, 'current_agent_id' => $currentAgent->id],
+			['agent_id' => 'required|uuid', 'current_agent_id' => 'same:agent_id'],
+			['same' => "Invalid session user id"]
+		);
+
+		$filters = $this->validate($request, ValidationRules::propertyFiltersRules());
+		$properties = $this->propertyService->getProperties($filters, false, $data['agent_id']);
+		return $this->sendResponse($properties);
+	}
+
+	public function agentPropertyDetails(Request $request, $agent_id, $id)
+	{
+		$this->validateParams(
+			["id" => $id, 'agent_id' => $agent_id],
+			["id" => "required|uuid","agent_id"=>"required|uuid|exists:users,id"]
+		);
+
+		$property = $this->propertyService->propertyDetails($id, false, $agent_id);
+		return $this->sendResponse($property);
+	}
+
+	public function adminAgentProperties(Request $request, $agent_id)
+	{
+		$data = $this->validateParams(
+			['agent_id' => $agent_id,],
+			['agent_id' => 'required|uuid|exists:users,id',],
+			['exists' => "Invalid agentId: Agent account not found"]
+		);
+
+		$filters = $this->validate($request, ValidationRules::propertyFiltersRules());
+		$properties = $this->propertyService->getProperties($filters, false, $data['agent_id']);
+		return $this->sendResponse($properties);
 	}
 }

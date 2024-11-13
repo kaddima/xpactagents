@@ -49,15 +49,14 @@ class PropertyService
       // Property not found, throw NotFoundException
       throw new NotFoundException("Property not found");
     }
-
-    // Check if the current user is the creator of the property
-    if ($property->creator_id !== $currentUser->id) {
+    // Check if the current user is the creator of the property or the user is an admin
+    if ($property->creator_id !== $currentUser->id && $currentUser->is_admin != 1) {
       throw new AuthorizationException("You are not authorized to perform this action on this property");
     }
 
     return $property;
   }
-  
+
   public function create(array $data, $currentUser)
   {
     $data['creator_id'] = $currentUser->id;
@@ -65,7 +64,7 @@ class PropertyService
     return $model->id;
   }
 
-  public function getProperties($filters = [], $includeUnpublished = false, $agentId = null)
+  public function getProperties($filters = [], $onlyPublishedProperty = true, $agentId = null)
   {
     //create a query builder for the propertyModel
     $query = $this->propertyRepo->getQuery();
@@ -74,10 +73,10 @@ class PropertyService
      * Use the model Local scope (scopeFilter, scopePublished, 
      * scopeagentLitings) for query filtering 
      */
-    if ($includeUnpublished) {
-      $query = $query->filter($filters);
-    } else {
+    if ($onlyPublishedProperty) {
       $query = $query->published()->filter($filters);
+    } else {
+      $query = $query->filter($filters);
     }
 
     if ($agentId) {
@@ -91,20 +90,25 @@ class PropertyService
     return new PropertyCollection($dataCollection);
   }
 
-  public function propertyDetails($property_id,$published = true){
+  public function propertyDetails($property_id, $onlyPublishedProperty = true, $agentId = null)
+  {
     $query = $this->propertyRepo->getQuery();
 
-    if($published){
+    if ($onlyPublishedProperty) {
       $query = $query->published();
     }
 
-    try{
+    if ($agentId) {
+      $query = $query->agentProperty($agentId);
+    }
+
+    try {
       $property = $query->findOrFail($property_id);
-    }catch(ModelNotFoundException $e){
+    } catch (ModelNotFoundException $e) {
       throw new NotFoundException("Property not found");
     }
 
-    return new PropertyResource($property);  
+    return new PropertyResource($property);
   }
 
   public function updateProperty($data, $property_id, $currentUser)
@@ -188,13 +192,13 @@ class PropertyService
     $property = $this->checkPropertyOwnership($property_id, $currentUser);
 
     foreach ($property->propertyImages as $image) {
-      
+
       if (Storage::exists($image->image_path)) {
         Storage::disk('public')->delete($image->image_path);
       }
       $image->delete();
     }
-    
+
     $property->favorites()->detach();
 
     $property->delete();

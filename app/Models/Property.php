@@ -141,7 +141,7 @@ class Property extends Model
 	 */
 	public function scopeAgentProperty($query, $agentId)
 	{
-		return $query->where('agent_id', $agentId); // Adjust 'agent_id' to your actual column name
+		return $query->where('creator_id', $agentId); // Adjust 'agent_id' to your actual column name
 	}
 
 	// Scope for filtering by criteria

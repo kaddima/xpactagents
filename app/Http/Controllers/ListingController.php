@@ -701,7 +701,6 @@ class ListingController extends Controller
         return json_encode(['data'=>$properties]);
     }
 
-
     public function adminPropertiesOverview(){
 
         if(auth()->check()){

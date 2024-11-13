@@ -40,7 +40,7 @@ class AuthService
       'email' => $this->normalizeEmail($data['email']),
       'password' => Hash::make($data['password']), // Hash the password
       'activation_code' => Hash::make($token),
-      'otp_expires_at' => Carbon::now()->addMinutes(1)
+      'otp_expires_at' => Carbon::now()->addMinutes(env('TOKEN_EXP'))
     ];
 
     if ($data['reg_type'] == 'user') {
@@ -67,15 +67,16 @@ class AuthService
   public function resendOTPEmail($data)
   {
     $token = $this->generateOTP();
+    $email = $this->normalizeEmail($data["email"]);
 
     // Check if the user exists
-    $user = $this->userRepository->findByEmail($this->normalizeEmail($data["email"]));
+    $user = $this->userRepository->findByEmail($email);
     if (!$user) {
       throw new NotFoundException("User not found: Email not associated with an account");
     }
 
     $this->userRepository->updateByEmail(
-      $this->normalizeEmail($data["email"]),
+      $email,
       [
         'activation_code' => Hash::make($token),
         "otp_expires_at" => Carbon::now()->addMinutes(env('TOKEN_EXP'))
@@ -83,7 +84,7 @@ class AuthService
     );
 
     $mail_data = new \stdClass;
-    $mail_data->email = $data['email'];
+    $mail_data->email = $email;
     $mail_data->token = $token;
 
     //send email

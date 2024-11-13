@@ -19,9 +19,9 @@ class CreatePropertyTable extends Migration
             $table->string("name")->default("");
             $table->string("title")->nullable();
             $table->string("description")->nullable();
-            $table->tinyInteger("bedrooms")->unsigned()->default(0);
-            $table->tinyInteger("bathrooms")->unsigned()->default(0);
-            $table->tinyInteger("toilets")->unsigned()->default(0);
+            $table->tinyInteger("bedrooms")->unsigned()->default(1);
+            $table->tinyInteger("bathrooms")->unsigned()->default(1);
+            $table->tinyInteger("toilets")->unsigned()->default(1);
             $table->string("category");
             $table->decimal("amount",15,2)->default(0.00);
             $table->string("location")->nullable();

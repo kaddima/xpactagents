@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class BaseController extends Controller
 {
@@ -40,5 +42,15 @@ class BaseController extends Controller
 			'error' => $errors,
 			'message' => null,
 		], $statusCode);
+	}
+
+	protected function validateParams($data,$rules,$message=[]){
+		$validator = Validator::make($data,$rules,$message);
+
+		if($validator->fails()){
+			throw new ValidationException($validator);
+		}
+
+		return $validator->validated();
 	}
 }
