@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\NotFoundException;
+use App\Http\Resources\ImageResource;
 use App\Http\Resources\PropertyCollection;
 use App\Http\Resources\PropertyResource;
 use App\Models\PropertyImage;
@@ -187,6 +188,13 @@ class PropertyService
     $currentUser->favorites()->detach($property_id);
   }
 
+  public function getFavoriteProperties($currentUser)
+  {
+    return PropertyResource::collection($currentUser->favorites->map(function ($property) {
+      return new PropertyResource($property, true); // Wrap each property with PropertyResource
+    }));
+  }
+
   public function deleteProperty($property_id, $currentUser)
   {
     $property = $this->checkPropertyOwnership($property_id, $currentUser);
@@ -202,5 +210,16 @@ class PropertyService
     $property->favorites()->detach();
 
     $property->delete();
+  }
+
+  public function getPropertyImages($property_id)
+  {
+    try {
+      $property = $this->propertyRepo->findById($property_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException('Invalid property ID: Property not found');
+    }
+
+    return ImageResource::collection($property->propertyImages);
   }
 }

@@ -45,11 +45,7 @@ class PropertyResource extends JsonResource
 	public function toArray($request)
 	{
 		$images = $this->propertyImages;
-		// If we're dealing with a single property, return an array of image paths
-		$imagePaths = $images->map(function ($image) {
-			return $image->image_path;
-		})->toArray();
-
+		
 		// Common property data
 		$propertyData = $this->transformPropertyData();
 
@@ -59,7 +55,7 @@ class PropertyResource extends JsonResource
 				$propertyData['images'] = isset($images) && $images->isNotEmpty() ? $images->first()->image_path : null;
 		} else {
 				// For a single property, return all images
-				$propertyData['images'] = $imagePaths;
+				$propertyData['images'] = new ImageResource($images);
 				$propertyData['author'] = new UserResource($this->author);
 		}
 

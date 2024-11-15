@@ -27,30 +27,31 @@ Route::prefix('v1')->group(function () {
 		Route::post('/password/reset', 'resetPassword');
 	});
 
-	Route::get('/properties', [PropertyController::class, 'getProperties']);
-	Route::get('/properties/{id}', [PropertyController::class, 'getPropertyDetails']);
-	Route::get('/properties/search', [PropertyController::class, 'getPropertyProperties']);
-
 	/**user must be authenticated to access this routes */
 	Route::middleware('auth:sanctum')->group(function () {
-		Route::get('/properties/favorite', [PropertyController::class, 'getFavoriteProperties']);
+		Route::get('/properties/favorites', [PropertyController::class, 'getFavoriteProperties']);
 		Route::post('/properties/{id}/favorite', [PropertyController::class, 'addFavorite']);
 		Route::delete('/properties/{id}/favorite', [PropertyController::class, 'removeFavorite']);
 		Route::post('/logout', [AuthenticationController::class, "logout"]);
 	});
 
+	Route::get('/properties', [PropertyController::class, 'getProperties']);
+	Route::get('/properties/{id}', [PropertyController::class, 'getPropertyDetails']);
+	Route::get('/properties/{id}/images', [PropertyController::class, 'getPropertyImages']);
+	Route::get('/properties/search', [PropertyController::class, 'getPropertyProperties']);
 
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
 		Route::controller(PropertyController::class)->group(function () {
-			Route::get('/agents/{agent_id}/dashboard/overview', 'agentOverview');
-			Route::get('/agents/{agent_id}/properties', 'agentProperties');
-			Route::get('/agents/{agent_id}/properties/{id}', 'agentPropertyDetails');
 			Route::post('/properties', 'create');
 			Route::post('/properties/images', 'uploadFile');
 			Route::put('/properties/{id}', 'updateProperty');
 			Route::put('/properties/{id}/published/{published}', 'publishedStatus');
 			Route::delete('/properties/{id}',  'deleteProperty');
 			Route::delete('/properties/images', 'deletePropertyImages');
+			
+			Route::get('/agents/{agent_id}/dashboard/overview', 'agentOverview');
+			Route::get('/agents/{agent_id}/properties', 'agentProperties');
+			Route::get('/agents/{agent_id}/properties/{id}', 'agentPropertyDetails');
 		});
 	});
 

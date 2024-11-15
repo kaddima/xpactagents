@@ -5,10 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Rules\ValidationRules;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
-use Laravel\Sanctum\PersonalAccessToken;
 
 class PropertyController extends BaseController
 {
@@ -131,11 +127,28 @@ class PropertyController extends BaseController
 	{
 		$this->validateParams(
 			["id" => $id, 'agent_id' => $agent_id],
-			["id" => "required|uuid","agent_id"=>"required|uuid|exists:users,id"]
+			["id" => "required|uuid", "agent_id" => "required|uuid|exists:users,id"]
 		);
 
 		$property = $this->propertyService->propertyDetails($id, false, $agent_id);
 		return $this->sendResponse($property);
+	}
+
+	public function getFavoriteProperties(Request $request)
+	{
+		$currentUser = $request->user();
+		$properties = $this->propertyService->getFavoriteProperties($currentUser);
+		return $this->sendResponse($properties);
+	}
+
+	public function getPropertyImages(Request $request, $id)
+	{
+		$this->validateParams(
+			['id' => $id],
+			['id' => 'required|uuid'],
+		);
+		$images = $this->propertyService->getPropertyImages($id);
+		return $this->sendResponse($images);
 	}
 
 	public function adminAgentProperties(Request $request, $agent_id)
