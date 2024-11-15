@@ -111,11 +111,10 @@ class PropertyController extends BaseController
 
 	public function agentProperties(Request $request, $agent_id)
 	{
-		$currentAgent = $request->user();
+		
 		$data = $this->validateParams(
-			['agent_id' => $agent_id, 'current_agent_id' => $currentAgent->id],
-			['agent_id' => 'required|uuid', 'current_agent_id' => 'same:agent_id'],
-			['same' => "Invalid session user id"]
+			['agent_id' => $agent_id],
+			['agent_id' => 'required|uuid|exists:users,id']
 		);
 
 		$filters = $this->validate($request, ValidationRules::propertyFiltersRules());
@@ -162,5 +161,13 @@ class PropertyController extends BaseController
 		$filters = $this->validate($request, ValidationRules::propertyFiltersRules());
 		$properties = $this->propertyService->getProperties($filters, false, $data['agent_id']);
 		return $this->sendResponse($properties);
+	}
+
+	public function searchProperties(Request $request){
+		return $this->getProperties($request);
+	}
+
+	public function searchAgentProperties(Request $request, $agent_id){
+		return $this->agentProperties($request, $agent_id);
 	}
 }

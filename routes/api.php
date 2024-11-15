@@ -36,9 +36,9 @@ Route::prefix('v1')->group(function () {
 	});
 
 	Route::get('/properties', [PropertyController::class, 'getProperties']);
+	Route::get('/properties/search', [PropertyController::class, 'searchProperties']);
 	Route::get('/properties/{id}', [PropertyController::class, 'getPropertyDetails']);
 	Route::get('/properties/{id}/images', [PropertyController::class, 'getPropertyImages']);
-	Route::get('/properties/search', [PropertyController::class, 'getPropertyProperties']);
 
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
 		Route::controller(PropertyController::class)->group(function () {
@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function () {
 			
 			Route::get('/agents/{agent_id}/dashboard/overview', 'agentOverview');
 			Route::get('/agents/{agent_id}/properties', 'agentProperties');
+			Route::get('/agents/{agent_id}/properties/search', 'searchAgentProperties');
 			Route::get('/agents/{agent_id}/properties/{id}', 'agentPropertyDetails');
 		});
 	});
