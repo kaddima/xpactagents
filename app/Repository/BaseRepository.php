@@ -62,4 +62,5 @@ class BaseRepository implements RepositoryInterface
   {
     return $this->model->newQuery();
   }
+
 }

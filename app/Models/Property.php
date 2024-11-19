@@ -217,4 +217,9 @@ class Property extends Model
 	{
 		return $this->belongsToMany(User::class, "favorites");
 	}
+
+	public function conversations()
+	{
+		return $this->hasMany(Conversation::class);
+	}
 }

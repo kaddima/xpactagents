@@ -68,4 +68,11 @@ class ValidationRules
       'image_ids.*' => 'exists:property_images,id,property_id,' . $property_id, // Validate each ID exists in the property_images table and belongs to the given property_id
     ];
   }
+
+  public static function createConversationRules(){
+    return [
+      "property_id"=>"required|uuid",
+      "message"=>"required|string"
+    ];
+  }
 }

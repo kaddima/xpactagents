@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 require __DIR__ . '/../../../Business/mailer.php';
 use Business\Mailer;
+use Illuminate\Support\Facades\File;
 
 class AccountController extends Controller
 {
@@ -184,114 +185,6 @@ class AccountController extends Controller
                 ]);
         }
 
-    }
-
-    public function updateAccount(Request $request){
-
-        $data = $request->all();
-        $table = 'users';
-
-        if(isset($data['name']) && ($data['name'] === 'account_number' ||
-            $data['name'] === 'savings' || $data['name'] === 'account_type'
-            || $data['name'] === 'account_balance')){
-            $table = 'accounts';
-        }
-        else if(isset($data['name']) && ($data['name'] === 'card_number' ||
-                $data['name'] === 'cvc'  || $data['name']==='spending_limit' ||
-                $data['name']==='spent' || $data['name']==='exp' ||
-                $data['name']==='card_balance' || $data['name']==='card_active'))
-        {
-            $table = 'card';
-        }
-
-        if($data['name'] === 'photo'){
-
-            $errors = [];
-            $status = 1;
-            $photoPattern = '#^(image/)[^\s\n<]+$#i';
-            $upload_dir = __DIR__."/../../public/uploads/";
-
-            $file = $request->file('photo');
-
-            $name = str_replace(' ', '-',$file->getClientOriginalName());
-            $size = $file->getSize();
-            $target = $upload_dir.$name;
-
-            if ((floatval($size)/1000) > 500){
-                $errors[] = 'file too large -- 500kb and below';
-                $status = 0;
-            }elseif (!preg_match($photoPattern,$file->getMimeType())){
-                $errors[] = 'please upload only images';
-                $status = 0;
-            }elseif (file_exists($target)){
-                $errors[] = 'File already exist';
-                $status = 0;
-
-            }
-
-            if($status){
-
-                //get the name of the previous photo
-                $prevPhoto = DB::table('users')
-                ->where(['id'=>$data['user_id']])
-                ->first(['photo']);
-
-                //unlink the previous pix
-                //unlink(public_path('uploads/'.$prevPhoto->photo));
-
-                // upload the photo to server
-                $file->move(public_path('uploads'),$name);
-
-                //update the value
-                DB::table('users')
-                ->where(['id'=>$data['user_id']])
-                ->update(['photo'=>$name]);
-
-                //get the table updated
-                $results =  DB::table('users')
-                    ->where(['id'=>$data['user_id']])
-                    ->first();
-
-                return json_encode(['status'=>1, 'data'=>[
-                    'table'=>$table,
-                    'data'=>$results
-                ]]);
-
-            }else{
-                return json_encode(['status'=>$status,
-                    'errors'=>$errors
-
-                ]);
-            }
-
-
-            $userphoto = Users::find('users', ['user_id'=>$user_id])['photo'];
-
-            $result = File::UploadPhoto($userPhotoDIR);
-
-            if ($result['valid']){
-
-                //delete the previous pix then save a new one
-                unlink($userPhotoDIR.$userphoto);
-
-                DbActions::update('users','user_id',$user_id,['photo'=>$_FILES['file']['name']]);
-            }
-        }
-
-        //update the value
-        DB::table($table)
-            ->where([$table=='users'?'id':'user_id'=>$data['user_id']])
-            ->update([$data['name']=>$data['value']]);
-
-        //get the table updated
-        $results =  DB::table($table)
-            ->where([$table=='users'?'id':'user_id'=>$data['user_id']])
-            ->first();
-
-        return json_encode(['status'=>1, 'data'=>[
-            'table'=>$table,
-            'data'=>$results
-        ]]);
     }
 
     public function updateLastSeen(){

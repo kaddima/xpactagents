@@ -55,6 +55,9 @@
 		"migrate" :[
 			"@php artisan migrate"
 		],
+		"seed" :[
+			"@php artisan db:seed"
+		],
 		"migrate:rb" :[
 			"@php artisan migrate:rollback"
 		]

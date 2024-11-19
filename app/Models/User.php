@@ -94,4 +94,14 @@ class User extends Authenticatable
 	{
 		return $this->belongsToMany(Property::class, 'favorites');
 	}
+
+	public function conversations()
+	{
+		return $this->hasMany(Conversation::class);
+	}
+
+	public function messages()
+	{
+		return $this->hasMany(Message::class);
+	}
 }

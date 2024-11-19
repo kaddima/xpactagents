@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
+use App\Http\Controllers\Api\MessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,6 +33,7 @@ Route::prefix('v1')->group(function () {
 		Route::get('/properties/favorites', [PropertyController::class, 'getFavoriteProperties']);
 		Route::post('/properties/{id}/favorite', [PropertyController::class, 'addFavorite']);
 		Route::delete('/properties/{id}/favorite', [PropertyController::class, 'removeFavorite']);
+		Route::post('/properties/conversation',[MessageController::class, 'createConversation']);
 		Route::post('/logout', [AuthenticationController::class, "logout"]);
 	});
 
@@ -65,3 +67,14 @@ Route::prefix('v1')->group(function () {
 
 Route::get('/listings', [ListingController::class, 'listings']);
 Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
+
+Route::post('/question/send-messge',[MessageController::class,'store']);
+Route::post('/agents/message/send',[MessageController::class,'saveMessage']);
+Route::get('/agent/message/property-of-interest',[MessageController::class,'agentsPropertyOfInterest']);
+Route::get('/users/message/property-of-interest',[MessageController::class,'usersPropertyOfInterest']);
+Route::get('/agent/message/participants',[MessageController::class,'agentsUsersInterested']);
+Route::get('/agent/message/messages',[MessageController::class,'agentsUserMessages']);
+Route::get('/user/message/messages',[MessageController::class,'userMessages']);
+Route::get('/user/message/notifier',[MessageController::class,'messageNotifier']);
+Route::post('/user/message/resolve',[MessageController::class,'resolveMessage']);
+Route::post('/message/read',[MessageController::class,'readMessage']);

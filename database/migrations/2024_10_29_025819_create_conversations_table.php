@@ -15,9 +15,8 @@ class CreateConversationsTable extends Migration
     {
         Schema::create('conversations', function (Blueprint $table) {
             $table->uuid("id")->primary();
-            $table->uuid("user_id");
-            $table->uuid("agent_id");
             $table->uuid("property_id");
+            $table->uuid("created_by");
             $table->timestamps();
         });
     }
