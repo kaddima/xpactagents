@@ -19,4 +19,15 @@ class MessageController extends BaseController
 		$message = $this->messageServices->createConversation($data, $request->user());
 		return $this->sendResponse($message, "Message sent");
 	}
+
+	public function sendMessage(Request $request){
+		$data = $this->validate($request,ValidationRules::sendMessageRules());
+		$message = $this->messageServices->sendMessage($data, $request->user());
+		return $this->sendResponse($message, "message sent");		
+	}
+
+	public function getUserConversations(Request $request){
+		$conversations = $this->messageServices->getUserConversations($request->user());
+		return $this->sendResponse($conversations);
+	}
 }

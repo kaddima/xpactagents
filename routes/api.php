@@ -33,7 +33,9 @@ Route::prefix('v1')->group(function () {
 		Route::get('/properties/favorites', [PropertyController::class, 'getFavoriteProperties']);
 		Route::post('/properties/{id}/favorite', [PropertyController::class, 'addFavorite']);
 		Route::delete('/properties/{id}/favorite', [PropertyController::class, 'removeFavorite']);
-		Route::post('/properties/conversation',[MessageController::class, 'createConversation']);
+		Route::get('/properties/conversations',[MessageController::class, 'getUserConversations']);
+		Route::post('/properties/conversations',[MessageController::class, 'createConversation']);
+		Route::post('/properties/messages',[MessageController::class, 'sendMessage']);
 		Route::post('/logout', [AuthenticationController::class, "logout"]);
 	});
 

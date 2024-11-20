@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class Property extends Model
@@ -220,6 +219,6 @@ class Property extends Model
 
 	public function conversations()
 	{
-		return $this->hasMany(Conversation::class);
+		return $this->hasMany(Conversation::class,'property_id');
 	}
 }

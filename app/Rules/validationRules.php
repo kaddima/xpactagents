@@ -75,4 +75,11 @@ class ValidationRules
       "message"=>"required|string"
     ];
   }
+
+  public static function sendMessageRules(){
+    return [
+      'conversation_id'=>"required|uuid",
+      'message'=>"required|string"
+    ];
+  }
 }

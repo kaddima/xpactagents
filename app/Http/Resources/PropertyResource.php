@@ -6,6 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class PropertyResource extends JsonResource
 {
+
 	private $isCollection;
 
 	public function __construct($data, bool $isCollection = false)
@@ -51,12 +52,12 @@ class PropertyResource extends JsonResource
 
 		// Handle images differently depending on collection or single property
 		if ($this->isCollection) {
-				// In a collection, return only the first image (if available)
-				$propertyData['images'] = isset($images) && $images->isNotEmpty() ? $images->first()->image_path : null;
+			// In a collection, return only the first image (if available)
+			$propertyData['images'] = isset($images) && $images->isNotEmpty() ? $images->first()->image_path : null;
 		} else {
-				// For a single property, return all images
-				$propertyData['images'] = new ImageResource($images);
-				$propertyData['author'] = new UserResource($this->author);
+			// For a single property, return all images
+			$propertyData['images'] = ImageResource::collection($images);
+			$propertyData['author'] = new UserResource($this->author);
 		}
 
 		return $propertyData;

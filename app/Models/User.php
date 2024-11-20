@@ -97,11 +97,11 @@ class User extends Authenticatable
 
 	public function conversations()
 	{
-		return $this->hasMany(Conversation::class);
+		return $this->hasMany(Conversation::class, 'created_by');
 	}
 
 	public function messages()
 	{
-		return $this->hasMany(Message::class);
+		return $this->hasMany(Message::class,"sender_id");
 	}
 }

@@ -26,9 +26,9 @@ class Conversation extends Model
     });
   }
 
-  public function property()
+  public function propertyDetails()
   {
-    return $this->belongsTo(Property::class);
+    return $this->belongsTo(Property::class,"property_id");
   }
 
   public function user()
