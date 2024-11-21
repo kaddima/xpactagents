@@ -46,7 +46,8 @@ Route::prefix('v1')->group(function () {
 
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
 		
-		Route::get('/agents/{agent_id}/properties/conversations',[MessageController::class, 'getAgentConversations']);
+		Route::get('/agents/properties/conversations',[MessageController::class, 'getAgentConversations']);
+		Route::get('/agents/properties/{id}/conversations',[MessageController::class, 'getPropertyConversations']);
 
 		Route::controller(PropertyController::class)->group(function () {
 			Route::post('/properties', 'create');

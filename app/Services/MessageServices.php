@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\ConversationCollection;
-use App\Http\Resources\ConversationResource;
 use App\Repository\AgentConversationRepository;
 use App\Repository\ConversationRepository;
 use App\Repository\MessageRepository;
@@ -110,7 +109,20 @@ class MessageServices
 
   public function getAgentConversations($currentUser, $agent_id=null){
     $conversations = $currentUser->agentConversations()
-    ->with('propertyDetails')
+    ->latest()
+    ->paginate(env("PAGINATE_NUMBER"));
+
+    return new ConversationCollection($conversations);
+  }
+
+  public function getpropertyConversations($property_id){
+    try{
+      $property = $this->propertyRepo->findById($property_id);
+    }catch(ModelNotFoundException $e){
+      throw new NotFoundException();
+    }
+
+    $conversations = $property->conversations()
     ->latest()
     ->paginate(env("PAGINATE_NUMBER"));
 

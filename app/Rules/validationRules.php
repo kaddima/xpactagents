@@ -82,4 +82,8 @@ class ValidationRules
       'message'=>"required|string"
     ];
   }
+
+  public static function propertyValidationRule(){
+    return ["property_id"=>"required|uuid"];
+  }
 }
