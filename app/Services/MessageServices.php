@@ -4,12 +4,14 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\ConversationCollection;
+use App\Http\Resources\MessageCollection;
 use App\Repository\AgentConversationRepository;
 use App\Repository\ConversationRepository;
 use App\Repository\MessageRepository;
 use App\Repository\PropertyRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Log;
 
 class MessageServices
 {
@@ -59,8 +61,8 @@ class MessageServices
 
     //add the agent conversation
     $this->agentConversationRepo->create([
-      "agent_id"=>$property->creator_id,
-      "conversation_id"=>$conversation->id
+      "agent_id" => $property->creator_id,
+      "conversation_id" => $conversation->id
     ]);
 
     //add the first message to the conversation
@@ -85,11 +87,11 @@ class MessageServices
      * or the property creator
      */
 
-     $property = $conversation->property;
+    $property = $conversation->propertyDetails;
 
-     if($currentUser->id !== $conversation->created_by && $currentUser->id !== $property->creator_id){
+    if ($currentUser->id !== $conversation->created_by && $currentUser->id !== $property->creator_id) {
       throw new AuthorizationException("Account not part of the conversation");
-     }
+    }
 
     //add the first message to the conversation
     return $this->messageRepo->create([
@@ -99,33 +101,58 @@ class MessageServices
     ]);
   }
 
-  public function getUserconversations($currentUser){
+  public function getUserconversations($currentUser)
+  {
     $conversations = $currentUser->conversations()
-    ->latest()
-    ->paginate(env("PAGINATE_NUMBER"));
+      ->latest()
+      ->paginate(env("PAGINATE_NUMBER"));
 
     return new ConversationCollection($conversations);
   }
 
-  public function getAgentConversations($currentUser, $agent_id=null){
+  public function getAgentConversations($currentUser, $agent_id = null)
+  {
     $conversations = $currentUser->agentConversations()
-    ->latest()
-    ->paginate(env("PAGINATE_NUMBER"));
+      ->latest()
+      ->paginate(env("PAGINATE_NUMBER"));
 
     return new ConversationCollection($conversations);
   }
 
-  public function getpropertyConversations($property_id){
-    try{
+  public function getpropertyConversations($property_id)
+  {
+    try {
       $property = $this->propertyRepo->findById($property_id);
-    }catch(ModelNotFoundException $e){
+    } catch (ModelNotFoundException $e) {
       throw new NotFoundException();
     }
 
     $conversations = $property->conversations()
+      ->latest()
+      ->paginate(env("PAGINATE_NUMBER"));
+
+    return new ConversationCollection($conversations);
+  }
+
+  public function getMessages($conversation_id, $currentUser)
+  {
+    try {
+      $conversation = $this->conversationRepo->findById($conversation_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("Invalid conversation id");
+    }
+
+    if (
+      $conversation->created_by !== $currentUser->id
+      && $conversation->propertyDetails->creator_id !== $currentUser->id
+    ) {
+      throw new AuthorizationException("Unauthorized: Account not associated with conversation");
+    }
+
+    $messages = $conversation->messages()
     ->latest()
     ->paginate(env("PAGINATE_NUMBER"));
 
-    return new ConversationCollection($conversations);
+    return new MessageCollection($messages);
   }
 }

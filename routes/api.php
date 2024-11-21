@@ -36,6 +36,7 @@ Route::prefix('v1')->group(function () {
 		Route::get('/properties/conversations',[MessageController::class, 'getUserConversations']);
 		Route::post('/properties/conversations',[MessageController::class, 'createConversation']);
 		Route::post('/properties/messages',[MessageController::class, 'sendMessage']);
+		Route::get('/properties/conversations/{id}/messages',[MessageController::class, 'getMessages']);
 		Route::post('/logout', [AuthenticationController::class, "logout"]);
 	});
 

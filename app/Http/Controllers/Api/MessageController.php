@@ -48,4 +48,15 @@ class MessageController extends BaseController
 		$conversations = $this->messageServices->getPropertyConversations($id);
 		return $this->sendResponse($conversations);
 	}
+
+	public function getMessages(Request $request, $id)
+	{
+		$this->validateParams(
+			['id' => $id],
+			['id' => "required|uuid"]
+		);
+
+		$messages = $this->messageServices->getMessages($id, $request->user());
+		return $this->sendResponse($messages);
+	}
 }
