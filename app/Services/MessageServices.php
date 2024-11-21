@@ -150,9 +150,30 @@ class MessageServices
     }
 
     $messages = $conversation->messages()
-    ->latest()
-    ->paginate(env("PAGINATE_NUMBER"));
+      ->latest()
+      ->paginate(env("PAGINATE_NUMBER"));
 
     return new MessageCollection($messages);
+  }
+
+  public function markMessagesRead($conversation_id, $currentUser)
+  {
+    try {
+      $conversation = $this->conversationRepo->findById($conversation_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("Invalid conversation id");
+    }
+
+    if (
+      $conversation->created_by !== $currentUser->id
+      && $conversation->propertyDetails->creator_id !== $currentUser->id
+    ) {
+      throw new AuthorizationException("Unauthorized: Account not associated with conversation");
+    }
+
+    $this->messageRepo->getQuery()
+    ->where("conversation_id","=", $conversation->id)
+    ->where("sender_id", "!=", $currentUser->id)
+    ->update(["read"=>1]);
   }
 }

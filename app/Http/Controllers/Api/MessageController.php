@@ -59,4 +59,11 @@ class MessageController extends BaseController
 		$messages = $this->messageServices->getMessages($id, $request->user());
 		return $this->sendResponse($messages);
 	}
+
+	public function markMessagesRead(Request $request, $id)
+	{
+		$data = $this->validateParams(["id" => $id], ["id" => "required|uuid"]);
+		$this->messageServices->markMessagesRead($id,$request->user());
+		return $this->sendResponse(null, "messages marked as read");
+	}
 }
