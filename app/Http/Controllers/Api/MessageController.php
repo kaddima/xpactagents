@@ -30,4 +30,10 @@ class MessageController extends BaseController
 		$conversations = $this->messageServices->getUserConversations($request->user());
 		return $this->sendResponse($conversations);
 	}
+
+	public function getAgentConversations(Request $request, $agent_id){
+		$this->validateParams(['agent_id'=>$agent_id],['agent_id'=>"required|uuid"]);
+		$conversations = $this->messageServices->getAgentConversations($request->user());
+		return $this->sendResponse($conversations);
+	}
 }

@@ -45,6 +45,9 @@ Route::prefix('v1')->group(function () {
 	Route::get('/properties/{id}/images', [PropertyController::class, 'getPropertyImages']);
 
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
+		
+		Route::get('/agents/{agent_id}/properties/conversations',[MessageController::class, 'getAgentConversations']);
+
 		Route::controller(PropertyController::class)->group(function () {
 			Route::post('/properties', 'create');
 			Route::post('/properties/images', 'uploadFile');
@@ -52,9 +55,9 @@ Route::prefix('v1')->group(function () {
 			Route::put('/properties/{id}/published/{published}', 'publishedStatus');
 			Route::delete('/properties/{id}',  'deleteProperty');
 			Route::delete('/properties/images', 'deletePropertyImages');
-			
 			Route::get('/agents/{agent_id}/dashboard/overview', 'agentOverview');
 			Route::get('/agents/{agent_id}/properties', 'agentProperties');
+
 			Route::get('/agents/{agent_id}/properties/search', 'searchAgentProperties');
 			Route::get('/agents/{agent_id}/properties/{id}', 'agentPropertyDetails');
 		});

@@ -17,11 +17,9 @@ class PropertySeeder extends Seeder
     {
         $users = User::all();
 
-        echo $users->random()->id;
-
         Property::factory()
             ->withCreatorId($users->random()->id)
-            ->count(4)
+            ->count(10)
             ->create();
 
     }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreatePasswordResetsTable extends Migration
+class CreateAgentConversationTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreatePasswordResetsTable extends Migration
      */
     public function up()
     {
-        Schema::create('password_resets', function (Blueprint $table) {
+        Schema::create('agent_conversation', function (Blueprint $table) {
             $table->id();
-            $table->string('token');
-			$table->string('email')->unique();
-            $table->timestamp("token_expires_at")->nullable();
+            $table->uuid('agent_id');
+            $table->uuid('conversation_id');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreatePasswordResetsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('password_resets');
+        Schema::dropIfExists('agent_conversation');
     }
 }

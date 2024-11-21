@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Exceptions\NotFoundException;
+use App\Http\Resources\ConversationCollection;
 use App\Http\Resources\ConversationResource;
+use App\Repository\AgentConversationRepository;
 use App\Repository\ConversationRepository;
 use App\Repository\MessageRepository;
 use App\Repository\PropertyRepository;
@@ -15,16 +17,19 @@ class MessageServices
   protected $messageRepo;
   protected $propertyRepo;
   protected $conversationRepo;
+  protected $agentConversationRepo;
 
   public function __construct(
     MessageRepository $messageRepo,
     PropertyRepository $propertyRepo,
-    ConversationRepository $conversationRepo
+    ConversationRepository $conversationRepo,
+    AgentConversationRepository $agentConversationRepo
 
   ) {
     $this->messageRepo = $messageRepo;
     $this->conversationRepo = $conversationRepo;
     $this->propertyRepo = $propertyRepo;
+    $this->agentConversationRepo = $agentConversationRepo;
   }
 
   public function createConversation($data, $currentUser)
@@ -52,6 +57,12 @@ class MessageServices
         'created_by' => $currentUser->id
       ]);
     }
+
+    //add the agent conversation
+    $this->agentConversationRepo->create([
+      "agent_id"=>$property->creator_id,
+      "conversation_id"=>$conversation->id
+    ]);
 
     //add the first message to the conversation
     return $this->messageRepo->create([
@@ -91,10 +102,18 @@ class MessageServices
 
   public function getUserconversations($currentUser){
     $conversations = $currentUser->conversations()
-    ->limit(12)
-    ->orderBy("created_at","desc")
-    ->get();
+    ->latest()
+    ->paginate(env("PAGINATE_NUMBER"));
 
-    return ConversationResource::collection($conversations);
+    return new ConversationCollection($conversations);
+  }
+
+  public function getAgentConversations($currentUser, $agent_id=null){
+    $conversations = $currentUser->agentConversations()
+    ->with('propertyDetails')
+    ->latest()
+    ->paginate(env("PAGINATE_NUMBER"));
+
+    return new ConversationCollection($conversations);
   }
 }
