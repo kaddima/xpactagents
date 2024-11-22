@@ -86,4 +86,7 @@ class ValidationRules
   public static function propertyValidationRule(){
     return ["property_id"=>"required|uuid"];
   }
+  public static function conversationValidationRule(){
+    return ["conversation_id"=>"required|uuid"];
+  }
 }

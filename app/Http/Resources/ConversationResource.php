@@ -16,6 +16,7 @@ class ConversationResource extends JsonResource
 		return [
 			"id"=>$this->id,
 			"created_by"=>$this->created_by,
+			"unread_messages_count"=>$this->messages_count,
 			"property_details"=> new PropertyResource($this->propertyDetails)
 		];
 	}

@@ -35,11 +35,11 @@ class MessageController extends BaseController
 		return $this->sendResponse($conversations);
 	}
 
-	public function getAgentConversations(Request $request)
+	public function getAgentPoi(Request $request)
 	{
 		//$this->validateParams(['agent_id'=>$agent_id],['agent_id'=>"required|uuid"]);
-		$conversations = $this->messageServices->getAgentConversations($request->user());
-		return $this->sendResponse($conversations);
+		$poi = $this->messageServices->getAgentPoi($request->user());
+		return $this->sendResponse($poi);
 	}
 
 	public function getPropertyConversations(Request $request, $id)
@@ -65,5 +65,11 @@ class MessageController extends BaseController
 		$data = $this->validateParams(["id" => $id], ["id" => "required|uuid"]);
 		$this->messageServices->markMessagesRead($id,$request->user());
 		return $this->sendResponse(null, "messages marked as read");
+	}
+
+	public function resolveMessage(Request $request){
+		$data = $this->validate($request,ValidationRules::conversationValidationRule());
+		$this->messageServices->resolveMessage($data['conversation_id'], $request->user());
+		return $this->sendResponse(null, 'message resolved');
 	}
 }

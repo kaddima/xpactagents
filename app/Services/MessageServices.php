@@ -11,6 +11,8 @@ use App\Repository\MessageRepository;
 use App\Repository\PropertyRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class MessageServices
@@ -104,23 +106,31 @@ class MessageServices
   public function getUserconversations($currentUser)
   {
     $conversations = $currentUser->conversations()
+      ->withCount(['messages' => function ($query) use ($currentUser) {
+        $query->where("sender_id", "!=", $currentUser->id);
+        $query->where("read", "=", 0);
+      }])
       ->latest()
       ->paginate(env("PAGINATE_NUMBER"));
 
     return new ConversationCollection($conversations);
   }
-
-  public function getAgentConversations($currentUser, $agent_id = null)
+  /**
+   * this methods gets the properties users are interested in
+   * the once they send a message of enquiry for
+   */
+  public function getAgentPoi($currentUser, $agent_id = null)
   {
-    $conversations = $currentUser->agentConversations()
+    $poi = $currentUser->agentConversations()
       ->latest()
       ->paginate(env("PAGINATE_NUMBER"));
 
-    return new ConversationCollection($conversations);
+    return new ConversationCollection($poi);
   }
 
   public function getpropertyConversations($property_id)
   {
+    $currentUser = Auth::user();
     try {
       $property = $this->propertyRepo->findById($property_id);
     } catch (ModelNotFoundException $e) {
@@ -128,6 +138,10 @@ class MessageServices
     }
 
     $conversations = $property->conversations()
+      ->withCount(['messages' => function ($query) use ($currentUser) {
+        $query->where("sender_id", "!=", $currentUser->id);
+        $query->where("read", "=", 0);
+      }])
       ->latest()
       ->paginate(env("PAGINATE_NUMBER"));
 
@@ -172,8 +186,32 @@ class MessageServices
     }
 
     $this->messageRepo->getQuery()
-    ->where("conversation_id","=", $conversation->id)
-    ->where("sender_id", "!=", $currentUser->id)
-    ->update(["read"=>1]);
+      ->where("conversation_id", "=", $conversation->id)
+      ->where("sender_id", "!=", $currentUser->id)
+      ->update(["read" => 1]);
+  }
+
+  public function resolveMessage($conversation_id, $currentUser)
+  {
+    try {
+      $conversation = $this->conversationRepo->findById($conversation_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("Invalid conversation id");
+    }
+
+    if (
+      $conversation->propertyDetails->creator_id !== $currentUser->id
+    ) {
+      throw new AuthorizationException("Unauthorized: Account not associated with conversation");
+    }
+
+    DB::transaction(function() use ($conversation, $currentUser){
+      
+      $this->agentConversationRepo->getQuery()
+      ->where("conversation_id", "=", $conversation->id)
+      ->delete();
+
+      $conversation->delete();
+    });
   }
 }

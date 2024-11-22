@@ -11,24 +11,32 @@ class Conversation extends Model
   use HasFactory;
 
   /**
-	 * Indicates if the model's ID is auto-incrementing.
-	 *
-	 * @var bool
-	 */
-	public $incrementing = false;
+   * Indicates if the model's ID is auto-incrementing.
+   *
+   * @var bool
+   */
+  public $incrementing = false;
 
   protected $fillable = ['property_id', 'created_by'];
 
-  protected static function boot(){
+  protected static function boot()
+  {
     parent::boot();
-    static::creating(function($model){
+
+    static::creating(function ($model) {
       $model->id = (string) Str::uuid(); // Generate a UUID
+    });
+
+    // Deleting the conversation
+    static::deleting(function ($model) {
+      // Delete all associated messages
+      $model->messages()->delete(); // This will delete all associated messages
     });
   }
 
   public function propertyDetails()
   {
-    return $this->belongsTo(Property::class,"property_id");
+    return $this->belongsTo(Property::class, "property_id");
   }
 
   public function user()
