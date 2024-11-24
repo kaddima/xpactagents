@@ -4,6 +4,39 @@ namespace App\Rules;
 
 class ValidationRules
 {
+  public static function registrationRules($is_user = null){
+    $rules = [
+			'email' => 'required|email|unique:users',
+			'password' => 'required|min:6',
+			'confirm_password' => 'required|same:password',
+			'reg_type' => 'required|in:user,agent'
+		];
+
+    if($is_user){
+      $rules['first_name'] = 'required';
+			$rules['last_name'] = 'required';
+			$rules['phone'] = 'required|min:11|regex:/^[0-9]+$/';
+    }
+
+    return $rules;
+  }
+
+  public static function loginRules(){
+    return [
+			'email' => 'required|email',
+			'password' => 'required',
+		];
+  }
+
+  public static function resetPasswordRules(){
+    return [
+			"email" => "required|email",
+			"token" => "required|digits:6",
+			"password" => "required|min:6",
+			"confirm_password" => "required|same:password"
+		];
+  }
+  
   public static function storeProductRules($isUpdate = false)
   {
     return [
@@ -88,5 +121,13 @@ class ValidationRules
   }
   public static function conversationValidationRule(){
     return ["conversation_id"=>"required|uuid"];
+  }
+
+  public static function changePasswordRules(){
+    return [
+      "old_password"=>"required|min:6",
+      "new_password"=>"required|min:6",
+      "confirm_password"=>"required|min:6|same:new_password"
+    ];
   }
 }

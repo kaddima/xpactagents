@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use Illuminate\Support\Facades\File;
 
 class UserActionController extends Controller
 {
@@ -170,7 +171,7 @@ class UserActionController extends Controller
                 //directory to upload image
                 $upload_dir = public_path('uploads/users/'.$user_id.'/');
                 //delete all agent folder containing property images
-                \File::deleteDirectory($upload_dir);
+                File::deleteDirectory($upload_dir);
 
                 //delete the agents messages
                 //start with property of interest poi

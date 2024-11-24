@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,12 @@ Route::prefix('v1')->group(function () {
 
 	/**user must be authenticated to access this routes */
 	Route::middleware('auth:sanctum')->group(function () {
+
+		Route::controller(UserController::class)->group(function () {
+			Route::get('/users/{user_id}', 'getUserdetails');
+			Route::post('/users/password/change', 'changePassword');
+		});
+
 		Route::get('/properties/favorites', [PropertyController::class, 'getFavoriteProperties']);
 		Route::post('/properties/{id}/favorite', [PropertyController::class, 'addFavorite']);
 		Route::delete('/properties/{id}/favorite', [PropertyController::class, 'removeFavorite']);

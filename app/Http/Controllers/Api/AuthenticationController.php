@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Rules\ValidationRules;
 use App\Services\AuthService;
 use Illuminate\Http\Request;
 
@@ -16,32 +17,20 @@ class AuthenticationController extends BaseController
 
 	public function register(Request $req)
 	{
-		// Define validation rules
-		$rules = [
-			'email' => 'required|email|unique:users',
-			'password' => 'required|min:6',
-			'confirm_password' => 'required|same:password',
-			'reg_type' => 'required|in:user,agent'
-		];
-
 		// Define custom messages
 		$messages = [
 			'reg_type.required' => 'The registration type is required. Please specify either user or agent.',
 			'reg_type.in' => 'The registration type must be either user or agent.'
 		];
 
-		$data = $this->validate($req, $rules, $messages);
+		$data = $this->validate($req, ValidationRules::registrationRules(), $messages);
 
 		// Determine registration type and adjust rules accordingly
 		if ($req->input('reg_type') == 'user') {
-			$rules['first_name'] = 'required';
-			$rules['last_name'] = 'required';
-			$rules['phone'] = 'required|min:11|regex:/^[0-9]+$/';
+			$data = $this->validate($req, ValidationRules::registrationRules(true), $messages);
 		}
-		$data = $this->validate($req, $rules, $messages);
 
 		$this->authService->register($data);
-
 		return $this->sendResponse(null, "Account created successfully");
 	}
 
@@ -71,11 +60,7 @@ class AuthenticationController extends BaseController
 	 */
 	public function login(Request $req)
 	{
-		$data = $this->validate($req, [
-			'email' => 'required|email',
-			'password' => 'required',
-
-		]);
+		$data = $this->validate($req, ValidationRules::loginRules());
 		$token = $this->authService->login($data);
 		return $this->sendResponse(['token' => $token]);
 	}
@@ -92,19 +77,13 @@ class AuthenticationController extends BaseController
 		$data = $this->validate($request, ["email" => "required|email"]);
 		$email = $this->authService->sendPasswordResetToken($data);
 
-		return $this->sendResponse(['email'=>$email],"Password reset code sent to email");
-
+		return $this->sendResponse(['email' => $email], "Password reset code sent to email");
 	}
 
-	public function resetpassword(Request $request){
-		$rules = ["email"=>"required|email",
-		"token"=>"required|digits:6",
-		"password"=>"required|min:6",
-		"confirm_password"=>"required|same:password"];
-
-		$data = $this->validate($request, $rules);
+	public function resetpassword(Request $request)
+	{
+		$data = $this->validate($request, ValidationRules::resetPasswordRules());
 		$this->authService->resetPassword($data);
 		return $this->sendResponse(null, "Password changed successfully");
 	}
-	
 }

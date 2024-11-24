@@ -27,6 +27,7 @@ class UserResource extends JsonResource
 			"photo" => $this->photo,
 			"id_verified" => $this->id_verified,
 			"last_seen" => $this->last_seen,
+			"is_agent" => $this->is_agent
 
 		];
 	}
