@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\UserResource;
+use App\Repository\IdverifyRepository;
 use App\Repository\UserRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -15,10 +16,14 @@ use Illuminate\Support\Facades\Storage;
 class UserServices
 {
   protected $userRepository;
+  protected $idVerifyRepo;
 
-  public function __construct(UserRepository $userRepository)
-  {
+  public function __construct(
+    UserRepository $userRepository,
+    IdverifyRepository $idVerifyRepo
+  ) {
     $this->userRepository = $userRepository;
+    $this->idVerifyRepo = $idVerifyRepo;
   }
 
   public function getuserDetails($user_id, $currentUser = null)
@@ -64,5 +69,36 @@ class UserServices
 
     $currentUser->save();
     // if uploaded delete that image and upload a new one
+  }
+
+  public function idVerificationRequest($data, $file, $currentUser)
+  {
+    if ($currentUser->id_verified == 1) {
+      throw new AuthorizationException("Account already verified.");
+    }
+
+    if($currentUser->id_verified == 2){
+      throw new AuthorizationException("You already have a pending verification");
+    }
+
+    //save the image
+    $path = $file->store("{$currentUser->id}/profile");
+
+    $currentUser->id_verified = 2;
+    $currentUser->save();
+
+    $this->idVerifyRepo->create([
+      'user_id'=>$currentUser->id,
+      'image'=>$path,
+      'status'=>0,
+      'fullname'=>$data['fullname'],
+      'doc_type'=>$data['doc_type']
+    ]);
+
+  }
+
+  public function updateUserLastSeen($currentUser){
+    $currentUser->last_seen = now();
+    $currentUser->save();
   }
 }

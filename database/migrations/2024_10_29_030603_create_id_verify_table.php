@@ -19,7 +19,7 @@ class CreateIdVerifyTable extends Migration
             $table->string("fullname");
             $table->string("doc_type");
             $table->string("image");
-            $table->tinyInteger("status");
+            $table->tinyInteger("status")->default(0);
             $table->timestamps();
         });
     }

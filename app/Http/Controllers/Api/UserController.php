@@ -46,4 +46,15 @@ class UserController extends BaseController
 		$this->userServices->uploadUserimage($file,$request->user());
 		return $this->sendResponse(null, "Image uploaded successfully");
 	}
+
+	public function IdVerificationRequest(Request $request){
+		$data = $this->validate($request, ValidationRules::idVerificationRequestRules());
+		$this->userServices->IdVerificationRequest($data, $request->file('image'), $request->user());
+		return $this->sendResponse(null, "Id verification in progress");
+	}
+
+	public function updateUserLastSeen(Request $request){
+		$this->userServices->updateUserLastSeen($request->user());
+		return $this->sendResponse(null, "Last updated");
+	}
 }

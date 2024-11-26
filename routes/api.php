@@ -36,6 +36,8 @@ Route::prefix('v1')->group(function () {
 			Route::get('/users/{user_id}', 'getUserdetails');
 			Route::post('/users/password/change', 'changePassword');
 			Route::post('/users/upload/image', 'uploadUserImage');
+			Route::post('/users/verification/request', 'idVerificationRequest');
+			Route::post('/users/lastseen', 'updateUserLastSeen');
 		});
 
 		Route::get('/properties/favorites', [PropertyController::class, 'getFavoriteProperties']);

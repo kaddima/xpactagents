@@ -135,4 +135,12 @@ class ValidationRules
       "confirm_password"=>"required|min:6|same:new_password"
     ];
   }
+
+  public static function idVerificationRequestRules(){
+    return [
+      "image"=>"required|image|mimes:jpg,jpeg,png|max:700",
+      "doc_type"=>"required|string",
+      "fullname"=>"required|string"
+    ];
+  }
 }
