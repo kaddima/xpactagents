@@ -38,4 +38,12 @@ class UserController extends BaseController
 		$this->userServices->changePassword($data, $request->user());
 		return $this->sendResponse(null, "Password changed successfully");
 	}
+
+	public function uploadUserimage(Request $request){
+		$data = $this->validate($request, ValidationRules::userImageRule());
+		$file = $request->file("image");
+
+		$this->userServices->uploadUserimage($file,$request->user());
+		return $this->sendResponse(null, "Image uploaded successfully");
+	}
 }

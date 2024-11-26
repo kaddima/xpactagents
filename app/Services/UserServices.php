@@ -7,8 +7,10 @@ use App\Http\Resources\UserResource;
 use App\Repository\UserRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class UserServices
 {
@@ -45,5 +47,22 @@ class UserServices
       $currentUser->id,
       ['password' => Hash::make($data['new_password'])]
     );
+  }
+
+  public function uploadUserImage(UploadedFile $file, $currentUser)
+  {
+    //check if the user already has an image uploaded
+    if (
+      $currentUser->photo &&
+      Storage::disk('public')->exists($currentUser->photo)
+    ) {
+      Storage::disk("public")->delete($currentUser->photo);
+    }
+
+    $path = $file->store("{$currentUser->id}/profile");
+    $currentUser->photo = $path;
+
+    $currentUser->save();
+    // if uploaded delete that image and upload a new one
   }
 }

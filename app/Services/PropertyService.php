@@ -6,7 +6,6 @@ use App\Exceptions\NotFoundException;
 use App\Http\Resources\ImageResource;
 use App\Http\Resources\PropertyCollection;
 use App\Http\Resources\PropertyResource;
-use App\Models\PropertyImage;
 use App\Repository\FavoriteRepositiory;
 use App\Repository\PropertyImageRepo;
 use App\Repository\PropertyRepository;
@@ -15,7 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use PhpParser\Node\Stmt\TryCatch;
+
 
 class PropertyService
 {

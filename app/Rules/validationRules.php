@@ -93,6 +93,11 @@ class ValidationRules
       'image' => 'required|image|mimes:jpg,jpeg,png|max:700'
     ];
   }
+
+  public static function userImageRule(){
+    return ['image' => 'required|image|mimes:jpg,jpeg,png|max:700'];
+  }
+
   public static function deletePropertyImageRules($property_id)
   {
     return [
