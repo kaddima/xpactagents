@@ -33,6 +33,12 @@ class UserController extends BaseController
 		return $this->sendResponse($userDetails, $request->user()->password);
 	}
 
+	public function updateUserdetails(Request $request, $user_id){
+		$data = $this->validate($request, ValidationRules::updateUserDetailsRules());
+		$this->userServices->updateUserDetails($data, $request->user());
+		return $this->sendResponse(null, "user info updated");
+	}
+
 	public function changePassword(Request $request){
 		$data = $this->validate($request, ValidationRules::changePasswordRules());
 		$this->userServices->changePassword($data, $request->user());
@@ -53,8 +59,8 @@ class UserController extends BaseController
 		return $this->sendResponse(null, "Id verification in progress");
 	}
 
-	public function updateUserLastSeen(Request $request){
+	public function updateUserLastSeen(Request $request, $user_id){
 		$this->userServices->updateUserLastSeen($request->user());
-		return $this->sendResponse(null, "Last updated");
+		return $this->sendResponse(null, "Last seen updated");
 	}
 }

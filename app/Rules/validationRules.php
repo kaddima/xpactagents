@@ -21,6 +21,21 @@ class ValidationRules
     return $rules;
   }
 
+  public static function updateUserDetailsRules(){
+    return [
+      'first_name' => 'string|min:3',
+      'last_name'=>'string|min:3',
+      'gender'=> ["string", new CaseInsensitiveIn(["male", "female", "other"])],
+      'nationality'=>'string',
+      'state'=>'string',
+      'whatsapp'=>'regex:/^[\+]?[0-9]{11}$/',
+      'city'=>'string',
+      'phone'=>'regex:/^[\+]?[0-9]{11}$/',
+      'dob'=>'date',
+      'address'=>'string',
+    ];
+  }
+
   public static function loginRules(){
     return [
 			'email' => 'required|email',

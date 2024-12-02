@@ -10,7 +10,6 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class UserServices
@@ -39,6 +38,10 @@ class UserServices
     }
 
     return new UserResource($userDetails);
+  }
+
+  public function updateUserDetails($data, $currentUser){
+    $this->userRepository->update($currentUser->id, $data);
   }
 
   public function changePassword($data, $currentUser)

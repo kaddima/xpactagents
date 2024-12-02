@@ -33,11 +33,12 @@ Route::prefix('v1')->group(function () {
 	Route::middleware('auth:sanctum')->group(function () {
 
 		Route::controller(UserController::class)->group(function () {
+			Route::patch('/users/{user_id}/lastseen', 'updateUserLastSeen');
+			Route::put('/users/{user_id}', 'updateUserDetails');
+			Route::patch('/users/{user_id}/password', 'changePassword');
+			Route::post('/users/{user_id}/image', 'uploadUserImage');
+			Route::post('/users/{user_id}/verification', 'idVerificationRequest');
 			Route::get('/users/{user_id}', 'getUserdetails');
-			Route::post('/users/password/change', 'changePassword');
-			Route::post('/users/upload/image', 'uploadUserImage');
-			Route::post('/users/verification/request', 'idVerificationRequest');
-			Route::post('/users/lastseen', 'updateUserLastSeen');
 		});
 
 		Route::get('/properties/favorites', [PropertyController::class, 'getFavoriteProperties']);
