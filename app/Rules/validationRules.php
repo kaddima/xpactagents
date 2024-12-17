@@ -4,54 +4,58 @@ namespace App\Rules;
 
 class ValidationRules
 {
-  public static function registrationRules($is_user = null){
+  public static function registrationRules($is_user = null)
+  {
     $rules = [
-			'email' => 'required|email|unique:users',
-			'password' => 'required|min:6',
-			'confirm_password' => 'required|same:password',
-			'reg_type' => 'required|in:user,agent'
-		];
+      'email' => 'required|email|unique:users',
+      'password' => 'required|min:6',
+      'confirm_password' => 'required|same:password',
+      'reg_type' => 'required|in:user,agent'
+    ];
 
-    if($is_user){
+    if ($is_user) {
       $rules['first_name'] = 'required';
-			$rules['last_name'] = 'required';
-			$rules['phone'] = 'required|min:11|regex:/^[0-9]+$/';
+      $rules['last_name'] = 'required';
+      $rules['phone'] = 'required|min:11|regex:/^[0-9]+$/';
     }
 
     return $rules;
   }
 
-  public static function updateUserDetailsRules(){
+  public static function updateUserDetailsRules()
+  {
     return [
       'first_name' => 'string|min:3',
-      'last_name'=>'string|min:3',
-      'gender'=> ["string", new CaseInsensitiveIn(["male", "female", "other"])],
-      'nationality'=>'string',
-      'state'=>'string',
-      'whatsapp'=>'regex:/^[\+]?[0-9]{11}$/',
-      'city'=>'string',
-      'phone'=>'regex:/^[\+]?[0-9]{11}$/',
-      'dob'=>'date',
-      'address'=>'string',
+      'last_name' => 'string|min:3',
+      'gender' => ["string", new CaseInsensitiveIn(["male", "female", "other"])],
+      'nationality' => 'string',
+      'state' => 'string',
+      'whatsapp' => 'regex:/^[\+]?[0-9]{11}$/',
+      'city' => 'string',
+      'phone' => 'regex:/^[\+]?[0-9]{11}$/',
+      'dob' => 'date',
+      'address' => 'string',
     ];
   }
 
-  public static function loginRules(){
+  public static function loginRules()
+  {
     return [
-			'email' => 'required|email',
-			'password' => 'required',
-		];
+      'email' => 'required|email',
+      'password' => 'required',
+    ];
   }
 
-  public static function resetPasswordRules(){
+  public static function resetPasswordRules()
+  {
     return [
-			"email" => "required|email",
-			"token" => "required|digits:6",
-			"password" => "required|min:6",
-			"confirm_password" => "required|same:password"
-		];
+      "email" => "required|email",
+      "token" => "required|digits:6",
+      "password" => "required|min:6",
+      "confirm_password" => "required|same:password"
+    ];
   }
-  
+
   public static function storeProductRules($isUpdate = false)
   {
     return [
@@ -109,53 +113,84 @@ class ValidationRules
     ];
   }
 
-  public static function userImageRule(){
+  public static function userImageRule()
+  {
     return ['image' => 'required|image|mimes:jpg,jpeg,png|max:700'];
   }
 
   public static function deletePropertyImageRules($property_id)
   {
     return [
-      'property_id'=>"required|uuid",
+      'property_id' => "required|uuid",
       'image_ids' => 'required|array', // Ensure 'image_ids' is an array
       'image_ids.*' => 'exists:property_images,id,property_id,' . $property_id, // Validate each ID exists in the property_images table and belongs to the given property_id
     ];
   }
 
-  public static function createConversationRules(){
+  public static function createConversationRules()
+  {
     return [
-      "property_id"=>"required|uuid",
-      "message"=>"required|string"
+      "property_id" => "required|uuid",
+      "message" => "required|string"
     ];
   }
 
-  public static function sendMessageRules(){
+  public static function sendMessageRules()
+  {
     return [
-      'conversation_id'=>"required|uuid",
-      'message'=>"required|string"
+      'conversation_id' => "required|uuid",
+      'message' => "required|string"
     ];
   }
 
-  public static function propertyValidationRule(){
-    return ["property_id"=>"required|uuid"];
+  public static function propertyValidationRule()
+  {
+    return ["property_id" => "required|uuid"];
   }
-  public static function conversationValidationRule(){
-    return ["conversation_id"=>"required|uuid"];
+  public static function conversationValidationRule()
+  {
+    return ["conversation_id" => "required|uuid"];
   }
 
-  public static function changePasswordRules(){
+  public static function changePasswordRules()
+  {
     return [
-      "old_password"=>"required|min:6",
-      "new_password"=>"required|min:6",
-      "confirm_password"=>"required|min:6|same:new_password"
+      "old_password" => "required|min:6",
+      "new_password" => "required|min:6",
+      "confirm_password" => "required|min:6|same:new_password"
     ];
   }
 
-  public static function idVerificationRequestRules(){
+  public static function idVerificationRequestRules()
+  {
     return [
-      "image"=>"required|image|mimes:jpg,jpeg,png|max:700",
-      "doc_type"=>"required|string",
-      "fullname"=>"required|string"
+      "image" => "required|image|mimes:jpg,jpeg,png|max:700",
+      "doc_type" => "required|string",
+      "fullname" => "required|string"
+    ];
+  }
+
+  public static function newTourRules()
+  {
+    return [
+      "first_name" => "required|string|min:3",
+      "last_name" => "required|string|min:3",
+      "email" => "required|email",
+      "phone" => "required",
+      "date" => "required|date",
+      "notes" => "nullable",
+      "best_contact" => ["required",new CaseInsensitiveIn(['text', 'call',])],
+      "property_id" => "required|uuid",
+      "agent_id" => "required|uuid",
+    ];
+  }
+  public static function toursFilterRules()
+  {
+    return [
+     
+      "type" => ["nullable",new CaseInsensitiveIn(['resolved', 'unresolved',])],
+      "limit" => "nullable|numeric",
+      "page" => "nullable|numeric",
     ];
   }
 }

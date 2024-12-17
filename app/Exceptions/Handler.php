@@ -82,6 +82,14 @@ class Handler extends ExceptionHandler
           'message' => $exception->getMessage(),
         ], 403);
       }
+      if ($exception instanceof AlreadyExistsException) {
+        return response()->json([
+          'data' => null,
+          'status' => false,
+          'error' => 'Resource exists',
+          'message' => $exception->getMessage(),
+        ], 403);
+      }
       if ($exception instanceof ValidationException) {
         return response()->json([
           'data' => null,

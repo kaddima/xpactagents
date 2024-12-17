@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\Api\MessageController;
+use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\UserController;
 
 /*
@@ -27,6 +28,10 @@ Route::prefix('v1')->group(function () {
 		Route::post('/register/verify-email', "verifyEmail");
 		Route::post('/password/send-reset-token', 'sendPasswordResetToken');
 		Route::post('/password/reset', 'resetPassword');
+	});
+
+	Route::controller(TourController::class)->group(function(){
+		Route::post("/tours", "addNewTour");
 	});
 
 	/**user must be authenticated to access this routes */
@@ -58,7 +63,8 @@ Route::prefix('v1')->group(function () {
 	Route::get('/properties/{id}/images', [PropertyController::class, 'getPropertyImages']);
 
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
-
+		Route::get("/tours", [TourController::class, "agentTours"]);
+		Route::patch("tours/{tour_id}", [TourController::class, "resolveTour"]);
 		Route::get('/agents/properties/properties-of-interest', [MessageController::class, 'getAgentPoi']);
 		Route::get('/agents/properties/{id}/conversations', [MessageController::class, 'getPropertyConversations']);
 		Route::post('/agents/properties/messages/resolve', [MessageController::class, 'resolveMessage']);

@@ -7,19 +7,29 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tour extends Model
 {
-    use HasFactory;
+	use HasFactory;
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'tours';
+	/**
+	 * The table associated with the model.
+	 *
+	 * @var string
+	 */
+	protected $table = 'tours';
 
-    /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
-    public $timestamps = true;
+	/**
+	 * Indicates if the model should be timestamped.
+	 *
+	 * @var bool
+	 */
+	public $timestamps = true;
+
+	protected $guarded = [];
+
+	public function scopeResolved($query) {
+		return $query->where("resolved", "1");
+	}
+
+	public function scopeUnresolved($query){
+		return $query->where("resolved", "0");
+	}
 }

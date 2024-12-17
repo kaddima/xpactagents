@@ -83,7 +83,7 @@ class PropertyService
       $query = $query->agentProperty($agentId);
     }
     // Handle pagination
-    $perPage = isset($filters['limit']) ? (int)$filters['limit'] : 25; // Default to 25
+    $perPage = isset($filters['limit']) ? (int)$filters['limit'] : env("PAGINATE_NUMBER"); // Default to 25
     $page = isset($filters['page']) ? (int)$filters['page'] : 1; // Default to page 1
 
     $dataCollection = $query->paginate($perPage, ['*'], 'page', $page);

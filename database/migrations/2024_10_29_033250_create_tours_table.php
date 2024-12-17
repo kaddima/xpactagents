@@ -14,13 +14,13 @@ class CreateToursTable extends Migration
 	public function up()
 	{
 		Schema::create('tours', function (Blueprint $table) {
-			$table->uuid("id")->primary();
+			$table->id();
 			$table->string('first_name')->nullable();
 			$table->string('last_name')->nullable();
 			$table->string('email')->unique();
 			$table->string("phone")->nullable();
 			$table->timestamp("date");
-			$table->text("notes");
+			$table->text("notes")->nullable();
 			$table->string("best_contact");
 			$table->uuid("property_id");
 			$table->tinyInteger("resolved")->default(0);
