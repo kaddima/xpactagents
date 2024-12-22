@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\BaseController;
 use App\Rules\ValidationRules;
 use App\Services\TourService;
 use Illuminate\Http\Request;
