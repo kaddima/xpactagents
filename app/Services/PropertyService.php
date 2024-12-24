@@ -127,7 +127,7 @@ class PropertyService
 
     //save the path to the database
     $this->propertyImageRepo->create(['property_id' => $property_id, "image_path" => $path]);
-    return $path;
+    return Storage::url($path);
   }
 
   public function deletePropertyImage($data, $currentUser)

@@ -17,7 +17,7 @@ class CreateToursTable extends Migration
 			$table->id();
 			$table->string('first_name')->nullable();
 			$table->string('last_name')->nullable();
-			$table->string('email')->unique();
+			$table->string('email');
 			$table->string("phone")->nullable();
 			$table->timestamp("date");
 			$table->text("notes")->nullable();

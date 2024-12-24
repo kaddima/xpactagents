@@ -170,10 +170,10 @@ class Property extends Model
 					}
 					continue;
 				} elseif ($key === 'min_price') {
-					$column_value[] = ['price', '>=', $value];
+					$column_value[] = ['amount', '>=', $value];
 					continue;
 				} elseif ($key === 'max_price') {
-					$column_value[] = ['price', '<=', $value];
+					$column_value[] = ['amount', '<=', $value];
 					continue;
 				} elseif ($key === 'page' || $key == "limit") {
 					continue; // Ignore page in filters

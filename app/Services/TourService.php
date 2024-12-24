@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\AlreadyExistsException;
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\TourCollection;
+use App\Mail\TourCreationMail;
 use App\Repository\PropertyRepository;
 use App\Repository\TourRepository;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TourService
 {
+  use EmailService;
+
   protected $propertyRepo;
   protected $tourRepo;
 
@@ -43,6 +46,16 @@ class TourService
 
   public function storeNewTour($data)
   {
+    try{
+      $property = $this->propertyRepo->findById($data['property_id']);
+    }catch(ModelNotFoundException $e){
+      throw new NotFoundException("invalid property id");
+    }
+
+    if($property->published != 1){
+      throw new AuthorizationException("Property not published");
+    }
+
     $tour = $this->tourRepo->getQuery()
       ->where([
         ['email', '=', $data['email']],
@@ -53,9 +66,13 @@ class TourService
     //if a tour exists that hasn't been resolve throw exception
     if ($tour && $tour->resolved == 0) {
       throw new AlreadyExistsException("Tour already exist for this property");
-
-      $this->tourRepo->create($data);
     }
+
+    //add the agent id
+    $data["agent_id"] = $property->creator_id;
+    $tour = $this->tourRepo->create($data);
+
+    $this->sendTourCreationEmail($tour);
   }
 
   public function getAgentTours($agent_id, $filter = [])

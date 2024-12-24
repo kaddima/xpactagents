@@ -68,9 +68,9 @@ class MessageController extends BaseController
 		return $this->sendResponse(null, "messages marked as read");
 	}
 
-	public function resolveMessage(Request $request){
+	public function resolveConversation(Request $request){
 		$data = $this->validate($request,ValidationRules::conversationValidationRule());
-		$this->messageServices->resolveMessage($data['conversation_id'], $request->user());
+		$this->messageServices->resolveConversation($data['conversation_id'], $request->user());
 		return $this->sendResponse(null, 'message resolved');
 	}
 }

@@ -73,8 +73,8 @@ class ValidationRules
       'property_type' => ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['duplex', 'condo', 'apartment', 'bungalow', 'mansion'])], // Required property type
       'state' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Required state
       'other_category' => ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['beach', 'modern', 'pool', 'countryside', 'islands', 'lake', 'castle', 'camping', 'estate', 'golfing', 'mansion', 'lux'])], // Optional other category
-      'amenities' => 'array', // Amenities should be an array
-      'amenities.*.amenities' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Each amenity should have a required string field
+      'amenities' => 'nullable|array', // Amenities should be an array
+      'amenities.*' => 'string',
       'property_fact' => 'nullable|array', // Property facts should be an array
       'property_fact.unit' => 'nullable|string|max:50', // Unit should be a string
       'property_fact.property_size' => 'nullable|integer|min:0', // Property size should be a non-negative integer
@@ -97,7 +97,7 @@ class ValidationRules
       'other_category' => 'nullable|string|max:255|not_in:any',
       'property_type' => 'nullable|string',
       'min_price' => 'nullable|numeric|min:0',
-      'max_price' => 'nullable|numeric|min:0|gte:min_price',
+      'max_price' => 'nullable|numeric|min:0',
       'lga' => 'nullable|string|max:255',
       'state' => 'nullable|string|max:255',
       'page' => 'nullable|integer|min:1',
@@ -123,7 +123,7 @@ class ValidationRules
     return [
       'property_id' => "required|uuid",
       'image_ids' => 'required|array', // Ensure 'image_ids' is an array
-      'image_ids.*' => 'exists:property_images,id,property_id,' . $property_id, // Validate each ID exists in the property_images table and belongs to the given property_id
+      'image_ids.*' => 'required|numeric|exists:property_images,id,property_id,' . $property_id, // Validate each ID exists in the property_images table and belongs to the given property_id
     ];
   }
 
@@ -177,11 +177,10 @@ class ValidationRules
       "last_name" => "required|string|min:3",
       "email" => "required|email",
       "phone" => "required",
-      "date" => "required|date",
+      "date" => "required|date|after:today",
       "notes" => "nullable",
       "best_contact" => ["required",new CaseInsensitiveIn(['text', 'call',])],
       "property_id" => "required|uuid",
-      "agent_id" => "required|uuid",
     ];
   }
   public static function toursFilterRules()

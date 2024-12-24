@@ -15,8 +15,8 @@ class ConversationCollection extends ResourceCollection
 	public function toArray($request)
 	{
 		return [
-			'data' => $this->collection->map(function ($property) {
-				return new ConversationResource($property); // Wrap each property with PropertyResource
+			'data' => $this->collection->map(function ($conversation) {
+				return new ConversationResource($conversation); // Wrap each property with PropertyResource
 			}),
 			
 			"meta" => [

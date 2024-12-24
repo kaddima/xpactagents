@@ -31,10 +31,10 @@ class UserController extends BaseController
 		}
 
 		$userDetails = $this->userServices->getuserDetails($user_id, $currentUser);
-		return $this->sendResponse($userDetails, $request->user()->password);
+		return $this->sendResponse($userDetails);
 	}
 
-	public function updateUserdetails(Request $request, $user_id){
+	public function updateUserdetails(Request $request){
 		$data = $this->validate($request, ValidationRules::updateUserDetailsRules());
 		$this->userServices->updateUserDetails($data, $request->user());
 		return $this->sendResponse(null, "user info updated");
@@ -50,8 +50,8 @@ class UserController extends BaseController
 		$data = $this->validate($request, ValidationRules::userImageRule());
 		$file = $request->file("image");
 
-		$this->userServices->uploadUserimage($file,$request->user());
-		return $this->sendResponse(null, "Image uploaded successfully");
+		$imagePath = $this->userServices->uploadUserimage($file,$request->user());
+		return $this->sendResponse($imagePath, "Image uploaded successfully");
 	}
 
 	public function IdVerificationRequest(Request $request){
@@ -60,7 +60,7 @@ class UserController extends BaseController
 		return $this->sendResponse(null, "Id verification in progress");
 	}
 
-	public function updateUserLastSeen(Request $request, $user_id){
+	public function updateUserLastSeen(Request $request){
 		$this->userServices->updateUserLastSeen($request->user());
 		return $this->sendResponse(null, "Last seen updated");
 	}

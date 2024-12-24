@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\ConversationCollection;
 use App\Http\Resources\MessageCollection;
+use App\Http\Resources\MessageResource;
 use App\Repository\AgentConversationRepository;
 use App\Repository\ConversationRepository;
 use App\Repository\MessageRepository;
@@ -54,24 +55,27 @@ class MessageServices
 
 
     if (!$conversation) {
+      // add the user conversation
       $conversation = $this->conversationRepo->create([
         'property_id' => $data['property_id'],
         'created_by' => $currentUser->id
       ]);
+
+      //add the agent conversation
+      $this->agentConversationRepo->create([
+        "agent_id" => $property->creator_id,
+        "conversation_id" => $conversation->id
+      ]);
     }
 
-    //add the agent conversation
-    $this->agentConversationRepo->create([
-      "agent_id" => $property->creator_id,
-      "conversation_id" => $conversation->id
-    ]);
-
     //add the first message to the conversation
-    return $this->messageRepo->create([
+    $message =  $this->messageRepo->create([
       'conversation_id' => $conversation->id,
       'sender_id' => $conversation->created_by,
       'body' => $data['message']
     ]);
+
+    return new MessageResource($message);
   }
 
   public function sendMessage($data, $currentUser)
@@ -95,11 +99,13 @@ class MessageServices
     }
 
     //add the first message to the conversation
-    return $this->messageRepo->create([
+    $message =  $this->messageRepo->create([
       'conversation_id' => $data['conversation_id'],
       'sender_id' => $currentUser->id,
       'body' => $data['message']
     ]);
+
+    return new MessageResource($message);
   }
 
   public function getUserconversations($currentUser)
@@ -190,7 +196,7 @@ class MessageServices
       ->update(["read" => 1]);
   }
 
-  public function resolveMessage($conversation_id, $currentUser)
+  public function resolveConversation($conversation_id, $currentUser)
   {
     try {
       $conversation = $this->conversationRepo->findById($conversation_id);
@@ -204,11 +210,11 @@ class MessageServices
       throw new AuthorizationException("Unauthorized: Account not associated with conversation");
     }
 
-    DB::transaction(function() use ($conversation, $currentUser){
-      
+    DB::transaction(function () use ($conversation, $currentUser) {
+
       $this->agentConversationRepo->getQuery()
-      ->where("conversation_id", "=", $conversation->id)
-      ->delete();
+        ->where("conversation_id", "=", $conversation->id)
+        ->delete();
 
       $conversation->delete();
     });

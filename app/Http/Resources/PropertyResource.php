@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class PropertyResource extends JsonResource
 {
@@ -53,7 +54,7 @@ class PropertyResource extends JsonResource
 		// Handle images differently depending on collection or single property
 		if ($this->isCollection) {
 			// In a collection, return only the first image (if available)
-			$propertyData['images'] = isset($images) && $images->isNotEmpty() ? $images->first()->image_path : null;
+			$propertyData['images'] = isset($images) && $images->isNotEmpty() ? Storage::url($images->first()->image_path) : null;
 		} else {
 			// For a single property, return all images
 			$propertyData['images'] = ImageResource::collection($images);

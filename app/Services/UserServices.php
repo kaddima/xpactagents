@@ -71,7 +71,7 @@ class UserServices
     $currentUser->photo = $path;
 
     $currentUser->save();
-    // if uploaded delete that image and upload a new one
+    return Storage::url($path);
   }
 
   public function idVerificationRequest($data, $file, $currentUser)

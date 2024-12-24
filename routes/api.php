@@ -38,11 +38,11 @@ Route::prefix('v1')->group(function () {
 	Route::middleware('auth:sanctum')->group(function () {
 
 		Route::controller(UserController::class)->group(function () {
-			Route::patch('/users/{user_id}/lastseen', 'updateUserLastSeen');
-			Route::put('/users/{user_id}', 'updateUserDetails');
-			Route::patch('/users/{user_id}/password', 'changePassword');
-			Route::post('/users/{user_id}/image', 'uploadUserImage');
-			Route::post('/users/{user_id}/verification', 'idVerificationRequest');
+			Route::patch('/users/lastseen', 'updateUserLastSeen');
+			Route::put('/users', 'updateUserDetails');
+			Route::patch('/users/password', 'changePassword');
+			Route::post('/users/image', 'uploadUserImage');
+			Route::post('/users/verification', 'idVerificationRequest');
 			Route::get('/users/{user_id}', 'getUserdetails');
 		});
 
@@ -57,25 +57,20 @@ Route::prefix('v1')->group(function () {
 		Route::post('/logout', [AuthenticationController::class, "logout"]);
 	});
 
-	Route::get('/properties', [PropertyController::class, 'getProperties']);
-	Route::get('/properties/search', [PropertyController::class, 'searchProperties']);
-	Route::get('/properties/{id}', [PropertyController::class, 'getPropertyDetails']);
-	Route::get('/properties/{id}/images', [PropertyController::class, 'getPropertyImages']);
-
 	Route::middleware(['auth:sanctum', 'agent_or_admin'])->group(function () {
 		Route::get("/tours", [TourController::class, "agentTours"]);
 		Route::patch("tours/{tour_id}", [TourController::class, "resolveTour"]);
 		Route::get('/agents/properties/properties-of-interest', [MessageController::class, 'getAgentPoi']);
 		Route::get('/agents/properties/{id}/conversations', [MessageController::class, 'getPropertyConversations']);
-		Route::post('/agents/properties/messages/resolve', [MessageController::class, 'resolveMessage']);
+		Route::post('/agents/properties/conversation/resolve', [MessageController::class, 'resolveConversation']);
 
 		Route::controller(PropertyController::class)->group(function () {
 			Route::post('/properties', 'create');
 			Route::post('/properties/images', 'uploadFile');
 			Route::put('/properties/{id}', 'updateProperty');
 			Route::put('/properties/{id}/published/{published}', 'publishedStatus');
-			Route::delete('/properties/{id}',  'deleteProperty');
 			Route::delete('/properties/images', 'deletePropertyImages');
+			Route::delete('/properties/{id}',  'deleteProperty');
 			Route::get('/agents/{agent_id}/dashboard/overview', 'agentOverview');
 			Route::get('/agents/{agent_id}/properties', 'agentProperties');
 			Route::get('/agents/{agent_id}/properties/search', 'searchAgentProperties');
@@ -88,6 +83,12 @@ Route::prefix('v1')->group(function () {
 			Route::get('/admin/agents/{agent_id}/properties', 'adminAgentProperties');
 		});
 	});
+
+	Route::get('/properties', [PropertyController::class, 'getProperties']);
+	Route::get('/properties/search', [PropertyController::class, 'searchProperties']);
+	Route::get('/properties/{id}', [PropertyController::class, 'getPropertyDetails']);
+	Route::get('/properties/{id}/images', [PropertyController::class, 'getPropertyImages']);
+
 });
 
 Route::get('/listings', [ListingController::class, 'listings']);
