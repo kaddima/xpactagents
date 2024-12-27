@@ -1,12 +1,11 @@
 import React, { useMemo } from 'react'
-import {MdApartment, MdOutlinePublishedWithChanges,MdOutlineUnpublished} from "react-icons/md"
-import {Link} from 'react-router-dom'
+import {MdApartment} from "react-icons/md"
 import {FaBed,FaBath,FaToilet, FaHeart} from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { loginModalOpen } from '../store/mainSlice'
 import { hideLoading, showLoading } from '../../utility/loading'
 import Axios from '../../utility/axios'
-import { updateFavorites, updateUserInfo } from '../store/userSlice'
+import { updateFavorites} from '../store/userSlice'
 
 const PropertyCard = ({data :v}) => {
 
@@ -56,7 +55,7 @@ const PropertyCard = ({data :v}) => {
             </div>
 
             <div className='h-[200px]'>
-                    <img src={`/uploads/users/${v.creator_id}/${v.images && JSON.parse(v?.images)[0]}`} alt="" className="w-full h-full object-cover"/>
+                <img src={v?.images} alt={`${v.name} image`} className="w-full h-full object-cover"/>
             </div>
             <div className="px-3 ">
                 <div className='py-2'>
@@ -87,11 +86,11 @@ const PropertyCard = ({data :v}) => {
                         </div>)}
                         <div className=''>
                             <span className='inline-block font-semibold'>
-                                {v.property_fact && parseFloat((JSON.parse(v.property_fact)).property_size).toLocaleString()}
+                                {v.property_fact && parseFloat(v.property_fact.property_size).toLocaleString()}
                                 {v.property_fact && 
-                                (parseFloat((JSON.parse(v.property_fact)).property_size) > 1 && (JSON.parse(v.property_fact)).unit != 'sq.ft')
-                                  ? (JSON.parse(v.property_fact)).unit+'s' 
-                                  : (JSON.parse(v.property_fact)).unit}
+                                (parseFloat(v.property_fact.property_size) > 1 && v.property_fact.unit != 'sq.ft')
+                                  ? v.property_fact.unit+'s' 
+                                  : v.property_fact.unit}
                             </span>
                         </div>
                     </div>
@@ -109,19 +108,6 @@ const PropertyCard = ({data :v}) => {
                 </div>
                 
             </div>
-
-            {/* <div className='mt-auto'>
-                <div className='flex justify-end space-x-2 md:space-x-4 items-start'>
-                    <Link to={`/dashboard/property/${v?.id}`} className='text-sm text-[#d92228] p-2 rounded-md hover:bg-slate-200'>View</Link>
-                    <button className='p-2 rounded-md hover:bg-slate-200' title={v?.published == 1 ? `Property is pulished` : `Property not yet published`}>
-                        {v?.published == 1 ? <MdOutlineUnpublished className='text-red-700'/> : <MdOutlinePublishedWithChanges className='text-green-600'/>}
-                    </button>
-                    <Link to={`/dashboard/property/${v?.id}/edit`} className='p-2 rounded-md hover:bg-slate-200'>
-                        <FaEdit/>
-                    </Link>
-                    
-                </div>
-            </div>           */}
         </div>    
 
 )

@@ -2,832 +2,785 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Rules\ValidationRules;
+use App\Services\PropertyService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class ListingController extends Controller
+class ListingController extends BaseController
 {
-    //Create new property
-    public function createProperty(Request $request){
+	protected $propertyService;
 
-        $user_id = auth()->user()['id'];
-        $data = $request->all();
-        $img = [];
+	public function __construct(PropertyService $propertyService)
+	{
+		$this->propertyService = $propertyService;
+	}
 
+	//Create new property
+	public function createProperty(Request $request)
+	{
+		/**Validate the request data */
+		$data = $this->validate($request, ValidationRules::storeProductRules());
+		/**Get the current signed user */
+		$currentUser = $request->user();
+		$productId = $this->propertyService->create($data, $currentUser);
+		return $this->sendResponse(['productId' => $productId], "Product created successfully");
+	}
 
-        $column_value = [
-            'name'=>$data['name']?$data['name']:null,
-            'images'=>json_encode([]),
-            'address'=>$data['address']?$data['address']:null,
-            'amount'=>$data['amount']?$data['amount']:null,
-            'category'=>$data['property_category']?$data['property_category']:null,
-            'description'=>$data['description']?$data['description']:null,
-            'size'=>isset($data['size']) ? $data['size'] : null,
-            'property_type'=>$data['property_type']?$data['property_type']:null,
-            'property_fact'=>$data['property_fact']?json_encode($data['property_fact']):null,
-            'creator_id'=>$user_id,
-            'amenities'=>$data['amenities']?json_encode($data['amenities']):json_encode([]),
-            'setup'=>1,
-            'duration'=>isset($data['duration']) ? $data['duration'] : null,
-            'state'=>isset($data['state']) ? $data['state'] : null,
-            'other_category'=>isset($data['other_category']) ? $data['other_category'] : null,
-            'lga'=>isset($data['lga']) ? $data['lga'] : null,
-            'bedrooms'=>isset($data['bedrooms']) ? $data['bedrooms'] : null,
-            'toilets'=>isset($data['toilets']) ? $data['toilets'] : null,
-            'bathrooms'=>isset($data['bathrooms']) ? $data['bathrooms'] : null,
-            'created_at'=>date('Y-m-d H:i:s')
-            ];
+	public function getProperties(Request $request)
+	{
+		$data = $this->validate($request, ValidationRules::propertyFiltersRules());
+		return $this->sendResponse($this->propertyService->getProperties($data));
+	}
 
+	public function updateProperty(Request $request)
+	{
 
-        $property_id = DB::table('property')
-            ->insertGetId($column_value);
+		$data = $request->all();
 
+		//logged in admin
+		$user_id = auth()->user()['id'];
 
-        return json_encode(['data'=>['property_id'=>$property_id]]);
+		$column_value = [
+			'name' => $data['name'] ? $data['name'] : null,
+			'address' => $data['address'] ? $data['address'] : null,
+			'amount' => $data['amount'] ? $data['amount'] : null,
+			'category' => $data['property_category'] ? $data['property_category'] : null,
+			'description' => $data['description'] ? $data['description'] : null,
+			'size' => isset($data['size']) ? $data['size'] : null,
+			'property_type' => $data['property_type'] ? $data['property_type'] : null,
+			'property_fact' => $data['property_fact'] ? json_encode($data['property_fact']) : null,
+			'amenities' => $data['amenities'] ? json_encode($data['amenities']) : json_encode([]),
+			'setup' => 1,
+			'duration' => isset($data['duration']) ? $data['duration'] : null,
+			'state' => isset($data['state']) ? $data['state'] : null,
+			'lga' => isset($data['lga']) ? $data['lga'] : null,
+			'other_category' => isset($data['other_category']) ? $data['other_category'] : null,
+			'bedrooms' => isset($data['bedrooms']) ? $data['bedrooms'] : null,
+			'toilets' => isset($data['toilets']) ? $data['toilets'] : null,
+			'bathrooms' => isset($data['bathrooms']) ? $data['bathrooms'] : null
+		];
 
-        //return json_encode(['data'=>$column_value]);
-
-
-    }
-
-    public function updateProperty(Request $request){
-
-        $data = $request->all();
-
-        //logged in admin
-        $user_id = auth()->user()['id'];
-
-        $column_value = [
-            'name'=>$data['name']?$data['name']:null,
-            'address'=>$data['address']?$data['address']:null,
-            'amount'=>$data['amount']?$data['amount']:null,
-            'category'=>$data['property_category']?$data['property_category']:null,
-            'description'=>$data['description']?$data['description']:null,
-            'size'=>isset($data['size']) ? $data['size'] : null,
-            'property_type'=>$data['property_type']?$data['property_type']:null,
-            'property_fact'=>$data['property_fact']?json_encode($data['property_fact']):null,
-            'amenities'=>$data['amenities']?json_encode($data['amenities']):json_encode([]),
-            'setup'=>1,
-            'duration'=>isset($data['duration']) ? $data['duration'] : null,
-            'state'=>isset($data['state']) ? $data['state'] : null,
-            'lga'=>isset($data['lga']) ? $data['lga'] : null,
-            'other_category'=>isset($data['other_category']) ? $data['other_category'] : null,
-            'bedrooms'=>isset($data['bedrooms']) ? $data['bedrooms'] : null,
-            'toilets'=>isset($data['toilets']) ? $data['toilets'] : null,
-            'bathrooms'=>isset($data['bathrooms']) ? $data['bathrooms'] : null
-        ];
-
-        //update the table
-        DB::table('property')
-        ->where(['id'=>$data['property_id']])
-        ->update($column_value);
+		//update the table
+		DB::table('property')
+			->where(['id' => $data['property_id']])
+			->update($column_value);
 
 
-        return json_encode(['status'=>1]);
+		return json_encode(['status' => 1]);
+	}
 
-    }
+	public function uploadPropertyImage(Request $request)
+	{
 
-    public function uploadPropertyImage(Request $request){
+		$user_id = auth()->user()['id'];
+		$photoPattern = '#^(image/)[^\s\n<]+$#i';
 
-        $user_id = auth()->user()['id'];
-        $photoPattern = '#^(image/)[^\s\n<]+$#i';
+		$file = $request->file('image');
+		$property_id = $request->get('property_id');
+		$filename = pathInfo($request->get('file_name'))['filename'] . ".jpg";
 
-        $file = $request->file('image');
-        $property_id = $request->get('property_id');
-        $filename = pathInfo($request->get('file_name'))['filename'].".jpg";
+		$error = '';
+		$status = 1;
 
-        $error = '';
-        $status = 1;
+		//directory to upload image
+		$upload_dir = public_path('uploads/users/' . $user_id . '/');
 
-        //directory to upload image
-        $upload_dir = public_path('uploads/users/'.$user_id.'/');
-
-        $name = $file->getClientOriginalName();
-        $size = $file->getSize();
-        $target = $upload_dir.$filename;
-
-
-        if ((floatval($size)/1000) > 700){
-            $error = 'file too large -- 700kb and below';
-            $status = 0;
-        }elseif (!preg_match($photoPattern,$file->getMimeType())){
-            $error = 'please upload only images';
-            $status = 0;
-        }elseif (file_exists($target)){
-            $error = 'File already exist';
-            $status = 0;
-
-        }
-
-        if($status == 1){
-
-            // upload the photo to server
-            $file->move($upload_dir,$filename);
-
-            //get the images from the property table by property_id
-
-            $property = DB::table('property')
-                ->where('id',$property_id)
-                ->first();
-
-            $images = $property->images ? (array)json_decode($property->images) : [];
-
-            $images[] = $filename;
-
-            //insert the photo to database
-
-            $columnValue = [
-                'images'=>json_encode($images)
-            ];
-
-            DB::table('property')
-                ->where('id',$property_id)
-                ->update($columnValue);
-
-            return json_encode(['status'=>$status, 'error'=>$error,'photos'=>$images]);
+		$name = $file->getClientOriginalName();
+		$size = $file->getSize();
+		$target = $upload_dir . $filename;
 
 
-        }
+		if ((floatval($size) / 1000) > 700) {
+			$error = 'file too large -- 700kb and below';
+			$status = 0;
+		} elseif (!preg_match($photoPattern, $file->getMimeType())) {
+			$error = 'please upload only images';
+			$status = 0;
+		} elseif (file_exists($target)) {
+			$error = 'File already exist';
+			$status = 0;
+		}
 
-        return json_encode(['status'=>$status, 'error'=>$error]);
+		if ($status == 1) {
 
-    }
+			// upload the photo to server
+			$file->move($upload_dir, $filename);
 
-    public function deletePropertyImage(Request $request){
+			//get the images from the property table by property_id
 
-        $user_id = auth()->user()['id'];
+			$property = DB::table('property')
+				->where('id', $property_id)
+				->first();
 
-        $data = $request->all();
-        $property_id = $data['property_id'];
+			$images = $property->images ? (array)json_decode($property->images) : [];
 
-        //directory to upload image
-        $upload_dir = public_path('uploads/users/'.$user_id.'/');
+			$images[] = $filename;
 
-        $target = $upload_dir.$data['image'];
+			//insert the photo to database
+
+			$columnValue = [
+				'images' => json_encode($images)
+			];
+
+			DB::table('property')
+				->where('id', $property_id)
+				->update($columnValue);
+
+			return json_encode(['status' => $status, 'error' => $error, 'photos' => $images]);
+		}
+
+		return json_encode(['status' => $status, 'error' => $error]);
+	}
+
+	public function deletePropertyImage(Request $request)
+	{
+
+		$user_id = auth()->user()['id'];
+
+		$data = $request->all();
+		$property_id = $data['property_id'];
+
+		//directory to upload image
+		$upload_dir = public_path('uploads/users/' . $user_id . '/');
+
+		$target = $upload_dir . $data['image'];
 
 
-        //get the images from the property table by property_id
+		//get the images from the property table by property_id
 
-        $property = DB::table('property')
-            ->where('id',$property_id)
-            ->first();
+		$property = DB::table('property')
+			->where('id', $property_id)
+			->first();
 
-        $images = json_decode($property->images);
+		$images = json_decode($property->images);
 
-        if(is_object($images)){
+		if (is_object($images)) {
 
-            //convert to array
-            $images = (array)$images;
+			//convert to array
+			$images = (array)$images;
 
-            $images = array_values($images);
+			$images = array_values($images);
+		}
 
-        }
+		for ($i = 0, $len = count($images); $i <= $len; $i++) {
 
-        for ($i=0,$len = count($images); $i<= $len; $i++){
+			if ($images[$i] == $data['image']) {
 
-            if($images[$i] == $data['image']){
+				if (unlink($target)) {
 
-                if(unlink($target)){
+					unset($images[$i]);
 
-                    unset($images[$i]);
-                    
-                    /*** reset the array index to start from 0 else when you encode the 
+					/*** reset the array index to start from 0 else when you encode the 
                         array it turns to object ({"1":"element"}) rather than "[element]"
                         as desired
-                    */
-                    $images = array_values($images);
+					 */
+					$images = array_values($images);
+
+					//insert the photo to database
+
+					$columnValue = [
+						'images' => json_encode($images)
+					];
+
+					DB::table('property')
+						->where('id', $property_id)
+						->update($columnValue);
+
+
+					return json_encode(
+						[
+							'status' => 1,
+							'photos' => array_values($images)
+						]
+					);
+				}
+			}
+		}
+
+		return json_encode(
+			[
+				'status' => 1,
+				'photos' => array_values($images)
+			]
+		);
+	}
+
+	public function agentListings(Request $request)
+	{
+
+		$agent_id = auth()->user()->id;
+
+		//when requesting from admin page
+		if ($request->has('agent_id')) {
+
+			$agent_id = $request->get('agent_id');
+		}
+
+		$listings = DB::table('property')
+			->where('creator_id', $agent_id)
+			->orderBy('created_at', 'desc')
+			->paginate(20);
+
+		return json_encode(['data' => $listings]);
+	}
+
+	public function adminAgentListings(Request $request)
+	{
+
+		$currentUser = auth()->user();
+
+		$searchTerms = $request->all();
+
+		$column_value = ['creator_id' => $request->get('agent_id')];
+
+
+		foreach ($searchTerms as $key => $value) {
+
+			if (isset($key)) {
+
+				if ($key == 'baths') {
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bathrooms', '>=', 1];
+						continue;
+					}
+					if ($value < 5) {
+						$column_value['bathrooms'] = $value;
+					} else {
+						$column_value[] = ['bathrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'beds') {
+
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bedrooms', '>=', 1];
+						continue;
+					}
+
+					if ($value < 5) {
+						$column_value['bedrooms'] = $value;
+					} else {
+						$column_value[] = ['bedrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'min_price') {
+					$column_value[] = ['amount', '>=', $value];
+					continue;
+				} else if ($key == 'max_price') {
+					$column_value[] = ['amount', '<=', $value];
+					continue;
+				} else if ($key == 'other-category') {
+					if (strtolower($value) == 'any') {
+						continue;
+					}
+					$column_value['other_category'] = $value;
+					continue;
+				} else if ($key == 'page' || $key == 'list-type' || $key == 'agent_id') {
+					continue;
+				}
 
-                    //insert the photo to database
+				$column_value[$key] = $value;
+			}
+		}
 
-                    $columnValue = [
-                        'images'=>json_encode($images)
-                    ];
+		$listings = DB::table('property')
+			->where($column_value)
+			->orderBy('created_at', 'desc')
+			->paginate(20);
 
-                    DB::table('property')
-                        ->where('id',$property_id)
-                        ->update($columnValue);
+		return json_encode(['data' => $listings]);
+	}
 
-
-                    return json_encode(
-                        ['status'=>1,
-                            'photos'=>array_values($images)
-                        ]);
-                }
-
-            }
-        }
-
-        return json_encode(
-            ['status'=>1,
-                'photos'=>array_values($images)
-            ]);
-    }
-
-    public function listings(Request $request){
-
-        //get the category
-        $other_category = $request->get('other_category');
-
-        if(strtolower($other_category) !== 'any' && isset($other_category)){
-
-            $listings = DB::table('property')
-            ->where('published', 1)
-            ->where('other_category',strtolower($other_category))
-            ->orderBy('id','desc')
-            ->paginate(20);
-        }else{
-            $listings = DB::table('property')
-            ->where('published', 1)
-            ->orderBy('id','desc')
-            ->paginate(20);
-        }
-        
-        return json_encode(['data'=>$listings]);
-
-    }
-
-    public function agentListings(Request $request){
-
-        $agent_id = auth()->user()->id;
-
-        //when requesting from admin page
-        if($request->has('agent_id')){
-
-            $agent_id = $request->get('agent_id');
-        }
-
-        $listings = DB::table('property')
-            ->where('creator_id',$agent_id)
-            ->orderBy('created_at','desc')
-            ->paginate(20);
-       
-        return json_encode(['data'=>$listings]);
-
-    }
-
-    public function adminAgentListings(Request $request){
-
-        $currentUser = auth()->user();
-
-        $searchTerms = $request->all();
-
-        $column_value = ['creator_id'=>$request->get('agent_id')];
-
-
-        foreach($searchTerms as $key=>$value){
-
-            if(isset($key)){
-
-                if($key == 'baths'){
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bathrooms', '>=',1];
-                        continue;
-                    }
-                    if($value < 5){
-                        $column_value['bathrooms'] = $value ;
-                    }else{
-                        $column_value[] = ['bathrooms', '>=',$value];
-                    } 
-                    continue;
-                }else if($key == 'beds'){
+	public function latestProperty()
+	{
 
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bedrooms', '>=',1];
-                        continue;
-                    }
-
-                    if($value < 5){
-                        $column_value['bedrooms'] = $value;
-                    }else{
-                        $column_value[] = ['bedrooms', '>=',$value];
-                    }   
-                    continue;
-                }
-                else if($key == 'min_price'){
-                    $column_value[] = ['amount', '>=',$value];
-                    continue;
-                }else if($key == 'max_price'){
-                    $column_value[] = ['amount', '<=', $value ];
-                    continue;
-                }else if($key == 'other-category'){
-                    if(strtolower($value) == 'any'){
-                        continue;
-                    }
-                    $column_value['other_category'] = $value;
-                    continue;
-                }
-                else if($key == 'page' || $key == 'list-type' || $key=='agent_id'){
-                    continue;
-                }
-
-                $column_value[$key] = $value;
-            }
-        }
-    
-        $listings = DB::table('property')
-        ->where($column_value)
-        ->orderBy('created_at','desc')
-        ->paginate(20);
-       
-        return json_encode(['data'=>$listings]);
-
-    }
-
-    public function latestProperty(){
-
-        //get land for sell
-        $properties = DB::table('property')
-        ->where('setup',1)
-        ->orderBy('created_at','desc')
-        ->limit(6)
-        ->get();
-
-        $properties = $this->GetImage($properties);
-
-        return json_encode(['data'=>$properties]);
-    }
+		//get land for sell
+		$properties = DB::table('property')
+			->where('setup', 1)
+			->orderBy('created_at', 'desc')
+			->limit(6)
+			->get();
 
-    public function PropertyByCategory(Request $request){
+		$properties = $this->GetImage($properties);
 
-        $category = $request->get('category');
+		return json_encode(['data' => $properties]);
+	}
 
-        //get land for sell
-        $properties = DB::table('property')
-        ->where('category',$category)
-        ->orderBy('created_at','desc')
-        ->paginate(12);
-
-        $properties = $this->GetImage($properties);
+	public function PropertyByCategory(Request $request)
+	{
 
-        return json_encode(['data'=>$properties]);
-    }
+		$category = $request->get('category');
 
-    /**Append image names to the properties */
-    public function GetImage($obj){
+		//get land for sell
+		$properties = DB::table('property')
+			->where('category', $category)
+			->orderBy('created_at', 'desc')
+			->paginate(12);
 
-        foreach ($obj as $key => $value) {
+		$properties = $this->GetImage($properties);
 
-            //get the first image name of that property and append to the obj
-            $image = DB::table('photos')
-                ->where('property_id', $value->id)
-                ->first();
+		return json_encode(['data' => $properties]);
+	}
 
-            //check if image is empty
-            if(empty($image)){
-                unset($obj[$key]);
-                continue;
-            }
+	/**Append image names to the properties */
+	public function GetImage($obj)
+	{
 
-            $value->image = $image->name;
+		foreach ($obj as $key => $value) {
 
+			//get the first image name of that property and append to the obj
+			$image = DB::table('photos')
+				->where('property_id', $value->id)
+				->first();
 
-           # code...
-       }
+			//check if image is empty
+			if (empty($image)) {
+				unset($obj[$key]);
+				continue;
+			}
 
-       return $obj;
+			$value->image = $image->name;
 
-    }
 
-    public function deleteProperty(Request $request){
+			# code...
+		}
 
-        $property_id = $request->input('property_id');
-        $currentUser = auth()->user();
+		return $obj;
+	}
 
-        $property = DB::table('property')
-        ->where(['id'=>$property_id])
-        ->first();
+	public function deleteProperty(Request $request)
+	{
 
-        //directory to upload image
-        $upload_dir = public_path('uploads/users/'.$currentUser->id.'/');
+		$property_id = $request->input('property_id');
+		$currentUser = auth()->user();
 
-        //deleting from admin's page
-        if($request->has('creator_id')){
-            //directory to upload image
-            $upload_dir = public_path('uploads/users/'.$request->get('creator_id').'/');
-        }
+		$property = DB::table('property')
+			->where(['id' => $property_id])
+			->first();
 
-        if(($property->creator_id == $currentUser->id) || $currentUser->is_admin == 1){
-            //check if the property has images and has been setup
-            $propertyPhotos = json_decode($property->images);
+		//directory to upload image
+		$upload_dir = public_path('uploads/users/' . $currentUser->id . '/');
 
-            if(is_object($propertyPhotos)){
-
-                //convert to array
-                $propertyPhotos = (array)$propertyPhotos;
-    
-                $propertyPhotos = array_values($propertyPhotos);
-    
-            }
+		//deleting from admin's page
+		if ($request->has('creator_id')) {
+			//directory to upload image
+			$upload_dir = public_path('uploads/users/' . $request->get('creator_id') . '/');
+		}
 
-            if(count($propertyPhotos) > 0){
-                for ($i=0,$len = count($propertyPhotos); $i< $len; $i++){
+		if (($property->creator_id == $currentUser->id) || $currentUser->is_admin == 1) {
+			//check if the property has images and has been setup
+			$propertyPhotos = json_decode($property->images);
 
-                    $target = $upload_dir.$propertyPhotos[$i];
+			if (is_object($propertyPhotos)) {
 
-                    unlink($target);
-                }
-            }
+				//convert to array
+				$propertyPhotos = (array)$propertyPhotos;
 
-            DB::table('property')
-            ->where('id', $property_id)
-            ->delete();
+				$propertyPhotos = array_values($propertyPhotos);
+			}
 
-            //delete the property from favorites table
-            DB::table('favorites')
-            ->where('property_id', $property_id)
-            ->delete();
+			if (count($propertyPhotos) > 0) {
+				for ($i = 0, $len = count($propertyPhotos); $i < $len; $i++) {
 
-            return json_encode(['status'=>1]);
-        }
+					$target = $upload_dir . $propertyPhotos[$i];
 
-        return json_encode(['status'=>0]);
-    }
+					unlink($target);
+				}
+			}
 
-    public function publishProperty(Request $request){
+			DB::table('property')
+				->where('id', $property_id)
+				->delete();
 
-        $property_id = $request->input('property_id');
+			//delete the property from favorites table
+			DB::table('favorites')
+				->where('property_id', $property_id)
+				->delete();
 
-        $currentUser = auth()->user();
+			return json_encode(['status' => 1]);
+		}
 
-        if($currentUser->is_admin == 0 && $currentUser->profile_complete != 1){
-            return [];
-        }
-        //get the property
-        $property = DB::table('property')
-            ->where(['id'=>$property_id])
-            ->first(['id','published','creator_id']);
+		return json_encode(['status' => 0]);
+	}
 
-        if($currentUser->id == $property->creator_id || $currentUser->is_admin == 1){
+	public function publishProperty(Request $request)
+	{
 
-            if ($property->published == 0){
+		$property_id = $request->input('property_id');
 
-                DB::table('property')
-                ->where(['id'=>$property_id])
-                ->update(['published'=>1]);
+		$currentUser = auth()->user();
 
-            }else{
+		if ($currentUser->is_admin == 0 && $currentUser->profile_complete != 1) {
+			return [];
+		}
+		//get the property
+		$property = DB::table('property')
+			->where(['id' => $property_id])
+			->first(['id', 'published', 'creator_id']);
 
-                DB::table('property')
-                ->where(['id'=>$property_id])
-                ->update(['published'=>0]);
-            }
-        }
+		if ($currentUser->id == $property->creator_id || $currentUser->is_admin == 1) {
 
-        // $propertyDetails = DB::table('property')
-        // ->where('id',$property_id)
-        // ->first('published');
+			if ($property->published == 0) {
 
-        return json_encode(['status'=>1,'data'=>$property_id]);
-    }
+				DB::table('property')
+					->where(['id' => $property_id])
+					->update(['published' => 1]);
+			} else {
 
-    public function propertyDetails(Request $request){
+				DB::table('property')
+					->where(['id' => $property_id])
+					->update(['published' => 0]);
+			}
+		}
 
-        $property_id = $request->get('propertyID');
+		// $propertyDetails = DB::table('property')
+		// ->where('id',$property_id)
+		// ->first('published');
 
-        $propertyDetails = DB::table('property')
-            ->where('id',$property_id)
-            ->first();
+		return json_encode(['status' => 1, 'data' => $property_id]);
+	}
 
-        $propertyDetails->agentDetails = DB::table('users')
-            ->where('id',$propertyDetails->creator_id)
-            ->first();
+	public function propertyDetails(Request $request)
+	{
 
-        //similar property search querry
-        $similar = [
-            'state'=>$propertyDetails->state,
-            'published'=>1,
-            'category'=>$propertyDetails->category,
-            ['id','!=',$propertyDetails->id],
-            //['amount', '<=',$propertyDetails->amount]
-        ];
+		$property_id = $request->get('propertyID');
 
-        $propertyDetails->similar = DB::table('property')
-        ->where($similar)
-        ->limit(6)
-        ->get();
+		$propertyDetails = DB::table('property')
+			->where('id', $property_id)
+			->first();
 
-        return json_encode([
-            'data'=>$propertyDetails,
-            'id'=>$property_id
-            ]);
-    }
+		$propertyDetails->agentDetails = DB::table('users')
+			->where('id', $propertyDetails->creator_id)
+			->first();
 
-    /**
-     * This method sets and unsets the users favorite listings
-     */
-    public function favorite(Request $request){
+		//similar property search querry
+		$similar = [
+			'state' => $propertyDetails->state,
+			'published' => 1,
+			'category' => $propertyDetails->category,
+			['id', '!=', $propertyDetails->id],
+			//['amount', '<=',$propertyDetails->amount]
+		];
 
-        $property_id = $request->get('property_id');
-        $currentUser = auth()->user();
+		$propertyDetails->similar = DB::table('property')
+			->where($similar)
+			->limit(6)
+			->get();
 
+		return json_encode([
+			'data' => $propertyDetails,
+			'id' => $property_id
+		]);
+	}
 
-        //get the favorite from the users table
+	/**
+	 * This method sets and unsets the users favorite listings
+	 */
+	public function favorite(Request $request)
+	{
 
-        $userFavorites = DB::table('favorites')
-            ->where('user_id', $currentUser->id)
-            ->get();
+		$property_id = $request->get('property_id');
+		$currentUser = auth()->user();
 
-
-        for ($i=0,$len=count($userFavorites) ; $i < $len ; $i++) { 
-            
-            if($userFavorites[$i]->property_id == $property_id){
-
-
-                //save the current favorites
-                DB::table('favorites')
-                ->where(['user_id'=>$currentUser->id,'property_id'=>$property_id])
-                ->delete();
-
-                $userFavorites = DB::table('favorites')
-                ->where('user_id', $currentUser->id)
-                ->get();
 
-                return json_encode(['data'=>$userFavorites]);
-            }
-        }
+		//get the favorite from the users table
 
-        
-        $column_value = ['user_id'=>$currentUser->id,'property_id'=>$property_id];
-        //save the current favorites
-        DB::table('favorites')
-        ->insert($column_value);
+		$userFavorites = DB::table('favorites')
+			->where('user_id', $currentUser->id)
+			->get();
 
-        $userFavorites = DB::table('favorites')
-        ->where('user_id', $currentUser->id)
-        ->get();
 
-        return json_encode(['data'=>$userFavorites,'status'=>'got on']);
-        
-        
-    }
+		for ($i = 0, $len = count($userFavorites); $i < $len; $i++) {
 
-    public function getFavorites(Request $request){
+			if ($userFavorites[$i]->property_id == $property_id) {
 
-        //get the user
-        $currentUser = auth()->user();
 
-        $favorite_properties = [];
-
-        $favorites =  DB::table('favorites')
-        ->where('user_id', $currentUser->id)
-        ->get();
-          
-
-        for ($i=0,$len =count($favorites); $i < $len; $i++) { 
-
-            $property = DB::table('property')
-                ->where('id', $favorites[$i]->property_id)
-                ->first();
-
-            array_push($favorite_properties,$property);
-        }
-
-        return json_encode(['data'=>$favorite_properties,'user'=>$currentUser]);
-    }
-
-    public function searchProperty(Request $request){
-
-        $searchTerms = $request->all();
-        $column_value = [];
-
-        foreach($searchTerms as $key=>$value){
-
-            if(isset($key)){
-
-                if($key == 'baths'){
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bathrooms', '>=',1];
-                        continue;
-                    }
-                    if($value < 5){
-                        $column_value['bathrooms'] = $value ;
-                    }else{
-                        $column_value[] = ['bathrooms', '>=',$value];
-                    } 
-                    continue;
-                }else if($key == 'beds'){
-
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bedrooms', '>=',1];
-                        continue;
-                    }
-
-                    if($value < 5){
-                        $column_value['bedrooms'] = $value;
-                    }else{
-                        $column_value[] = ['bedrooms', '>=',$value];
-                    }   
-                    continue;
-                }
-                else if($key == 'min_price'){
-                    $column_value[] = ['amount', '>=',$value];
-                    continue;
-                }else if($key == 'max_price'){
-                    $column_value[] = ['amount', '<=', $value ];
-                    continue;
-                }else if($key == 'page'){
-                    continue;
-                }
-
-                $column_value[$key] = $value;
-            }
-        }
-
-        $properties = DB::table('property')
-            ->where($column_value)
-            ->where('published',1)
-            ->paginate(20);
-
-        return json_encode(['data'=>$properties]);
-    }
-
-    public function agentSearchProperty(Request $request){
-
-         $currentUser = auth()->user();
-
-        $searchTerms = $request->all();
-        $column_value = ['creator_id'=>$currentUser->id];
-
-        foreach($searchTerms as $key=>$value){
-
-            if(isset($key)){
-
-                if($key == 'baths'){
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bathrooms', '>=',1];
-                        continue;
-                    }
-                    if($value < 5){
-                        $column_value['bathrooms'] = $value ;
-                    }else{
-                        $column_value[] = ['bathrooms', '>=',$value];
-                    } 
-                    continue;
-                }else if($key == 'beds'){
-
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bedrooms', '>=',1];
-                        continue;
-                    }
-
-                    if($value < 5){
-                        $column_value['bedrooms'] = $value;
-                    }else{
-                        $column_value[] = ['bedrooms', '>=',$value];
-                    }   
-                    continue;
-                }
-                else if($key == 'min_price'){
-                    $column_value[] = ['amount', '>=',$value];
-                    continue;
-                }else if($key == 'max_price'){
-                    $column_value[] = ['amount', '<=', $value ];
-                    continue;
-                }else if($key == 'page'){
-                    continue;
-                }
-
-                $column_value[$key] = $value;
-            }
-        }
-
-        $properties = DB::table('property')
-            ->where($column_value)
-            ->where('published',1)
-            ->paginate(20);
-
-        return json_encode(['data'=>$properties]);
-    }
-
-    public function adminPropertiesOverview(){
-
-        if(auth()->check()){
-
-            $obj = new \stdClass();
-
-            //get count for rent,land,house for sell,short-let
-            $forSellCount  = DB::table('property')
-                ->where(['category'=>'sell'])
-                ->count();
-
-            $rentCount  = DB::table('property')
-                ->where(['category'=>'rent',])
-                ->count();
-
-            $landCount  = DB::table('property')
-                ->where(['category'=>'land',])
-                ->count();
-
-            $short_letCount  = DB::table('property')
-                ->where(['category'=>'short_let',])
-                ->count();
-
-            $propertyCount  = DB::table('property')
-                ->count();
-            $unpublishedPropertyCount  = DB::table('property')
-                ->where(['published'=>0])
-                ->count();
-
-            $unpublishedProperty = DB::table('property')
-                ->where(['published'=>0])
-                ->limit(3)
-                ->get();
-
-            $obj->forSellCount = $forSellCount;
-            $obj->rentCount = $rentCount;
-            $obj->landCount = $landCount;
-            $obj->shortLetCount = $short_letCount;
-            $obj->propertyCount = $propertyCount;
-            $obj->unpublishedProperty = $unpublishedProperty;
-            $obj->unpublishedPropertyCount = $unpublishedPropertyCount;
-
-            return json_encode([
-                'status'=>1,
-                'data'=>[
-                    'propertyDetails'=>$obj
-
-                ]
-            ]);
-        }
-        
-    }
-
-    public function adminAllListings(Request $request){
-
-        $currentUser = auth()->user();
-
-        $searchTerms = $request->all();
-
-        $column_value = [];
-
-        if($request->has('list-type') && $request->get('list-type') == 'currentuser'){
-
-            $column_value = ['creator_id'=>$currentUser->id];
-
-        }    
-
-        foreach($searchTerms as $key=>$value){
-
-            if(isset($key)){
-
-                if($key == 'baths'){
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bathrooms', '>=',1];
-                        continue;
-                    }
-                    if($value < 5){
-                        $column_value['bathrooms'] = $value ;
-                    }else{
-                        $column_value[] = ['bathrooms', '>=',$value];
-                    } 
-                    continue;
-                }else if($key == 'beds'){
-
-                    if(strtolower($value) == 'any'){
-                        $column_value[] = ['bedrooms', '>=',1];
-                        continue;
-                    }
-
-                    if($value < 5){
-                        $column_value['bedrooms'] = $value;
-                    }else{
-                        $column_value[] = ['bedrooms', '>=',$value];
-                    }   
-                    continue;
-                }
-                else if($key == 'min_price'){
-                    $column_value[] = ['amount', '>=',$value];
-                    continue;
-                }else if($key == 'max_price'){
-                    $column_value[] = ['amount', '<=', $value ];
-                    continue;
-                }else if($key == 'other-category'){
-                    if(strtolower($value) == 'any'){
-                        continue;
-                    }
-                    $column_value['other_category'] = $value;
-                    continue;
-                }
-                else if($key == 'page' || $key == 'list-type'){
-                    continue;
-                }
-
-                $column_value[$key] = $value;
-            }
-        }
-    
-
-        $listings = DB::table('property')
-        ->where($column_value)
-        ->orderBy('id','desc')
-        ->paginate(20);
-        
-        return json_encode(['data'=>$listings]);
-
-    }
+				//save the current favorites
+				DB::table('favorites')
+					->where(['user_id' => $currentUser->id, 'property_id' => $property_id])
+					->delete();
 
+				$userFavorites = DB::table('favorites')
+					->where('user_id', $currentUser->id)
+					->get();
 
+				return json_encode(['data' => $userFavorites]);
+			}
+		}
 
+
+		$column_value = ['user_id' => $currentUser->id, 'property_id' => $property_id];
+		//save the current favorites
+		DB::table('favorites')
+			->insert($column_value);
+
+		$userFavorites = DB::table('favorites')
+			->where('user_id', $currentUser->id)
+			->get();
+
+		return json_encode(['data' => $userFavorites, 'status' => 'got on']);
+	}
+
+	public function getFavorites(Request $request)
+	{
+
+		//get the user
+		$currentUser = auth()->user();
+
+		$favorite_properties = [];
+
+		$favorites =  DB::table('favorites')
+			->where('user_id', $currentUser->id)
+			->get();
+
+
+		for ($i = 0, $len = count($favorites); $i < $len; $i++) {
+
+			$property = DB::table('property')
+				->where('id', $favorites[$i]->property_id)
+				->first();
+
+			array_push($favorite_properties, $property);
+		}
+
+		return json_encode(['data' => $favorite_properties, 'user' => $currentUser]);
+	}
+
+	public function searchProperty(Request $request)
+	{
+
+		$searchTerms = $request->all();
+		$column_value = [];
+
+		foreach ($searchTerms as $key => $value) {
+
+			if (isset($key)) {
+
+				if ($key == 'baths') {
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bathrooms', '>=', 1];
+						continue;
+					}
+					if ($value < 5) {
+						$column_value['bathrooms'] = $value;
+					} else {
+						$column_value[] = ['bathrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'beds') {
+
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bedrooms', '>=', 1];
+						continue;
+					}
+
+					if ($value < 5) {
+						$column_value['bedrooms'] = $value;
+					} else {
+						$column_value[] = ['bedrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'min_price') {
+					$column_value[] = ['amount', '>=', $value];
+					continue;
+				} else if ($key == 'max_price') {
+					$column_value[] = ['amount', '<=', $value];
+					continue;
+				} else if ($key == 'page') {
+					continue;
+				}
+
+				$column_value[$key] = $value;
+			}
+		}
+
+		$properties = DB::table('property')
+			->where($column_value)
+			->where('published', 1)
+			->paginate(20);
+
+		return json_encode(['data' => $properties]);
+	}
+
+	public function agentSearchProperty(Request $request)
+	{
+
+		$currentUser = auth()->user();
+
+		$searchTerms = $request->all();
+		$column_value = ['creator_id' => $currentUser->id];
+
+		foreach ($searchTerms as $key => $value) {
+
+			if (isset($key)) {
+
+				if ($key == 'baths') {
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bathrooms', '>=', 1];
+						continue;
+					}
+					if ($value < 5) {
+						$column_value['bathrooms'] = $value;
+					} else {
+						$column_value[] = ['bathrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'beds') {
+
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bedrooms', '>=', 1];
+						continue;
+					}
+
+					if ($value < 5) {
+						$column_value['bedrooms'] = $value;
+					} else {
+						$column_value[] = ['bedrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'min_price') {
+					$column_value[] = ['amount', '>=', $value];
+					continue;
+				} else if ($key == 'max_price') {
+					$column_value[] = ['amount', '<=', $value];
+					continue;
+				} else if ($key == 'page') {
+					continue;
+				}
+
+				$column_value[$key] = $value;
+			}
+		}
+
+		$properties = DB::table('property')
+			->where($column_value)
+			->where('published', 1)
+			->paginate(20);
+
+		return json_encode(['data' => $properties]);
+	}
+
+	public function adminPropertiesOverview()
+	{
+
+		if (auth()->check()) {
+
+			$obj = new \stdClass();
+
+			//get count for rent,land,house for sell,short-let
+			$forSellCount  = DB::table('property')
+				->where(['category' => 'sell'])
+				->count();
+
+			$rentCount  = DB::table('property')
+				->where(['category' => 'rent',])
+				->count();
+
+			$landCount  = DB::table('property')
+				->where(['category' => 'land',])
+				->count();
+
+			$short_letCount  = DB::table('property')
+				->where(['category' => 'short_let',])
+				->count();
+
+			$propertyCount  = DB::table('property')
+				->count();
+			$unpublishedPropertyCount  = DB::table('property')
+				->where(['published' => 0])
+				->count();
+
+			$unpublishedProperty = DB::table('property')
+				->where(['published' => 0])
+				->limit(3)
+				->get();
+
+			$obj->forSellCount = $forSellCount;
+			$obj->rentCount = $rentCount;
+			$obj->landCount = $landCount;
+			$obj->shortLetCount = $short_letCount;
+			$obj->propertyCount = $propertyCount;
+			$obj->unpublishedProperty = $unpublishedProperty;
+			$obj->unpublishedPropertyCount = $unpublishedPropertyCount;
+
+			return json_encode([
+				'status' => 1,
+				'data' => [
+					'propertyDetails' => $obj
+
+				]
+			]);
+		}
+	}
+
+	public function adminAllListings(Request $request)
+	{
+
+		$currentUser = auth()->user();
+
+		$searchTerms = $request->all();
+
+		$column_value = [];
+
+		if ($request->has('list-type') && $request->get('list-type') == 'currentuser') {
+
+			$column_value = ['creator_id' => $currentUser->id];
+		}
+
+		foreach ($searchTerms as $key => $value) {
+
+			if (isset($key)) {
+
+				if ($key == 'baths') {
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bathrooms', '>=', 1];
+						continue;
+					}
+					if ($value < 5) {
+						$column_value['bathrooms'] = $value;
+					} else {
+						$column_value[] = ['bathrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'beds') {
+
+					if (strtolower($value) == 'any') {
+						$column_value[] = ['bedrooms', '>=', 1];
+						continue;
+					}
+
+					if ($value < 5) {
+						$column_value['bedrooms'] = $value;
+					} else {
+						$column_value[] = ['bedrooms', '>=', $value];
+					}
+					continue;
+				} else if ($key == 'min_price') {
+					$column_value[] = ['amount', '>=', $value];
+					continue;
+				} else if ($key == 'max_price') {
+					$column_value[] = ['amount', '<=', $value];
+					continue;
+				} else if ($key == 'other-category') {
+					if (strtolower($value) == 'any') {
+						continue;
+					}
+					$column_value['other_category'] = $value;
+					continue;
+				} else if ($key == 'page' || $key == 'list-type') {
+					continue;
+				}
+
+				$column_value[$key] = $value;
+			}
+		}
+
+
+		$listings = DB::table('property')
+			->where($column_value)
+			->orderBy('id', 'desc')
+			->paginate(20);
+
+		return json_encode(['data' => $listings]);
+	}
 }

@@ -21,7 +21,7 @@ const PhotoLists = ({propertyDetails,images=[],
                         {images && images.length > 0 && images.map((v,i)=>{
                             return(
                                 <div key={i} className='w-full relative'>
-                                    <img src={`/uploads/users/${propertyDetails.creator_id}/${v}`} alt="" className='rounded w-full h-[220px] object-cover' />
+                                    <img src={v.image_path} alt="" className='rounded w-full h-[220px] object-cover' />
                                 </div>
                             ) 
                         })}

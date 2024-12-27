@@ -71,7 +71,7 @@ const Question = ({propertyDetails}) => {
 
             <div className='flex items-center space-x-5'>
                 <div className='w-24 h-24 rounded-full border overflow-hidden'>
-                    <img src={`/uploads/users/${propertyDetails.creator_id}/profile-photo/${propertyDetails?.agentDetails.photo}`} alt="" className='w-24 h-24 object-cover'/>
+                    <img src={propertyDetails?.agentDetails.photo} alt="" className='w-24 h-24 object-cover'/>
                 </div>
 
                 <div className='text-sm'>

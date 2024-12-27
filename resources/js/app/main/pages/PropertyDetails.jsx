@@ -1,6 +1,5 @@
 import React, { useState,useEffect } from 'react'
 import { useParams,Link,useNavigate, NavLink, useLocation } from 'react-router-dom';
-import {toast} from 'react-toastify'
 import {BsArrowLeft, BsCardImage, BsChevronDown, BsChevronUp} from "react-icons/bs"
 import $ from 'jquery'
 
@@ -12,7 +11,7 @@ import PhotoLists from "../components/PhotoLists"
 import Tour from '../components/Tour/Tour';
 import Axios from '../../utility/axios';
 import Question from '../components/question/Question';
-import { FaUser, FaUserCircle } from 'react-icons/fa';
+import {FaUserCircle } from 'react-icons/fa';
 import PropertyCard from '../components/PropertyCard';
     
 
@@ -20,7 +19,7 @@ const PropertyDetails = () => {
 
     // const [propertyDetails,setPropertyDetails] = useState({photos:[]})
     const [propertyDetails,setPropertyDetails] = useState(null)
-    const [modelVisible,setModelVisible] = useState(false)
+    const [similarProperties, setSimilarProperties] = useState([])
     const [showLess,setShowLess] = useState(false)
   
     const [showPhotoList,setShowPhotoList] = useState(false)
@@ -30,59 +29,17 @@ const PropertyDetails = () => {
 
     const {hash} = useLocation()
 
-    const UpdateImageState = (photos)=>{
-
-         setPropertyDetails({...propertyDetails, photos:photos})
-
+    const getSimilarProperties = (propertyDetails)=>{
+        Axios.get("/api/v1/properties", {params:{
+            state:propertyDetails.state,
+            published:1,
+            category:propertyDetails.category
+        }}).then(data=>{
+            setSimilarProperties(data.data.data.data)
+        }).catch(e=>{
+            console.log(e.response)
+        })
     }
-
-    const handlePublish = ()=>{
-
-		$('#spinner').fadeIn()
-
-		Axios.post('/dashboard/property/user-action',{property_id:propertyID,type:'publish_property'}).then(data=>{
-
-			$('#spinner').fadeOut()
-
-			setPropertyDetails({...propertyDetails, published:data.data.data})
-			
-		}).catch(e=>{
-			$('#spinner').fadeOut()
-			console.log(e)
-		})
-		
-	}
-
-    const handleYes = ()=>{
-
-		setModelVisible(false)
-
-		$('#spinner').fadeIn()
-
-		Axios.post('/dashboard/property/user-action',{property_id:propertyID,type:'delete-property'}).then(data=>{
-
-			$('#spinner').fadeOut()
-
-            if(data.data.data == 1){
-
-                toast('property deleted successfully', {type:'success'})
-
-			    navigate(`/dashboard/listings`)
-            }
-	
-		}).catch(e=>{
-			$('#spinner').fadeOut()
-			console.log(e)
-		})
-		
-	}
-	const handleNo = ()=>{setModelVisible(false)}
-
-	const handleBtnAction = ()=>{
-
-		setModelVisible(true)
-
-	}
 
     //scroll function
     useEffect(()=>{
@@ -97,17 +54,10 @@ const PropertyDetails = () => {
     },[hash])
 
     useEffect(()=>{
-
-        Axios.get('/api/listings/details', {params:{propertyID}}).then(data=>{
-            let property = data.data.data
-
-            property = {...property, images:JSON.parse(property.images), 
-                property_fact:JSON.parse(property.property_fact),amenities:JSON.parse(property.amenities)}
-
-                //console.log(property)
-             setPropertyDetails(property)
+        Axios.get(`/api/v1/properties/${propertyID}`).then(data=>{   
+            setPropertyDetails(data.data.data)
+            getSimilarProperties(data.data.data);
         }).catch(e=>{
-
             console.log(e.response)
         })
     },[propertyID])
@@ -179,20 +129,20 @@ const PropertyDetails = () => {
                     <div className='h-full md:flex md:space-x-1 relative'>
                         <div className='md:w-2/4 overflow-hidden'>
                             {propertyDetails.images.length && (
-                                <img src={`/uploads/users/${propertyDetails.creator_id}/${propertyDetails.images && propertyDetails.images[0]}`} alt="" className='h-[22rem] w-full object-cover'/>) 
+                                <img src={propertyDetails.images[0].image_path} alt="" className='h-[22rem] w-full object-cover'/>) 
                             }
                             
                         </div>
                         <div className='w-2/4 hidden md:flex space-x-1'>
                             <div className='w-2/4 '>
                                 {propertyDetails.images.length > 1 && (
-                                    <img src={`/uploads/users/${propertyDetails.creator_id}/${propertyDetails.images && propertyDetails.images[1]}`} alt="" className='h-[22rem] w-full object-cover'/>
+                                    <img src={propertyDetails.images[1].image_path} alt="" className='h-[22rem] w-full object-cover'/>
                                     )
                                 }
                             </div>
                             <div className='w-2/4'>
                             {propertyDetails.images.length > 2 && (
-                                <img src={`/uploads/users/${propertyDetails.creator_id}/${propertyDetails.images && propertyDetails.images[2]}`} alt="" className='h-[22rem] w-full object-cover'/>)
+                                <img src={propertyDetails.images[2].image_path} alt="" className='h-[22rem] w-full object-cover'/>)
                                 
                             }
                             </div>
@@ -364,7 +314,7 @@ const PropertyDetails = () => {
             <h1 className='font-bold text-xl'>Similar properties for you</h1>
             <p className='text-xs mt-2'>Homes similar to {propertyDetails?.name ? propertyDetails.name : 'This property'} are shown below.</p>
             <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-5'>
-                {propertyDetails.similar.map((v,i)=>{
+                {similarProperties.map((v,i)=>{
 
                     return <Link key={i} onClick={(e)=>{
                         e.preventDefault()

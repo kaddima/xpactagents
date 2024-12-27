@@ -58,7 +58,7 @@ class PropertyResource extends JsonResource
 		} else {
 			// For a single property, return all images
 			$propertyData['images'] = ImageResource::collection($images);
-			$propertyData['author'] = new UserResource($this->author);
+			$propertyData['agentDetails'] = new UserResource($this->author);
 		}
 
 		return $propertyData;

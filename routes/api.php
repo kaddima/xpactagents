@@ -91,5 +91,5 @@ Route::prefix('v1')->group(function () {
 
 });
 
-Route::get('/listings', [ListingController::class, 'listings']);
+Route::get('/listings', [ListingController::class, 'getProperties']);
 Route::get('/listings/details', [ListingController::class, 'propertyDetails']);;
