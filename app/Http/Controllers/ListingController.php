@@ -33,6 +33,18 @@ class ListingController extends BaseController
 		return $this->sendResponse($this->propertyService->getProperties($data));
 	}
 
+	public function propertyDetails(Request $request, $id)
+	{
+		$this->validateParams(
+			["id" => $id],
+			["id" => "required|uuid"]
+		);
+
+		$property = $this->propertyService->propertyDetails($id);
+		return $this->sendResponse($property);
+	
+	}
+
 	public function updateProperty(Request $request)
 	{
 
@@ -206,10 +218,10 @@ class ListingController extends BaseController
 		);
 	}
 
+	// AGENT PROPERTIES CONTROLLER
 	public function agentListings(Request $request)
 	{
-
-		$agent_id = auth()->user()->id;
+		$agent_id = $request->user()->id;
 
 		//when requesting from admin page
 		if ($request->has('agent_id')) {
@@ -217,12 +229,26 @@ class ListingController extends BaseController
 			$agent_id = $request->get('agent_id');
 		}
 
-		$listings = DB::table('property')
-			->where('creator_id', $agent_id)
-			->orderBy('created_at', 'desc')
-			->paginate(20);
+		$data = $this->validateParams(
+			['agent_id' => $agent_id],
+			['agent_id' => 'required|uuid|exists:users,id']
+		);
 
-		return json_encode(['data' => $listings]);
+		$filters = $this->validate($request, ValidationRules::propertyFiltersRules());
+		$properties = $this->propertyService->getProperties($filters, false, $data['agent_id']);
+		return $this->sendResponse($properties);
+	}
+
+	public function agentPropertyDetails(Request $request, $id)
+	{
+		$agent_id = $request->user()->id;
+		$this->validateParams(
+			["id" => $id],
+			["id" => "required|uuid"]
+		);
+
+		$property = $this->propertyService->propertyDetails($id, false, $agent_id);
+		return $this->sendResponse($property);
 	}
 
 	public function adminAgentListings(Request $request)
@@ -440,38 +466,6 @@ class ListingController extends BaseController
 		return json_encode(['status' => 1, 'data' => $property_id]);
 	}
 
-	public function propertyDetails(Request $request)
-	{
-
-		$property_id = $request->get('propertyID');
-
-		$propertyDetails = DB::table('property')
-			->where('id', $property_id)
-			->first();
-
-		$propertyDetails->agentDetails = DB::table('users')
-			->where('id', $propertyDetails->creator_id)
-			->first();
-
-		//similar property search querry
-		$similar = [
-			'state' => $propertyDetails->state,
-			'published' => 1,
-			'category' => $propertyDetails->category,
-			['id', '!=', $propertyDetails->id],
-			//['amount', '<=',$propertyDetails->amount]
-		];
-
-		$propertyDetails->similar = DB::table('property')
-			->where($similar)
-			->limit(6)
-			->get();
-
-		return json_encode([
-			'data' => $propertyDetails,
-			'id' => $property_id
-		]);
-	}
 
 	/**
 	 * This method sets and unsets the users favorite listings

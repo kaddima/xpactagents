@@ -1,4 +1,5 @@
 /node_modules
+public/
 # ignore log files and databases
 *.log
 *.sql
@@ -83,11 +84,7 @@ Homestead.json
 storage/
 
 vendor/
-public/*/**/*.png
-public/*/**/*.jpg
-public/*/**/*.svg
-public/*/**/*.webp
-public/*/**/*.jpeg
+
 .env
 .env.backup
 .phpunit.result.cache

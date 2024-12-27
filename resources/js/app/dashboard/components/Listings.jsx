@@ -35,7 +35,7 @@ const Listings = ({propertyListing=[],listState=[],pagination=false,setProperty=
         Axios.get(path, {params:{...params,page:pageParam}}).then(data=>{
 
             setProperty(prev=>{
-                let appendedListing = {data : prev.data.concat(data.data.data.data)}
+                let appendedListing = {data : prev.data.concat(data.data.data.data), meta:data.data.data.meta}
                 return {...data.data.data, ...appendedListing}
             })
         }).catch(e=>{
@@ -66,9 +66,9 @@ const Listings = ({propertyListing=[],listState=[],pagination=false,setProperty=
           })} 
       </div>
 
-      {showMore?.next_page_url && <div className='mt-5 mb-3'>
+      {showMore?.nextPageUrl && <div className='mt-5 mb-3'>
             <h1 className='text-center mb-3 font-semibold'>Continue exploring our listings</h1>
-            <button onClick={()=>onshowMore(showMore?.next_page_url)} className='block max-w-[150px] bg-black text-white text-sm font-semibold mx-auto px-5 py-2 rounded border border-black'>Show more</button>
+            <button onClick={()=>onshowMore(showMore?.nextPageUrl)} className='block max-w-[150px] bg-black text-white text-sm font-semibold mx-auto px-5 py-2 rounded border border-black'>Show more</button>
         </div>}
     </div>
   )
