@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\PropertyController;
 use App\Rules\ValidationRules;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
@@ -10,39 +11,28 @@ use Illuminate\Support\Facades\DB;
 class ListingController extends BaseController
 {
 	protected $propertyService;
+	protected $apiController;
 
-	public function __construct(PropertyService $propertyService)
+	public function __construct(PropertyService $propertyService, PropertyController $apiController)
 	{
 		$this->propertyService = $propertyService;
+		$this->apiController = $apiController;
 	}
 
 	//Create new property
 	public function createProperty(Request $request)
 	{
-		/**Validate the request data */
-		$data = $this->validate($request, ValidationRules::storeProductRules());
-		/**Get the current signed user */
-		$currentUser = $request->user();
-		$productId = $this->propertyService->create($data, $currentUser);
-		return $this->sendResponse(['productId' => $productId], "Product created successfully");
+		return $this->apiController->create($request);
 	}
 
 	public function getProperties(Request $request)
 	{
-		$data = $this->validate($request, ValidationRules::propertyFiltersRules());
-		return $this->sendResponse($this->propertyService->getProperties($data));
+		return $this->apiController->getProperties($request);
 	}
 
 	public function propertyDetails(Request $request, $id)
 	{
-		$this->validateParams(
-			["id" => $id],
-			["id" => "required|uuid"]
-		);
-
-		$property = $this->propertyService->propertyDetails($id);
-		return $this->sendResponse($property);
-	
+		return $this->apiController->getPropertyDetails($request, $id);
 	}
 
 	public function updateProperty(Request $request)
@@ -82,173 +72,26 @@ class ListingController extends BaseController
 		return json_encode(['status' => 1]);
 	}
 
-	public function uploadPropertyImage(Request $request)
-	{
-
-		$user_id = auth()->user()['id'];
-		$photoPattern = '#^(image/)[^\s\n<]+$#i';
-
-		$file = $request->file('image');
-		$property_id = $request->get('property_id');
-		$filename = pathInfo($request->get('file_name'))['filename'] . ".jpg";
-
-		$error = '';
-		$status = 1;
-
-		//directory to upload image
-		$upload_dir = public_path('uploads/users/' . $user_id . '/');
-
-		$name = $file->getClientOriginalName();
-		$size = $file->getSize();
-		$target = $upload_dir . $filename;
-
-
-		if ((floatval($size) / 1000) > 700) {
-			$error = 'file too large -- 700kb and below';
-			$status = 0;
-		} elseif (!preg_match($photoPattern, $file->getMimeType())) {
-			$error = 'please upload only images';
-			$status = 0;
-		} elseif (file_exists($target)) {
-			$error = 'File already exist';
-			$status = 0;
-		}
-
-		if ($status == 1) {
-
-			// upload the photo to server
-			$file->move($upload_dir, $filename);
-
-			//get the images from the property table by property_id
-
-			$property = DB::table('property')
-				->where('id', $property_id)
-				->first();
-
-			$images = $property->images ? (array)json_decode($property->images) : [];
-
-			$images[] = $filename;
-
-			//insert the photo to database
-
-			$columnValue = [
-				'images' => json_encode($images)
-			];
-
-			DB::table('property')
-				->where('id', $property_id)
-				->update($columnValue);
-
-			return json_encode(['status' => $status, 'error' => $error, 'photos' => $images]);
-		}
-
-		return json_encode(['status' => $status, 'error' => $error]);
+	public function uploadPropertyImage(Request $request) {
+		return $this->apiController->uploadFile($request);
 	}
 
 	public function deletePropertyImage(Request $request)
 	{
-
-		$user_id = auth()->user()['id'];
-
-		$data = $request->all();
-		$property_id = $data['property_id'];
-
-		//directory to upload image
-		$upload_dir = public_path('uploads/users/' . $user_id . '/');
-
-		$target = $upload_dir . $data['image'];
-
-
-		//get the images from the property table by property_id
-
-		$property = DB::table('property')
-			->where('id', $property_id)
-			->first();
-
-		$images = json_decode($property->images);
-
-		if (is_object($images)) {
-
-			//convert to array
-			$images = (array)$images;
-
-			$images = array_values($images);
-		}
-
-		for ($i = 0, $len = count($images); $i <= $len; $i++) {
-
-			if ($images[$i] == $data['image']) {
-
-				if (unlink($target)) {
-
-					unset($images[$i]);
-
-					/*** reset the array index to start from 0 else when you encode the 
-                        array it turns to object ({"1":"element"}) rather than "[element]"
-                        as desired
-					 */
-					$images = array_values($images);
-
-					//insert the photo to database
-
-					$columnValue = [
-						'images' => json_encode($images)
-					];
-
-					DB::table('property')
-						->where('id', $property_id)
-						->update($columnValue);
-
-
-					return json_encode(
-						[
-							'status' => 1,
-							'photos' => array_values($images)
-						]
-					);
-				}
-			}
-		}
-
-		return json_encode(
-			[
-				'status' => 1,
-				'photos' => array_values($images)
-			]
-		);
+		return $this->apiController->deletePropertyImages($request);
 	}
 
 	// AGENT PROPERTIES CONTROLLER
 	public function agentListings(Request $request)
 	{
 		$agent_id = $request->user()->id;
-
-		//when requesting from admin page
-		if ($request->has('agent_id')) {
-
-			$agent_id = $request->get('agent_id');
-		}
-
-		$data = $this->validateParams(
-			['agent_id' => $agent_id],
-			['agent_id' => 'required|uuid|exists:users,id']
-		);
-
-		$filters = $this->validate($request, ValidationRules::propertyFiltersRules());
-		$properties = $this->propertyService->getProperties($filters, false, $data['agent_id']);
-		return $this->sendResponse($properties);
+		return $this->apiController->agentProperties($request, $agent_id);
 	}
 
 	public function agentPropertyDetails(Request $request, $id)
 	{
 		$agent_id = $request->user()->id;
-		$this->validateParams(
-			["id" => $id],
-			["id" => "required|uuid"]
-		);
-
-		$property = $this->propertyService->propertyDetails($id, false, $agent_id);
-		return $this->sendResponse($property);
+		return $this->apiController->agentPropertyDetails($request,$agent_id,$id);
 	}
 
 	public function adminAgentListings(Request $request)

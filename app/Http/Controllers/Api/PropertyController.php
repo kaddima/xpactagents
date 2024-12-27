@@ -59,7 +59,7 @@ class PropertyController extends BaseController
 		$file = $request->file("image");
 
 		$path = $this->propertyService->uploadFile($file, $data['property_id'], $currentUser);
-		return $this->sendResponse(['path' => $path], "File uploaded successfully");
+		return $this->sendResponse($path, "File uploaded successfully");
 	}
 
 	public function deletePropertyImages(Request $request)

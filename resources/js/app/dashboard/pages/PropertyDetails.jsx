@@ -74,10 +74,12 @@ const PropertyDetails = () => {
 
 	// Update property image
 	const setPropertyImage = (image) => {
-
 		setPropertyDetails(prev => {
-
-			return { ...prev, images: image }
+			if (Array.isArray(image)) {
+				return { ...prev, images: image };
+			} else {
+				return { ...prev, images: [...prev.images, image] };
+			}
 		})
 	}
 
@@ -169,9 +171,8 @@ const PropertyDetails = () => {
 					<div className='h-full flex md:flex-row flex-col space-x-1 relative'>
 						<div className='md:w-2/4 overflow-hidden'>
 							{propertyDetails.images.length ? (
-								<img src={`/uploads/users/${propertyDetails?.creator_id}/${propertyDetails.images && propertyDetails.images[0]}`} alt="" className='h-[22rem] w-full object-cover' />)
+								<img src={propertyDetails.images[0].image_path} alt="" className='h-[22rem] w-full object-cover' />)
 								:
-
 								<ImageUpload property_id={propertyDetails.id} getPhoto={true} fn={setPropertyImage} />
 							}
 
@@ -179,7 +180,7 @@ const PropertyDetails = () => {
 						<div className='md:w-2/4 md:flex space-x-1 hidden'>
 							<div className='w-2/4 '>
 								{propertyDetails.images.length > 1 ? (
-									<img src={`/uploads/users/${propertyDetails?.creator_id}/${propertyDetails.images && propertyDetails.images[1]}`} alt="" className='h-[22rem] w-full object-cover' />)
+									<img src={propertyDetails.images[1].image_path} alt="" className='h-[22rem] w-full object-cover' />)
 									:
 
 									<ImageUpload property_id={propertyDetails.id} getPhoto={true} fn={setPropertyImage} />
@@ -187,7 +188,7 @@ const PropertyDetails = () => {
 							</div>
 							<div className='w-2/4'>
 								{propertyDetails.images.length > 2 ? (
-									<img src={`/uploads/users/${propertyDetails?.creator_id}/${propertyDetails.images && propertyDetails.images[2]}`} alt="" className='h-[22rem] w-full object-cover' />)
+									<img src={propertyDetails.images[1].image_path} alt="" className='h-[22rem] w-full object-cover' />)
 									:
 
 									<ImageUpload property_id={propertyDetails.id} getPhoto={true} fn={setPropertyImage} />
@@ -203,7 +204,6 @@ const PropertyDetails = () => {
 					{showPhotoManager && <>
 						<PhotoManager
 							property_id={propertyID}
-							currentUser={currentUser}
 							images={propertyDetails.images}
 							setFn={setPropertyImage}
 							closePhotoManager={setShowPhotoManager} />

@@ -12,11 +12,10 @@ const ListingsPage = () => {
 
   useEffect(() => {
 
-    Axios.get('/api/v1/properties',
+    Axios.get('/properties',
       {
         params: { 'other_category': searchParams.get('other-category')}
       }).then(data => {
-        console.log(data.data.data)
         setPropertyListing(data.data.data)
 
       }).catch(e => {

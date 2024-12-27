@@ -126,8 +126,8 @@ class PropertyService
     $path = $file->store("{$currentUser->id}/{$property->id}");
 
     //save the path to the database
-    $this->propertyImageRepo->create(['property_id' => $property_id, "image_path" => $path]);
-    return Storage::url($path);
+    $image = $this->propertyImageRepo->create(['property_id' => $property_id, "image_path" => $path]);
+    return new ImageResource($image);
   }
 
   public function deletePropertyImage($data, $currentUser)
