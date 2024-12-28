@@ -6,6 +6,7 @@ use App\Http\Controllers\BaseController;
 use App\Rules\ValidationRules;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PropertyController extends BaseController
 {
@@ -40,11 +41,9 @@ class PropertyController extends BaseController
 
 	public function updateProperty(Request $request, $id)
 	{
+		Log::debug($request->all());
 		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
-
 		$data = $this->validate($request, ValidationRules::storeProductRules(true));
-
-		$id;
 		$currentUser = $request->user();
 		$this->propertyService->updateProperty($data, $id, $currentUser);
 		return $this->sendResponse([], "Property updated");

@@ -72,13 +72,12 @@ class ValidationRules
         ['required', 'string', 'max:255', new CaseInsensitiveIn(['sell', 'rent', 'land', 'shortlet'])], // Limited options for property category
       'property_type' => ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['duplex', 'condo', 'apartment', 'bungalow', 'mansion'])], // Required property type
       'state' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Required state
-      'other_category' => ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['beach', 'modern', 'pool', 'countryside', 'islands', 'lake', 'castle', 'camping', 'estate', 'golfing', 'mansion', 'lux'])], // Optional other category
+      'other_category' => ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['beach', 'modern', 'pool', 'countryside', 'island', 'lake', 'castle', 'camping', 'estate', 'golfing', 'mansion', 'lux'])], // Optional other category
       'amenities' => 'nullable|array', // Amenities should be an array
       'amenities.*' => 'string',
-      'property_fact' => 'nullable|array', // Property facts should be an array
       'property_fact.unit' => 'nullable|string|max:50', // Unit should be a string
-      'property_fact.property_size' => 'nullable|integer|min:0', // Property size should be a non-negative integer
-      'property_fact.upload_time' => 'nullable|integer', // Optional upload time
+      'property_fact.size' => 'nullable|integer|min:0', // Property size should be a non-negative integer
+      'property_fact.upload_time' => 'nullable|date', // Optional upload time
       'property_fact.year_built' => 'nullable|integer|gte:1900', // Year built should be a reasonable year
       'property_fact.flooring' => 'nullable|string|max:255' // Optional flooring type
     ];

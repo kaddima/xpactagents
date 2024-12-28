@@ -35,41 +35,9 @@ class ListingController extends BaseController
 		return $this->apiController->getPropertyDetails($request, $id);
 	}
 
-	public function updateProperty(Request $request)
+	public function updateProperty(Request $request, $id)
 	{
-
-		$data = $request->all();
-
-		//logged in admin
-		$user_id = auth()->user()['id'];
-
-		$column_value = [
-			'name' => $data['name'] ? $data['name'] : null,
-			'address' => $data['address'] ? $data['address'] : null,
-			'amount' => $data['amount'] ? $data['amount'] : null,
-			'category' => $data['property_category'] ? $data['property_category'] : null,
-			'description' => $data['description'] ? $data['description'] : null,
-			'size' => isset($data['size']) ? $data['size'] : null,
-			'property_type' => $data['property_type'] ? $data['property_type'] : null,
-			'property_fact' => $data['property_fact'] ? json_encode($data['property_fact']) : null,
-			'amenities' => $data['amenities'] ? json_encode($data['amenities']) : json_encode([]),
-			'setup' => 1,
-			'duration' => isset($data['duration']) ? $data['duration'] : null,
-			'state' => isset($data['state']) ? $data['state'] : null,
-			'lga' => isset($data['lga']) ? $data['lga'] : null,
-			'other_category' => isset($data['other_category']) ? $data['other_category'] : null,
-			'bedrooms' => isset($data['bedrooms']) ? $data['bedrooms'] : null,
-			'toilets' => isset($data['toilets']) ? $data['toilets'] : null,
-			'bathrooms' => isset($data['bathrooms']) ? $data['bathrooms'] : null
-		];
-
-		//update the table
-		DB::table('property')
-			->where(['id' => $data['property_id']])
-			->update($column_value);
-
-
-		return json_encode(['status' => 1]);
+		return $this->apiController->updateProperty($request, $id);
 	}
 
 	public function uploadPropertyImage(Request $request) {

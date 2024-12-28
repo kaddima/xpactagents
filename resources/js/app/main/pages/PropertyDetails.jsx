@@ -277,7 +277,7 @@ const PropertyDetails = () => {
 
                                     return (
                                         <p key={index} className='flex justify-between items-center border-b dark:border-b-slate-800 pb-3'>
-                                            {value.amenities ? value.amenities : ''}
+                                            {value}
                                         </p>
                                     )
                                 })}

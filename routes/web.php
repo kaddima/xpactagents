@@ -75,6 +75,7 @@ Route::middleware("auth")->group(function () {
 	Route::Post('/property/publish', [ListingController::class, 'publishProperty']);
 	Route::post('/properties/{id}/images', [ListingController::class, 'uploadPropertyImage']);
 	Route::delete('/properties/{id}/images', [ListingController::class, 'deletePropertyImage']);
+	Route::put('/properties/{id}', [ListingController::class, 'updateProperty']);
 
 	//===== SPECIFIC AGENT ROUTES =====
 	Route::get('/agents/properties', [ListingController::class, 'agentListings']);
@@ -89,7 +90,6 @@ Route::middleware("auth")->group(function () {
 
 	Route::post('/dashboard/add-property', [ListingController::class, 'createProperty']);
 	
-	Route::post('/dashboard/update-property', [ListingController::class, 'updateProperty']);
 	Route::post('/dashboard/create-property', [ListingController::class, 'createProperty']);
 	Route::post('/dashboard/property-listings', [ListingController::class, 'propertyListings']);
 	Route::get('/dashboard/property/category', [ListingController::class, 'PropertyByCategory']);
