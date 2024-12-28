@@ -72,10 +72,10 @@ Route::middleware("auth")->group(function () {
 	Route::Post('/property/favorite', [ListingController::class, 'favorite']);
 	Route::get('/property/favorites', [ListingController::class, 'getFavorites']);
 	Route::get('/property/listings/search', [ListingController::class, 'searchProperty']);
-	Route::Post('/property/publish', [ListingController::class, 'publishProperty']);
 	Route::post('/properties/{id}/images', [ListingController::class, 'uploadPropertyImage']);
 	Route::delete('/properties/{id}/images', [ListingController::class, 'deletePropertyImage']);
 	Route::put('/properties/{id}', [ListingController::class, 'updateProperty']);
+	Route::Post('/properties/{id}/published/{status}', [ListingController::class, 'publishProperty']);
 
 	//===== SPECIFIC AGENT ROUTES =====
 	Route::get('/agents/properties', [ListingController::class, 'agentListings']);

@@ -40,6 +40,11 @@ class ListingController extends BaseController
 		return $this->apiController->updateProperty($request, $id);
 	}
 
+	public function publishProperty(Request $request, $id, $status)
+	{
+		return $this->apiController->publishedStatus($request,$id,$status);
+	}
+
 	public function uploadPropertyImage(Request $request) {
 		return $this->apiController->uploadFile($request);
 	}
@@ -238,43 +243,6 @@ class ListingController extends BaseController
 		}
 
 		return json_encode(['status' => 0]);
-	}
-
-	public function publishProperty(Request $request)
-	{
-
-		$property_id = $request->input('property_id');
-
-		$currentUser = auth()->user();
-
-		if ($currentUser->is_admin == 0 && $currentUser->profile_complete != 1) {
-			return [];
-		}
-		//get the property
-		$property = DB::table('property')
-			->where(['id' => $property_id])
-			->first(['id', 'published', 'creator_id']);
-
-		if ($currentUser->id == $property->creator_id || $currentUser->is_admin == 1) {
-
-			if ($property->published == 0) {
-
-				DB::table('property')
-					->where(['id' => $property_id])
-					->update(['published' => 1]);
-			} else {
-
-				DB::table('property')
-					->where(['id' => $property_id])
-					->update(['published' => 0]);
-			}
-		}
-
-		// $propertyDetails = DB::table('property')
-		// ->where('id',$property_id)
-		// ->first('published');
-
-		return json_encode(['status' => 1, 'data' => $property_id]);
 	}
 
 

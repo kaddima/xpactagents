@@ -63,10 +63,12 @@ const EditProperty = () => {
 		//display spinner
 		$('#spinner').fadeIn()
 
-		let values = { ...data,
-			property_fact:{...data.property_fact}, 
-			description: descriptionValue, 
-			amenities }
+		let values = {
+			...data,
+			property_fact: { ...data.property_fact },
+			description: descriptionValue,
+			amenities
+		}
 
 		Axios.put(`/properties/${property_id}`, values).then(data => {
 			toast('Update successful', { type: 'success' })
@@ -89,7 +91,7 @@ const EditProperty = () => {
 		})
 	}
 
-	const onPublished = (property_id) => {
+	const onPublished = (property_id, status) => {
 
 		if (currentUser.profile_complete != 1) {
 			toast('You have to complete your registration before you can publish your properties',
@@ -99,11 +101,9 @@ const EditProperty = () => {
 
 		showLoading()
 
-		Axios.post('/property/publish', { property_id }).then(data => {
-			// console.log(data.data.data)
+		Axios.post(`/properties/${property_id}/published/${status}`).then(data => {
 			toast(`Your property is now ${propertyDetails.published == 0 ? 'public ' : 'private'}`, { type: 'success' })
 			setPropertyDetails(prev => {
-
 				return { ...prev, published: prev.published == 1 ? 0 : 1 }
 			})
 		}).catch(e => {
@@ -142,7 +142,11 @@ const EditProperty = () => {
 							<p className='text-xs'>This page modifies your listings</p>
 						</div>
 
-						<button onClick={() => onPublished(propertyDetails.id)}
+						<button onClick={(e) => {
+							let publishStatus = e.target.getAttribute("data-status")
+							onPublished(propertyDetails.id, publishStatus)
+						}}
+							data-status={propertyDetails.published == 0 ? "true" : "false"}
 							className={`border-[2px] ${propertyDetails.published == 1 ?
 								'border-green-600' :
 								'border-red-600'} text-xs px-5 transition py-2 rounded-md 
