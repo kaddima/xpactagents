@@ -152,7 +152,7 @@ const PropertyDetails = () => {
 						</ul>
 
 						<div>
-							<NavLink to={`/dashboard/listings/favorite`}>
+							<NavLink to={`/dashboard/listings/favorites`}>
 								Favorite
 							</NavLink>
 						</div>

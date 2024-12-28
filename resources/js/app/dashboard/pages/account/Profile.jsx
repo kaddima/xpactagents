@@ -5,7 +5,6 @@ import {MdEditLocation, MdEmail, MdOutlineLocationOn,
 
 import {FaLocationArrow, FaWhatsapp,FaUpload } from 'react-icons/fa'
 import { BsTelephoneFill } from 'react-icons/bs'
-import Loader from '../../components/Loader'
 import EmptyState from '../../components/EmptyState'
 import { useDispatch, useSelector } from 'react-redux'
 import {formatDistance } from 'date-fns'
@@ -41,7 +40,7 @@ const Profile = () => {
                         <div className=''>
                             {userDetails?.photo ? 
                             (<div>
-                                <img src={`/uploads/users/${userDetails.id}/profile-photo/${userDetails.photo}`} alt="" className='h-[22rem] w-full object-contain'/>
+                                <img src={userDetails.photo} alt="" className='h-[22rem] w-full object-contain'/>
                             </div>) : 
                             (<div className='border border-dashed border-slate-600 p-3 rounded'>
                                 <h1 className='font-semibold'>No profile photo</h1>

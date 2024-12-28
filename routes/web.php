@@ -34,7 +34,7 @@ Route::get('/forgot-password', [PasswordResetController::class, 'showforgetpassw
 Route::post('/forgot-password', [PasswordResetController::class, 'submitforgetpasswordform']);
 //Route::get('/reset-password/{token}',[PasswordResetController::class,'showResetPasswordForm'])->name('resetpassword.get');
 Route::post('/reset-password', [PasswordResetController::class, 'submitResetPasswordForm']);
-Route::post('/change-password', [PasswordResetController::class, 'changePassword']);
+Route::post('/change-password', [AccountController::class, 'changePassword']);
 
 Route::post('/resend-verification-email', [EmailVerificationController::class, 'ResendEmail']);
 Route::post('/verify-email-token', [EmailVerificationController::class, 'verifyEmailToken']);
@@ -68,13 +68,14 @@ Route::get('/app/{path?}', function () {
 
 Route::middleware("auth")->group(function () {
 	//===== PROPERTIES ROUTE =====
-	Route::Post('/property/delete', [ListingController::class, 'deleteProperty']);
-	Route::Post('/property/favorite', [ListingController::class, 'favorite']);
-	Route::get('/property/favorites', [ListingController::class, 'getFavorites']);
+	Route::post('/properties/{id}/favorite', [ListingController::class, 'addFavorite']);
+	Route::delete('/properties/{id}/favorite', [ListingController::class, 'removeFavorite']);
+	Route::get('/properties/favorites', [ListingController::class, 'getFavorites']);
 	Route::get('/property/listings/search', [ListingController::class, 'searchProperty']);
 	Route::post('/properties/{id}/images', [ListingController::class, 'uploadPropertyImage']);
 	Route::delete('/properties/{id}/images', [ListingController::class, 'deletePropertyImage']);
 	Route::put('/properties/{id}', [ListingController::class, 'updateProperty']);
+	Route::delete('/properties/{id}', [ListingController::class, 'deleteProperty']);
 	Route::Post('/properties/{id}/published/{status}', [ListingController::class, 'publishProperty']);
 
 	//===== SPECIFIC AGENT ROUTES =====
@@ -107,8 +108,8 @@ Route::middleware("auth")->group(function () {
 	Route::post('/users/update', [UserActionController::class, 'updateUser']);
 	Route::post('/users/delete', [UserActionController::class, 'deleteUser']);
 	Route::post('/users/block', [UserActionController::class, 'blockUser']);
-	Route::post('/users/upload-photo', [UserActionController::class, 'uploadPhoto']);
-	Route::post('/users/id-verification', [UserActionController::class, 'verifyIdentification']);
+	Route::post('/users/image', [UserActionController::class, 'uploadPhoto']);
+	Route::post('/users/id-verification', [UserActionController::class, 'idVerifyRequest']);
 
 	Route::post('/question/send-messge', [MessageController::class, 'store']);
 	Route::post('/agents/message/send', [MessageController::class, 'saveMessage']);

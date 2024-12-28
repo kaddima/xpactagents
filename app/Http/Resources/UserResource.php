@@ -21,6 +21,8 @@ class UserResource extends JsonResource
 			"last_name" => $this->last_name,
 			"email" => $this->email,
 			"phone" => $this->phone,
+			"gender" => $this->gender,
+			"dob" => $this->dob,
 			"whatsapp" => $this->whatsapp,
 			"state" => $this->state,
 			"lga" => $this->lga,
@@ -28,8 +30,9 @@ class UserResource extends JsonResource
 			"photo" => Storage::url($this->photo),
 			"id_verified" => $this->id_verified,
 			"last_seen" => $this->last_seen,
-			"is_agent" => $this->is_agent
-
+			"is_agent" => $this->is_agent,
+			"profile_complete" => $this->profile_complete,
+			"created_at" => $this->created_at
 		];
 	}
 }

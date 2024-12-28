@@ -20,9 +20,7 @@ const ImageUpload = ({ uploadType = "property", property_id = null, getPhoto = f
 		let reader = new FileReader();
 
 		reader.readAsDataURL(image)
-
-		reader.onload = (e) => {
-
+		reader.addEventListener('load', (e) => {
 			let img = document.createElement('img')
 
 			img.src = e.target.result
@@ -68,8 +66,6 @@ const ImageUpload = ({ uploadType = "property", property_id = null, getPhoto = f
 				// let dataUrl = canvas.toDataURL(imageFile)
 
 				// document.getElementById('preview').src = dataUrl
-
-
 				canvas.toBlob((blob) => {
 
 					let formdata = new FormData()
@@ -82,7 +78,7 @@ const ImageUpload = ({ uploadType = "property", property_id = null, getPhoto = f
 						formdata.append('property_id', property_id)
 						formdata.append('get_photo', getPhoto ? 1 : 0)
 					} else {
-						url = "/users/upload-photo"
+						url = "/users/image"
 					}
 
 					Axios({
@@ -112,11 +108,8 @@ const ImageUpload = ({ uploadType = "property", property_id = null, getPhoto = f
 					})
 
 				}, 'image/jpeg', quality)
-
-
 			}
-
-		}
+		})
 
 	}
 

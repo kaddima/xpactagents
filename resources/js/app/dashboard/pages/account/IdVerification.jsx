@@ -89,7 +89,7 @@ const IdVerification = () => {
                 <div>
                     <h1 className='text-lg font-semibold'>Your profile photo</h1>
                     <div>
-                        <img src={`/uploads/users/${userDetails?.id}/profile-photo/${userDetails?.photo}`} alt="" className='h-[10rem] w-[10rem] object-cover rounded-full'/>
+                        <img src={userDetails?.photo} alt="" className='h-[10rem] w-[10rem] object-cover rounded-full'/>
                     </div>
                 </div> 
                 <div>

@@ -190,133 +190,26 @@ class ListingController extends BaseController
 		return $obj;
 	}
 
-	public function deleteProperty(Request $request)
+	public function deleteProperty(Request $request, $id)
 	{
-
-		$property_id = $request->input('property_id');
-		$currentUser = auth()->user();
-
-		$property = DB::table('property')
-			->where(['id' => $property_id])
-			->first();
-
-		//directory to upload image
-		$upload_dir = public_path('uploads/users/' . $currentUser->id . '/');
-
-		//deleting from admin's page
-		if ($request->has('creator_id')) {
-			//directory to upload image
-			$upload_dir = public_path('uploads/users/' . $request->get('creator_id') . '/');
-		}
-
-		if (($property->creator_id == $currentUser->id) || $currentUser->is_admin == 1) {
-			//check if the property has images and has been setup
-			$propertyPhotos = json_decode($property->images);
-
-			if (is_object($propertyPhotos)) {
-
-				//convert to array
-				$propertyPhotos = (array)$propertyPhotos;
-
-				$propertyPhotos = array_values($propertyPhotos);
-			}
-
-			if (count($propertyPhotos) > 0) {
-				for ($i = 0, $len = count($propertyPhotos); $i < $len; $i++) {
-
-					$target = $upload_dir . $propertyPhotos[$i];
-
-					unlink($target);
-				}
-			}
-
-			DB::table('property')
-				->where('id', $property_id)
-				->delete();
-
-			//delete the property from favorites table
-			DB::table('favorites')
-				->where('property_id', $property_id)
-				->delete();
-
-			return json_encode(['status' => 1]);
-		}
-
-		return json_encode(['status' => 0]);
+		return $this->apiController->deleteProperty($request, $id);
 	}
-
 
 	/**
 	 * This method sets and unsets the users favorite listings
 	 */
-	public function favorite(Request $request)
+	public function addFavorite(Request $request, $id)
 	{
+		return $this->apiController->addFavorite($request, $id);
+	}
 
-		$property_id = $request->get('property_id');
-		$currentUser = auth()->user();
-
-
-		//get the favorite from the users table
-
-		$userFavorites = DB::table('favorites')
-			->where('user_id', $currentUser->id)
-			->get();
-
-
-		for ($i = 0, $len = count($userFavorites); $i < $len; $i++) {
-
-			if ($userFavorites[$i]->property_id == $property_id) {
-
-
-				//save the current favorites
-				DB::table('favorites')
-					->where(['user_id' => $currentUser->id, 'property_id' => $property_id])
-					->delete();
-
-				$userFavorites = DB::table('favorites')
-					->where('user_id', $currentUser->id)
-					->get();
-
-				return json_encode(['data' => $userFavorites]);
-			}
-		}
-
-
-		$column_value = ['user_id' => $currentUser->id, 'property_id' => $property_id];
-		//save the current favorites
-		DB::table('favorites')
-			->insert($column_value);
-
-		$userFavorites = DB::table('favorites')
-			->where('user_id', $currentUser->id)
-			->get();
-
-		return json_encode(['data' => $userFavorites, 'status' => 'got on']);
+	public function removeFavorite(Request $request, $id){
+		return $this->apiController->removeFavorite($request, $id);
 	}
 
 	public function getFavorites(Request $request)
 	{
-
-		//get the user
-		$currentUser = auth()->user();
-
-		$favorite_properties = [];
-
-		$favorites =  DB::table('favorites')
-			->where('user_id', $currentUser->id)
-			->get();
-
-
-		for ($i = 0, $len = count($favorites); $i < $len; $i++) {
-
-			$property = DB::table('property')
-				->where('id', $favorites[$i]->property_id)
-				->first();
-
-			array_push($favorite_properties, $property);
-		}
-
-		return json_encode(['data' => $favorite_properties, 'user' => $currentUser]);
+		return $this->apiController->getFavoriteProperties($request);
 	}
 
 	public function searchProperty(Request $request)

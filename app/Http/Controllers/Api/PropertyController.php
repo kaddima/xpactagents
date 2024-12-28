@@ -83,18 +83,24 @@ class PropertyController extends BaseController
 	public function addFavorite(Request $request, $id)
 	{
 		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
-
-		$this->propertyService->addFavoriteProperty($id, $request->user());
-		return $this->sendResponse(null, "Property added to favorite");
+		$result = $this->propertyService->addFavoriteProperty($id, $request->user());
+		return $this->sendResponse($result, "Property added to favorite");
 	}
 
 	public function removeFavorite(Request $request, $id)
 	{
 		$this->validateParams(["id" => $id], ["id" => "required|uuid"]);
-
-		$this->propertyService->removeFavoriteProperty($id, $request->user());
-		return $this->sendResponse(null, "Property deleted from favorite");
+		$result = $this->propertyService->removeFavoriteProperty($id, $request->user());
+		return $this->sendResponse($result, "Property deleted from favorite");
 	}
+
+	public function getFavoriteProperties(Request $request)
+	{
+		$currentUser = $request->user();
+		$properties = $this->propertyService->getFavoriteProperties($currentUser);
+		return $this->sendResponse($properties);
+	}
+
 
 	public function publishedStatus(Request $request, $id, $published)
 	{
@@ -111,7 +117,6 @@ class PropertyController extends BaseController
 
 	public function agentProperties(Request $request, $agent_id)
 	{
-		
 		$data = $this->validateParams(
 			['agent_id' => $agent_id],
 			['agent_id' => 'required|uuid|exists:users,id']
@@ -131,13 +136,6 @@ class PropertyController extends BaseController
 
 		$property = $this->propertyService->propertyDetails($id, false, $agent_id);
 		return $this->sendResponse($property);
-	}
-
-	public function getFavoriteProperties(Request $request)
-	{
-		$currentUser = $request->user();
-		$properties = $this->propertyService->getFavoriteProperties($currentUser);
-		return $this->sendResponse($properties);
 	}
 
 	public function getPropertyImages(Request $request, $id)
@@ -163,11 +161,13 @@ class PropertyController extends BaseController
 		return $this->sendResponse($properties);
 	}
 
-	public function searchProperties(Request $request){
+	public function searchProperties(Request $request)
+	{
 		return $this->getProperties($request);
 	}
 
-	public function searchAgentProperties(Request $request, $agent_id){
+	public function searchAgentProperties(Request $request, $agent_id)
+	{
 		return $this->agentProperties($request, $agent_id);
 	}
 }

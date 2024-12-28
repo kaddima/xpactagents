@@ -2,298 +2,247 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Api\UserController;
 use App\Models\User;
+use App\Services\GeneralDataService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-require __DIR__ . '/../../../Business/mailer.php';
-use Business\Mailer;
-use Illuminate\Support\Facades\File;
-
-class AccountController extends Controller
+class AccountController extends BaseController
 {
-    public function getUserAccount(Request $request){
+	protected $generalDataService;
+	protected $apiController;
+
+	public function __construct(
+		GeneralDataService $service,
+		UserController $apiController
+	) {
+		$this->generalDataService = $service;
+		$this->apiController = $apiController;
+	}
 
-        $user_id = auth()->user()->id;
+	public function getUserAccount(Request $request)
+	{
+		$user_id = auth()->user()->id;
+		if ($request->has('user_id')) {
+			$user_id = $request->get('user_id');
+		}
+		return $this->apiController->getuserDetails($request, $user_id);
+	}
+
+	public function generalAgentData(Request $request)
+	{
+		$data = $this->generalDataService->agentOverviewData($request->user());
+		return $this->sendResponse($data);
+	}
 
-        if($request->has('user_id')){
-            $user_id = $request->get('user_id');
-        }
+	public function createAccount(Request $request)
+	{
 
-        $user = User::find($user_id);
+		$data = [];
+		$errors = [];
+		$status = 1;
 
-        return json_encode(['data'=>$user]);
-    }
+		$data = $request->all();
 
-    public function generalAgentData(Request $request){
+		$email = strtolower($data['email']);
+		$email = preg_replace('/(^wwww\.|^www\.|^ww\.)/', '', $email);
 
-        if(auth()->check()){
 
-            $agent_id = auth()->user()['id'];
+		if ($data['accountType'] == 'admin') {
 
-            if($request->has('agent_id')){
+			//check if email is already registered
+			$result = DB::table('users')
+				->where(['email' => $email])
+				->first();
 
-                $agent_id = $request->get('agent_id');
-            }
 
-            //favorite properties
-            $favorite_properties = DB::table('favorites')->where('user_id',auth()->user()->id)->get();
-            
-            $profile = User::find($agent_id);
+			if (isset($result)) {
+				$status = 0;
+				$errors[] = 'Email address is already registered';
+			}
 
-            $obj = new \stdClass();
+			$password = $data['password'];
+			$c_password = $data['confirm_password'];
 
-            //get count for rent,land,house for sell,short-let
-            $forSellCount  = DB::table('property')
-                ->where(['category'=>'sell','creator_id'=>$agent_id])
-                ->count();
+			if ($password !== $c_password) {
+				$status = 0;
+				$errors[] = 'Password does not match';
+			}
 
-            $rentCount  = DB::table('property')
-                ->where(['category'=>'rent','creator_id'=>$agent_id])
-                ->count();
+			if ($status) {
 
-            $landCount  = DB::table('property')
-                ->where(['category'=>'land','creator_id'=>$agent_id])
-                ->count();
+				//hash password
+				$password = password_hash($data['password'], PASSWORD_DEFAULT);
 
-            $short_letCount  = DB::table('property')
-                ->where(['category'=>'short_let','creator_id'=>$agent_id])
-                ->count();
+				$columName_values = [
+					'first_name' => $data['first_name'],
+					'last_name' => $data['last_name'],
+					'email' => $email,
+					'password' => $password,
 
-            $propertyCount  = DB::table('property')
-                ->where(['creator_id'=>$agent_id])
-                ->count();
-            $unpublishedPropertyCount  = DB::table('property')
-                ->where(['creator_id'=>$agent_id,
-                'published'=>0])
-                ->count();
+				];
 
-            $unpublishedProperty = DB::table('property')
-                ->where(['creator_id'=>$agent_id,
-                        'published'=>0])
-                ->limit(3)
-                ->get();
+				//insert the user data into user database
+				$last_id = DB::table('users')
+					->insertGetId($columName_values);
 
-            $obj->forSellCount = $forSellCount;
-            $obj->rentCount = $rentCount;
-            $obj->landCount = $landCount;
-            $obj->shortLetCount = $short_letCount;
-            $obj->propertyCount = $propertyCount;
-            $obj->unpublishedProperty = $unpublishedProperty;
-            $obj->unpublishedPropertyCount = $unpublishedPropertyCount;
+				//get all users
+				$users = DB::table('users')
+					->get();
 
-            return json_encode([
-                'status'=>1,
-                'data'=>[
-                    'profile'=>$profile,
-                    'propertyDetails'=>$obj,
-                    'favorites'=>$favorite_properties
+				return json_encode([
+					'status' => $status,
+					'data' => $users
 
-                ]
-            ]);
-        }
-    }
+				]);
+			}
 
-    public function createAccount(Request $request){
+			return json_encode([
+				'status' => $status,
+				'errors' => $errors
+			]);
+		} else {
 
-        $data = [];
-        $errors = [];
-        $status = 1;
+			$columName_values = [
+				'first_name' => $data['first_name'],
+				'last_name' => $data['last_name'],
+				'email' => $email,
+				'phone' => $data['phone'],
+				'whatsapp_number' => $data['whatsapp']
 
-        $data = $request->all();
+			];
 
-        $email = strtolower($data['email']);
-        $email = preg_replace('/(^wwww\.|^www\.|^ww\.)/', '',$email);
+			DB::table('agents')
+				->insert($columName_values);
 
+			$agents = DB::table('agents')
+				->get();
 
-        if($data['accountType'] == 'admin'){
+			return json_encode([
+				'status' => $status,
+				'data' => $agents
+			]);
+		}
+	}
 
-            //check if email is already registered
-            $result = DB::table('users')
-            ->where(['email'=>$email])
-            ->first();
+	public function changePassword(Request $request){
+		return $this->apiController->changePassword($request);
+	}
 
+	public function updateLastSeen()
+	{
 
-            if (isset($result)){
-                $status = 0;
-                $errors[] = 'Email address is already registered';
-            }
+		$currentUser = auth()->user();
 
-            $password = $data['password'];
-            $c_password = $data['confirm_password'];
+		$date = date('Y-m-d H:i:s');
 
-             if ($password !== $c_password){
-            $status = 0;
-            $errors[] = 'Password does not match';
-            }
+		$currentUser->last_seen = $date;
 
-            if($status){
+		DB::table('users')
+			->where('id', $currentUser->id)
+			->update(['last_seen' => $date]);
 
-                //hash password
-                $password = password_hash($data['password'], PASSWORD_DEFAULT);
+		return json_encode(['data' => $currentUser]);
+	}
 
-                $columName_values = [
-                    'first_name'=>$data['first_name'],
-                    'last_name'=>$data['last_name'],
-                    'email'=>$email,
-                    'password'=>$password,
+	public function adminUsersOverview()
+	{
 
-                ];
+		if (Auth::check() && Auth::user()->is_admin == 1) {
 
-                //insert the user data into user database
-                $last_id = DB::table('users')
-                        ->insertGetId($columName_values);
+			//get the current User
+			$currentUser = Auth::user();
 
-                //get all users
-                $users = DB::table('users')
-                    ->get();
+			if ($currentUser->is_admin == 1) {
 
-                return json_encode([
-                    'status'=>$status,
-                    'data'=>$users
+				$obj = new \stdClass();
 
-                ]);
-            }
+				//get count for rent,land,house for sell,short-let
+				$usersCount  = DB::table('users')
+					->count();
 
-            return json_encode([
-            'status'=>$status,
-            'errors'=>$errors
-              ]);
+				$agentsCount  = DB::table('users')
+					->where(['is_agent' => '1',])
+					->count();
 
-        }else{
+				$adminsCount = DB::table('users')
+					->where(['is_admin' => '1',])
+					->count();
 
-            $columName_values = [
-                'first_name'=>$data['first_name'],
-                'last_name'=>$data['last_name'],
-                'email'=>$email,
-                'phone'=>$data['phone'],
-                'whatsapp_number'=>$data['whatsapp']
+				$regularUsersCount = DB::table('users')
+					->where(['is_agent' => '0',])
+					->count();
 
-            ];
+				$recentUsers = DB::table('users')
+					->orderBy('created_at', 'desc')
+					->limit(6)
+					->get();
 
-            DB::table('agents')
-                ->insert($columName_values);
+				$obj->usersCount  = $usersCount;
+				$obj->agentsCount = $agentsCount;
+				$obj->adminsCount = $adminsCount;
+				$obj->regularUsersCount = $regularUsersCount;
+				$obj->recentUsers = $recentUsers;
 
-            $agents = DB::table('agents')
-                ->get();
 
-            return json_encode([
-                'status'=>$status,
-                'data'=>$agents
-                ]);
-        }
+				return json_encode(['data' => $obj]);
+			}
+		}
+	}
 
-    }
+	public function adminUsersRegular()
+	{
 
-    public function updateLastSeen(){
+		if (Auth::check() && Auth::user()->is_admin == 1) {
 
-        $currentUser = auth()->user();
+			$users = User::where('is_agent', 0)
+				->paginate(20);
 
-        $date = date('Y-m-d H:i:s');
+			return json_encode(['data' => $users]);
+		}
+	}
 
-        $currentUser->last_seen = $date;
+	public function verificationRequest()
+	{
 
-        DB::table('users')
-            ->where('id',$currentUser->id)
-            ->update(['last_seen'=>$date]);
+		if (Auth::check() && Auth::user()->is_admin == 1) {
 
-        return json_encode(['data'=>$currentUser]);
-    }
+			$requests = DB::table('id_verify')->where('status', 0)
+				->paginate(12);
 
-    public function adminUsersOverview(){
+			return json_encode(['data' => $requests]);
+		}
+	}
 
-        if(Auth::check() && Auth::user()->is_admin == 1){
+	public function verificationResponse(Request $req)
+	{
 
-                //get the current User
-            $currentUser = Auth::user();
+		$currentUser = Auth::user();
+		$email = $req->get('email');
+		$type = $req->get('type');
+		$user_id = $req->get('user_id');
+		$img = $req->get('doc_img');
 
-            if($currentUser->is_admin == 1){
+		$message = '';
+		$subject = '';
 
-                $obj = new \stdClass();
+		if (Auth::check() && Auth::user()->is_admin == 1) {
 
-                //get count for rent,land,house for sell,short-let
-                $usersCount  = DB::table('users')
-                    ->count();
-    
-                $agentsCount  = DB::table('users')
-                    ->where(['is_agent'=>'1',])
-                    ->count();
+			if (strtolower($type) == 'verify') {
 
-                $adminsCount = DB::table('users')
-                ->where(['is_admin'=>'1',])
-                ->count();
+				DB::table('users')
+					->where('id', $user_id)
+					->update(['id_verified' => 1]);
 
-                $regularUsersCount = DB::table('users')
-                ->where(['is_agent'=>'0',])
-                ->count();
+				DB::table('id_verify')
+					->where('user_id', $user_id)
+					->update(['status' => 1]);
 
-                $recentUsers = DB::table('users')
-                    ->orderBy('created_at','desc')
-                    ->limit(6)
-                    ->get();
-
-                $obj->usersCount  = $usersCount ;
-                $obj->agentsCount = $agentsCount;
-                $obj->adminsCount = $adminsCount;
-                $obj->regularUsersCount = $regularUsersCount;
-                $obj->recentUsers = $recentUsers;
-    
-
-                return json_encode(['data'=>$obj]);
-            }
-        }
-        
-    }
-
-    public function adminUsersRegular(){
-        
-        if(Auth::check() && Auth::user()->is_admin == 1){
-
-            $users = User::where('is_agent', 0)
-                ->paginate(20);
-
-            return json_encode(['data'=>$users]);
-        }
-    }
-
-    public function verificationRequest(){
-        
-        if(Auth::check() && Auth::user()->is_admin == 1){
-
-            $requests = DB::table('id_verify')->where('status', 0)
-                ->paginate(12);
-
-            return json_encode(['data'=>$requests]);
-        }
-    }
-
-    public function verificationResponse(Request $req){
-
-        $currentUser = Auth::user();
-        $email = $req->get('email');
-        $type = $req->get('type');
-        $user_id = $req->get('user_id');
-        $img = $req->get('doc_img');
-
-        $message = '';
-        $subject = '';
-        
-        if(Auth::check() && Auth::user()->is_admin == 1){
-
-            if(strtolower($type) == 'verify'){
-
-                DB::table('users')
-                    ->where('id',$user_id)
-                    ->update(['id_verified'=>1]);
-
-                DB::table('id_verify')
-                    ->where('user_id',$user_id)
-                    ->update(['status'=>1]);
-
-                $subject = 'Verification Request Approved';
-                $message = <<<EMAIL
+				$subject = 'Verification Request Approved';
+				$message = <<<EMAIL
                 <div style="margin-top:10px">
                 <p>Dear user, your account has been reviewed and found to comply with our community
                 guidelines.Your verification request was approved successfully. A verification badge will now appear next 
@@ -301,126 +250,117 @@ class AccountController extends Controller
                 
             </div>
 EMAIL;
+			} else if (strtolower($type) == 'deny') {
 
+				//directory to upload image
+				$upload_dir = public_path('uploads/users/' . $user_id . '/profile-photo/' . $img);
 
-            }else if(strtolower($type) == 'deny'){
+				if (file_exists($upload_dir)) {
+					//delete the doc img uploaded
+					unlink($upload_dir);
+				}
 
-                //directory to upload image
-                $upload_dir = public_path('uploads/users/'.$user_id.'/profile-photo/'.$img);
-                
-                if(file_exists($upload_dir)){
-                    //delete the doc img uploaded
-                    unlink($upload_dir);
+				DB::table('users')
+					->where('id', $user_id)
+					->update(['id_verified' => 0]);
 
-                }
-                
-                DB::table('users')
-                ->where('id',$user_id)
-                ->update(['id_verified'=>0]);
+				DB::table('id_verify')
+					->where('user_id', $user_id)
+					->delete();
 
-                DB::table('id_verify')
-                    ->where('user_id',$user_id)
-                    ->delete();
-
-                $subject = 'Verification Request Approved';
-                $message = <<<EMAIL
+				$subject = 'Verification Request Approved';
+				$message = <<<EMAIL
                 <div style="margin-top:10px">
                 <p>Dear user, we are sorry to inform you that your account wasn't verified because 
                 it doesn't meet the criteria for verification</p>
             </div>
 EMAIL;
-        
-            }
+			}
 
-            //Mailer::sendMail($email,$message,$subject,true);
+			//Mailer::sendMail($email,$message,$subject,true);
 
-            return json_encode(['status'=>1]);
-        }
-    }
+			return json_encode(['status' => 1]);
+		}
+	}
 
 
-    public function adminUsersAgent(){
-        
-        if(Auth::check() && Auth::user()->is_admin == 1){
+	public function adminUsersAgent()
+	{
 
-            $users = User::where('is_agent', 1)
-                ->paginate(20);
+		if (Auth::check() && Auth::user()->is_admin == 1) {
 
-            return json_encode(['data'=>$users]);
-        }
-    }
+			$users = User::where('is_agent', 1)
+				->paginate(20);
 
-    public function searchUser(Request $request){
+			return json_encode(['data' => $users]);
+		}
+	}
 
-        $search_type = $request->get('search_type');
-        $q = $request->get('q');
+	public function searchUser(Request $request)
+	{
 
-        $q = explode(' ', trim($q));
+		$search_type = $request->get('search_type');
+		$q = $request->get('q');
 
-        if(count($q) > 1){
-            
-            if($search_type == 'agent'){
+		$q = explode(' ', trim($q));
 
-                $users = DB::table('users')
-                ->where(['is_agent'=>1,'first_name'=>$q[0],'last_name'=>$q[1]])
-                ->paginate(20);
+		if (count($q) > 1) {
 
-           }else if($search_type == 'admin'){
-                $users = DB::table('users')
-                ->where(['is_admin'=>1,'first_name'=>$q[0],'last_name'=>$q[1]])
-                ->paginate(20);
-           }else if($search_type == 'all'){
-                $users = DB::table('users')
-                ->where(['first_name'=>$q[0],'last_name'=>$q[1]])
-                ->paginate(20);
-                
-            }else{
-               $users = DB::table('users')
-                    ->where(['is_agent'=>0,'first_name'=>$q[0],'last_name'=>$q[1]])
-                   ->paginate(20);
-           }
-        }else{
+			if ($search_type == 'agent') {
 
-            if($search_type == 'agent'){
+				$users = DB::table('users')
+					->where(['is_agent' => 1, 'first_name' => $q[0], 'last_name' => $q[1]])
+					->paginate(20);
+			} else if ($search_type == 'admin') {
+				$users = DB::table('users')
+					->where(['is_admin' => 1, 'first_name' => $q[0], 'last_name' => $q[1]])
+					->paginate(20);
+			} else if ($search_type == 'all') {
+				$users = DB::table('users')
+					->where(['first_name' => $q[0], 'last_name' => $q[1]])
+					->paginate(20);
+			} else {
+				$users = DB::table('users')
+					->where(['is_agent' => 0, 'first_name' => $q[0], 'last_name' => $q[1]])
+					->paginate(20);
+			}
+		} else {
 
-                $users = DB::table('users')
-                ->where('is_agent', 1)
-                ->where(function (Builder $query) use ($q){
-                    $query->where('first_name', 'LIKE', "%{$q[0]}%")
-                    ->orWhere('last_name','LIKE', "%{$q[0]}%");
-                })->paginate(20);
+			if ($search_type == 'agent') {
 
-           }else if($search_type == 'admin'){
+				$users = DB::table('users')
+					->where('is_agent', 1)
+					->where(function (Builder $query) use ($q) {
+						$query->where('first_name', 'LIKE', "%{$q[0]}%")
+							->orWhere('last_name', 'LIKE', "%{$q[0]}%");
+					})->paginate(20);
+			} else if ($search_type == 'admin') {
 
-                $users = DB::table('users')
-                ->where('is_admin', 1)
-                ->where(function (Builder $query) use ($q){
-                    $query->where('first_name', 'LIKE', "%{$q[0]}%")
-                    ->orWhere('last_name','LIKE', "%{$q[0]}%");
-                })->paginate(20);
+				$users = DB::table('users')
+					->where('is_admin', 1)
+					->where(function (Builder $query) use ($q) {
+						$query->where('first_name', 'LIKE', "%{$q[0]}%")
+							->orWhere('last_name', 'LIKE', "%{$q[0]}%");
+					})->paginate(20);
+			} else if ($search_type == 'all') {
 
-            }else if($search_type == 'all'){
+				$users = DB::table('users')
+					->where(function (Builder $query) use ($q) {
+						$query->where('first_name', 'LIKE', "%{$q[0]}%")
+							->orWhere('last_name', 'LIKE', "%{$q[0]}%");
+					})->paginate(20);
+			} else {
 
-                $users = DB::table('users')
-                ->where(function (Builder $query) use ($q){
-                    $query->where('first_name', 'LIKE', "%{$q[0]}%")
-                    ->orWhere('last_name','LIKE', "%{$q[0]}%");
-                })->paginate(20);
+				$users = DB::table('users')
+					->where('is_agent', 0)
+					->where(function (Builder $query) use ($q) {
+						$query->where('first_name', 'LIKE', "%{$q[0]}%")
+							->orWhere('last_name', 'LIKE', "%{$q[0]}%");
+					})
+					->paginate(20);
+			}
+		}
 
-            }else{
-
-               $users = DB::table('users')
-                   ->where('is_agent', 0)
-                   ->where(function (Builder $query) use ($q){
-                       $query->where('first_name', 'LIKE', "%{$q[0]}%")
-                       ->orWhere('last_name','LIKE', "%{$q[0]}%");
-                   })
-                   ->paginate(20);
-           }
-        }
-    
-        return json_encode(['data'=>$users]);
-    }
-
+		return json_encode(['data' => $users]);
+	}
 }
-

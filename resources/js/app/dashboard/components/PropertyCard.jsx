@@ -16,43 +16,38 @@ const PropertyCard = ({ data: v, listState = false }) => {
 	let favorites = useSelector(state => state.user.favorites)
 
 	const isFavorite = useMemo(() => {
-
 		if (favorites && favorites.length) {
 
 			for (let i = 0; i < favorites.length; i++) {
-				if (favorites[i].property_id == v.id) {
+				if (favorites[i].id == v.id) {
 					return true
 				}
 			}
-
 			return false
 		}
 	}, [favorites])
 
 	const onDelete = (property_id) => {
-
 		if (window.confirm("Delete this listing?")) {
 			showLoading()
 
-			Axios.post('/property/delete', { property_id }).then(data => {
+			Axios.delete(`/properties/${property_id}`).then(data => {
 				toast('Property deleted', { type: 'success' })
 
 				if (listState !== false) {
 
-					if (listState !== false) {
+					listState(prev => {
 
-						listState(prev => {
+						let data = prev.data
 
-							let data = prev.data
-
-							data = data.filter((v, i) => {
-								return v.id !== property_id
-							})
-							return { ...prev, data: data }
-
+						data = data.filter((v, i) => {
+							return v.id !== property_id
 						})
-					}
+						return { ...prev, data: data }
+
+					})
 				}
+
 
 			}).catch(e => {
 				console.log(e)
@@ -62,19 +57,24 @@ const PropertyCard = ({ data: v, listState = false }) => {
 		}
 	}
 
-	const onFavorite = (property_id) => {
-		showLoading()
+	const onFavorite = (property_id, type) => {
+		const method = type === "add" ? 'post' : 'delete'; // Determine whether it's a POST or DELETE request
+		const url = `/properties/${property_id}/favorite`;
 
-		Axios.post('/property/favorite', { property_id }).then(data => {
-			dispatch(updateFavorites(data.data.data))
-		}).catch(e => {
+		showLoading();
 
-			console.log(e.response)
-		}).finally(() => {
+		Axios({ method, url })  // Use dynamic method (POST or DELETE) here
+			.then(data => {
+				dispatch(updateFavorites(data.data.data));
+			})
+			.catch(e => {
+				toast.error(e.response.data.message)
+			})
+			.finally(() => {
+				hideLoading();
+			});
+	};
 
-			hideLoading()
-		})
-	}
 
 	return (
 
@@ -85,7 +85,12 @@ const PropertyCard = ({ data: v, listState = false }) => {
 				this property is not pulished
 			</div>}
 
-			<div className='absolute top-5 right-2 bg-black/50 rounded-lg p-1' onClick={() => onFavorite(v.id)}>
+			<div className='absolute top-5 right-2 bg-black/50 rounded-lg p-1'
+				data-type={isFavorite ? "remove" : "add"}
+				onClick={(e) => {
+					let type = e.currentTarget.getAttribute("data-type")
+					onFavorite(v.id, type)
+				}}>
 				<FaHeart size={24} className={`${isFavorite ? 'text-pink-400' : 'text-white'} transition`} />
 			</div>
 

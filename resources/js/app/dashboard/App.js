@@ -89,7 +89,7 @@ function App() {
                                 <Route path="/dashboard/tours" element={<Tours/>}/>
                                 <Route path="/dashboard/listings" element={<ListingsPage/>}/>
                                 <Route path="/dashboard/listings/search" element={<SearchPage/>}/>
-                                <Route path="/dashboard/favorites" element={<Favorites/>}/>
+                                <Route path="/dashboard/listings/favorites" element={<Favorites/>}/>
                                 <Route path='/dashboard/property/category/:name' element={<PropertiesByCategory/>}/>  
                                 <Route path='/dashboard/account' element={<Account/>}>
                                     <Route index element={<Profile/>}/>

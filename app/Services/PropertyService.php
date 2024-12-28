@@ -166,6 +166,10 @@ class PropertyService
 
     // Attach the property to the user's favorites list
     $currentUser->favorites()->attach($property_id);
+
+    // Reload the favorites to ensure up-to-date data
+    $currentUser->load('favorites'); // Reload the favorites relationship
+    return $currentUser->favorites; // Return the fresh favorites collection
   }
 
   public function removeFavoriteProperty($property_id, $currentUser)
@@ -185,6 +189,10 @@ class PropertyService
 
     // detach the property from the user's favorites list
     $currentUser->favorites()->detach($property_id);
+
+    // Reload the favorites to ensure up-to-date data
+    $currentUser->load('favorites'); // Reload the favorites relationship
+    return $currentUser->favorites; // Return the fresh favorites collection
   }
 
   public function getFavoriteProperties($currentUser)
