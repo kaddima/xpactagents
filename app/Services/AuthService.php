@@ -130,7 +130,7 @@ class AuthService
     throw new AuthenticationException("Invalid username or password");
   }
 
-  public function sendPasswordResetToken($data)
+  public function sendPasswordResetToken($data, $platform = "api")
   {
     //get the user
     $email = $this->normalizeEmail($data["email"]);
@@ -138,33 +138,42 @@ class AuthService
     if (!$user) {
       throw new NotFoundException("Invalid email address");
     }
-
     //generate token
     $token = $this->generateOTP();
+    $hashToken = Hash::make($token);
 
-    try{
+    try {
       $email_data = new stdClass;
       $email_data->email = $user->email;
-      $email_data->token = $token;
-  
+      $email_data->token = $platform == "api" ? $token : $hashToken;
+
       //send password reset token mail
-      $this->sendPasswordResetTokenMail($email_data);
+      $this->sendPasswordResetTokenMail($email_data, $platform);
 
       $this->passwordResetRepo->create(
         [
-          "token" => Hash::make($token),
+          "token" => $hashToken,
           "email" => $user->email,
           "token_expires_at" => Carbon::now()->addMinutes(env('TOKEN_EXP'))
         ]
       );
-    }catch(Exception $e){
+    } catch (Exception $e) {
       throw $e;
     }
 
     return $email;
   }
 
-  public function resetPassword($data)
+  public function resetPassword($data, $platform = "api")
+  {
+    if ($platform === "api") {
+      $this->apiPasswordReset($data);
+    } else {
+      $this->webPasswordReset($data);
+    }
+  }
+
+  public function apiPasswordReset($data)
   {
     $email = $this->normalizeEmail($data["email"]);
     $user = $this->userRepository->findByEmail($email);
@@ -173,13 +182,37 @@ class AuthService
     }
 
     $passwordReset = $this->passwordResetRepo->findByEmail($user->email);
-    
+
     if (
       !$passwordReset ||
       !Hash::check($data['token'], $passwordReset->token) ||
       Carbon::now()->greaterThan($passwordReset->token_expires_at)
     ) {
       throw ValidationException::withMessages(["Password_reset" => "Invalid or expired token."]);
+    }
+
+    $passwordReset->delete();
+
+    $user->password = $data['password'];
+    $user->save();
+  }
+
+  public function webPasswordReset($data)
+  {
+    $passwordReset = $this->passwordResetRepo->getQuery()->where("token", $data["token"])->first();
+
+    if (
+      !$passwordReset ||
+      $data['token'] !== $passwordReset->token ||
+      Carbon::now()->greaterThan($passwordReset->token_expires_at)
+    ) {
+      throw ValidationException::withMessages(["Password_reset" => "Invalid or expired token."]);
+    }
+
+    $email = $this->normalizeEmail($passwordReset->email);
+    $user = $this->userRepository->findByEmail($email);
+    if (!$user) {
+      throw new NotFoundException("Invalid email address");
     }
 
     $passwordReset->delete();

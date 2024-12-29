@@ -25,7 +25,7 @@ const ForgotForm = ({stateFn})=>{
 
         try{
             
-            Axios.post('/forgot-password', formdata)
+            Axios.post('password/send-reset-token', formdata)
 
             stateFn(prev=>{
 

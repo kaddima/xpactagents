@@ -12,6 +12,7 @@ use App\Http\Controllers\TourController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\AdmsController;
+use App\Http\Controllers\Web\AuthenticationController;
 use Illuminate\Support\Facades\DB;
 
 /*
@@ -30,10 +31,16 @@ Route::view('/', 'app.main');
 Route::view('/terms-and-condition', 'terms');
 Route::view('/contact-us', 'contact-us');
 
-Route::get('/forgot-password', [PasswordResetController::class, 'showforgetpasswordform']);
-Route::post('/forgot-password', [PasswordResetController::class, 'submitforgetpasswordform']);
-//Route::get('/reset-password/{token}',[PasswordResetController::class,'showResetPasswordForm'])->name('resetpassword.get');
-Route::post('/reset-password', [PasswordResetController::class, 'submitResetPasswordForm']);
+// Authentication route
+Route::controller(AuthenticationController::class)->group(function () {
+	Route::post('/login', "login");
+	Route::post('/register', "register");
+	Route::post('/register/resend-otp', "resendOTPEmail");
+	Route::post('/register/verify-email', "verifyEmail");
+	Route::post('/password/send-reset-token', 'sendPasswordResetToken');
+	Route::post('/password/reset', 'resetPassword');
+});
+
 Route::post('/change-password', [AccountController::class, 'changePassword']);
 
 Route::post('/resend-verification-email', [EmailVerificationController::class, 'ResendEmail']);
@@ -90,7 +97,7 @@ Route::middleware("auth")->group(function () {
 	Route::post('/dashboard/listings', [ListingController::class, 'listings']);
 
 	Route::post('/dashboard/add-property', [ListingController::class, 'createProperty']);
-	
+
 	Route::post('/dashboard/create-property', [ListingController::class, 'createProperty']);
 	Route::post('/dashboard/property-listings', [ListingController::class, 'propertyListings']);
 	Route::get('/dashboard/property/category', [ListingController::class, 'PropertyByCategory']);
@@ -162,9 +169,7 @@ Route::middleware("auth")->group(function () {
 
 		return redirect('/');
 	})->where('path', '.*');
-
 });
 
 Route::get('/properties', [ListingController::class, 'getProperties']);
 Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);;
-

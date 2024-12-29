@@ -11,14 +11,16 @@ class PasswordResetMail extends Mailable
 	use Queueable, SerializesModels;
 
 	protected $data;
+	protected $platform;
 	/**
 	 * Create a new message instance.
 	 *
 	 * @return void
 	 */
-	public function __construct($data)
+	public function __construct($data, $platform="api")
 	{
 		$this->data = $data;
+		$this->platform = $platform;
 	}
 
 	/**
@@ -30,6 +32,6 @@ class PasswordResetMail extends Mailable
 	{
 		return $this->subject("Password Reset")
 			->view('emails.auth.passwordResetMail')
-			->with(["token" => $this->data->token]);
+			->with(["token" => $this->data->token, "platform"=>$this->platform]);
 	}
 }

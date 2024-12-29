@@ -46,14 +46,18 @@ class ValidationRules
     ];
   }
 
-  public static function resetPasswordRules()
+  public static function resetPasswordRules($platform = "api")
   {
-    return [
-      "email" => "required|email",
-      "token" => "required|digits:6",
+    $rules =  [
+      "token" => "required",
       "password" => "required|min:6",
       "confirm_password" => "required|same:password"
     ];
+
+    if($platform == "api"){
+      $rules["email"] = "required|email";
+    }
+    return $rules;
   }
 
   public static function storeProductRules($isUpdate = false)

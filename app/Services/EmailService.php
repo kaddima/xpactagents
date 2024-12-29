@@ -13,8 +13,8 @@ trait EmailService
     Mail::to($email_data->email)->send(new OTPEmailVerification($email_data));
   }
 
-  public function sendPasswordResetTokenMail($email_data){
-    Mail::to($email_data->email)->send(new PasswordResetMail($email_data));
+  public function sendPasswordResetTokenMail($email_data, $platform = 'api'){
+    Mail::to($email_data->email)->send(new PasswordResetMail($email_data, $platform));
   }
 
   public function sendTourCreationEmail($email_data){

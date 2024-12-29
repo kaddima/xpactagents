@@ -3,11 +3,13 @@ import { useForm } from "react-hook-form";
 import Input from "../components/input/Input";
 import Button from "../components/Button";
 import { BsPatchCheckFill } from "react-icons/bs";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { hideLoading, showLoading } from "../../utility/loading";
 import { toast } from "react-toastify";
 import $ from "jquery";
+import Axios from "../../utility/axios";
+import errorHandler from "../../utility/errorHandler";
 
 const ResetPassword = () => {
 	const {
@@ -17,27 +19,20 @@ const ResetPassword = () => {
 		watch,
 		formState: { errors },
 	} = useForm();
-	const token = useParams().token;
-
+	const [params] = useSearchParams();
+	const token = params.get("token")
 	const onSubmit = async (formData) => {
 		showLoading();
 		let submitData = { ...formData, token };
-
-		try {
-			const { data } = await axios.post("/reset-password", submitData);
-
-			if (data.status == 0) {
-				toast(data.error, { type: "error" });
-				return;
-			}
-
+		
+		Axios.post("/password/reset", submitData).then(response => {
 			$("#reset-success").slideDown();
 			reset();
-		} catch (error) {
-			console.log(error);
-		} finally {
+		}).catch(e => {
+			errorHandler(e.response.data)
+		}).finally(() => {
 			hideLoading();
-		}
+		})
 	};
 
 	return (
@@ -81,7 +76,7 @@ const ResetPassword = () => {
 							<Input
 								type={"password"}
 								register={register}
-								id={"c_password"}
+								id={"confirm_password"}
 								errors={errors}
 								valObj={{
 									required: "Please enter confirm password",

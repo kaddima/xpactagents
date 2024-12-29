@@ -99,7 +99,7 @@ function App() {
                                 <Route path='/app/tour/:id/checkout' element={<ScheduleTour/>}/>
                                 <Route path='/app/listings/search' element={<SearchPage/>}/>
                                 <Route path='/app/register/verify-email' element={<VerifyEmail/>}/>
-                                <Route path='/app/reset-password/:token' element={<ResetPassword/>}/>
+                                <Route path='/app/reset-password/' element={<ResetPassword/>}/>
                                 <Route path='*' element={<Index/>}/>
                             </Routes>
                         </div>
