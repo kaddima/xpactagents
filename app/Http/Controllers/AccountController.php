@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\UserController;
 use App\Models\User;
+use App\Services\AuthService;
 use App\Services\GeneralDataService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Query\Builder;
@@ -14,13 +15,16 @@ class AccountController extends BaseController
 {
 	protected $generalDataService;
 	protected $apiController;
+	protected $authService;
 
 	public function __construct(
 		GeneralDataService $service,
-		UserController $apiController
+		UserController $apiController,
+		AuthService $authService
 	) {
 		$this->generalDataService = $service;
 		$this->apiController = $apiController;
+		$this->authService = $authService;
 	}
 
 	public function getUserAccount(Request $request)
@@ -146,6 +150,11 @@ class AccountController extends BaseController
 			->update(['last_seen' => $date]);
 
 		return json_encode(['data' => $currentUser]);
+	}
+
+	public function verifyAuthentication(Request $request){
+		$data = $this->authService->verifyAuthentication();
+		return $this->sendResponse($data);
 	}
 
 	public function adminUsersOverview()

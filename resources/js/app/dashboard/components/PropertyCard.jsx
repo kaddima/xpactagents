@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { useMemo } from 'react'
 import { updateFavorites } from '../store/userSlice'
+import errorHandler from '../../utility/errorHandler'
 
 const PropertyCard = ({ data: v, listState = false }) => {
 	const navigate = useNavigate()
@@ -68,7 +69,7 @@ const PropertyCard = ({ data: v, listState = false }) => {
 				dispatch(updateFavorites(data.data.data));
 			})
 			.catch(e => {
-				toast.error(e.response.data.message)
+				errorHandler(e)
 			})
 			.finally(() => {
 				hideLoading();

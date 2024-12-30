@@ -1,10 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ListingController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\UserActionController;
@@ -13,7 +11,6 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\AdmsController;
 use App\Http\Controllers\Web\AuthenticationController;
-use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +38,6 @@ Route::controller(AuthenticationController::class)->group(function () {
 	Route::post('/password/reset', 'resetPassword');
 });
 
-Route::post('/change-password', [AccountController::class, 'changePassword']);
 
 Route::post('/resend-verification-email', [EmailVerificationController::class, 'ResendEmail']);
 Route::post('/verify-email-token', [EmailVerificationController::class, 'verifyEmailToken']);
@@ -51,29 +47,13 @@ Route::post('/signin', [LoginController::class, 'store']);
 Route::post('/create-account', [RegisterController::class, 'store']);
 Route::get('/logout', [LoginController::class, 'logout']);
 
-Route::get('/logged-user', function () {
 
-	if (Auth::check()) {
-
-		if (Auth::viaRemember() && Auth::user()->is_agent == 1) {
-
-			return json_encode(['redirect' => true]);
-		}
-
-		$favorites = DB::table('favorites')->where('user_id', Auth::user()->id)->get();
-		return json_encode(['userInfo' => Auth::user(), 'favorites' => $favorites]);
-	}
-
-	return json_encode(['userInfo' => [], 'favorites' => []]);
-});
-
-Route::get('/app/{path?}', function () {
-
-	return view('app.main');
-})->where('path', '.*');
-
-
+Route::get('/users/verify/authentication', [AccountController::class, "verifyAuthentication"]);
+	
 Route::middleware("auth")->group(function () {
+	//===== AccountCOntroller =====
+	Route::post('/change-password', [AccountController::class, 'changePassword']);
+
 	//===== PROPERTIES ROUTE =====
 	Route::post('/properties/{id}/favorite', [ListingController::class, 'addFavorite']);
 	Route::delete('/properties/{id}/favorite', [ListingController::class, 'removeFavorite']);
@@ -149,7 +129,6 @@ Route::middleware("auth")->group(function () {
 	Route::post('/adms/create-admin', [AdmsController::class, 'admsCreateAdmin']);
 	Route::post('/adms/make-admin', [AdmsController::class, 'admsMakeAdmin']);
 
-
 	Route::get('/dashboard/{path?}', function () {
 
 		if ((auth()->check()  && auth()->user()['is_agent'] == 1) || (auth()->check() && auth()->user()['is_admin'] == 1)) {
@@ -169,7 +148,12 @@ Route::middleware("auth")->group(function () {
 
 		return redirect('/');
 	})->where('path', '.*');
+	
 });
+
+Route::get('/app/{path?}', function () {
+	return view('app.main');
+})->where('path', '.*');
 
 Route::get('/properties', [ListingController::class, 'getProperties']);
 Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);;

@@ -3,11 +3,14 @@
 namespace App\Services;
 
 use App\Exceptions\NotFoundException;
+use App\Http\Resources\PropertyCollection;
+use App\Http\Resources\PropertyResource;
 use App\Repository\PasswordResetRepository;
 use App\Repository\UserRepository;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use stdClass;
@@ -219,5 +222,34 @@ class AuthService
 
     $user->password = $data['password'];
     $user->save();
+  }
+
+  /**
+   * Helps to verify if the user is signed in
+   */
+  public function verifyAuthentication()
+  {
+    $currentUser = Auth::user();
+    if (Auth::check() && Auth::viaRemember()) {
+      if ($currentUser->is_agent == 1) {
+        return ['redirect' => true];
+      } else {
+        return [
+          "userInfo" => $currentUser ?? [],
+          "favorites" => $currentUser ? PropertyResource::collection($currentUser->favorites) : []
+        ];
+      }
+    }
+
+    if (Auth::check()) {
+      if ($currentUser->is_agent == 1) {
+        return ['redirect' => true];
+      } else {
+        return [
+          "userInfo" => $currentUser ?? [],
+          "favorites" => $currentUser ? PropertyResource::collection($currentUser->favorites) : []
+        ];
+      }
+    }
   }
 }

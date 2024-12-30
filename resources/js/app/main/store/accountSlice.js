@@ -4,7 +4,6 @@ import Axios from "../../utility/axios";
 
 
 export const getAccount = createAsyncThunk('account/getAccount', async ()=>{
-
     const response = await Axios.get('/user-account')
     return response.data
 })
