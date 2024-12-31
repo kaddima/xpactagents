@@ -11,7 +11,7 @@ export const getAccount = createAsyncThunk('account/getAccount', async ()=>{
 
 const initialState = {
 
-    user : {},
+    user : {userInfo:[],favorites:[]},
     account:{},
     card:{},
     statements : [],

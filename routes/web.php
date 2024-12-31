@@ -1,14 +1,11 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\ListingController;
-use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Web\AccountController;
+use App\Http\Controllers\Web\ListingController;
 use App\Http\Controllers\UserActionController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\MessageController;
-use App\Http\Controllers\EmailVerificationController;
 use App\Http\Controllers\AdmsController;
 use App\Http\Controllers\Web\AuthenticationController;
 
@@ -22,34 +19,24 @@ use App\Http\Controllers\Web\AuthenticationController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-
 Route::view('/', 'app.main');
 Route::view('/terms-and-condition', 'terms');
 Route::view('/contact-us', 'contact-us');
 
 // Authentication route
 Route::controller(AuthenticationController::class)->group(function () {
-	Route::post('/login', "login");
+	Route::post("login", "login")->middleware("throttle:login");
 	Route::post('/register', "register");
 	Route::post('/register/resend-otp', "resendOTPEmail");
 	Route::post('/register/verify-email', "verifyEmail");
 	Route::post('/password/send-reset-token', 'sendPasswordResetToken');
 	Route::post('/password/reset', 'resetPassword');
+	Route::post("/logout", "logout");
 });
 
-
-Route::post('/resend-verification-email', [EmailVerificationController::class, 'ResendEmail']);
-Route::post('/verify-email-token', [EmailVerificationController::class, 'verifyEmailToken']);
-
-
-Route::post('/signin', [LoginController::class, 'store']);
-Route::post('/create-account', [RegisterController::class, 'store']);
-Route::get('/logout', [LoginController::class, 'logout']);
-
-
+// check if the user is still logged
 Route::get('/users/verify/authentication', [AccountController::class, "verifyAuthentication"]);
-	
+
 Route::middleware("auth")->group(function () {
 	//===== AccountCOntroller =====
 	Route::post('/change-password', [AccountController::class, 'changePassword']);
@@ -148,7 +135,6 @@ Route::middleware("auth")->group(function () {
 
 		return redirect('/');
 	})->where('path', '.*');
-	
 });
 
 Route::get('/app/{path?}', function () {

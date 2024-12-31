@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 
-const errorHandler = (response)=>{
+const errorHandler = (errResponse)=>{
+  let response = errResponse.response.data
   if (response && response.status === false && response.messages) {
     // Check if 'messages' is an object (validation error field)
     if (typeof response.messages === 'object') {

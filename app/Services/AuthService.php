@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\PropertyCollection;
 use App\Http\Resources\PropertyResource;
+use App\Http\Resources\UserResource;
 use App\Repository\PasswordResetRepository;
 use App\Repository\UserRepository;
 use Carbon\Carbon;
@@ -97,7 +98,7 @@ class AuthService
   /**
    * Verifies the email using the provide token
    */
-  public function verifyEmailOTP(array $data)
+  public function verifyEmailOTP(array $data, $platform = "api")
   {
     $user = $this->userRepository->findByEmail($this->normalizeEmail($data['email']));
 
@@ -115,23 +116,62 @@ class AuthService
     $user->activation_code = null; // Clear the expiration
     $user->save();
 
-    return $user->createToken("api_access_token")->plainTextToken;
+    if ($platform == "api") {
+      return $user->createToken("api_access_token")->plainTextToken;
+    }
+
+    Auth::login($user, true);
+    return [
+      'user' => new UserResource($user),
+      'is_agent' => $user->is_agent
+    ];
   }
 
   /**
    * Handles login functionalities for the api
    */
-  public function login($data)
+  public function login($data, $platform = "api", $request = null)
   {
-    $user = $this->userRepository->findByEmail(
-      $this->normalizeEmail($data["email"])
-    );
+    $email = $this->normalizeEmail($data["email"]);
+    $user = $this->userRepository->findByEmail($email);
 
-    if ($user && Hash::check($data['password'], $user->password)) {
+    if (!$user || !Hash::check($data['password'], $user->password)) {
+      throw new AuthenticationException("Invalid username or password");
+    }
+
+    if ($user->block == 1) {
+      throw new AuthenticationException("This account has been suspended.");
+    }
+
+    // Handle platform-specific login
+    if ($platform == "api") {
       return $user->createToken('api_access_token')->plainTextToken;
     }
-    throw new AuthenticationException("Invalid username or password");
+
+    // Handle web login
+    if ($platform == "web" && Auth::attempt($data, true)) {
+      // Ensure session is regenerated to prevent session fixation
+      if ($request) {
+        $request->session()->regenerate();
+      }
+      return [
+        'userInfo' => Auth::user(),
+        'favorites' => PropertyResource::collection($user->favorites)
+      ];
+    }
+
+    // Throw an exception for unexpected platform values
+    throw new AuthenticationException("Invalid login platform.");
   }
+
+  public function webLogout($request)
+  {
+    Auth::logout();
+    $request->session()->invalidate();
+    // regenerate CSRF token
+    $request->session()->regenerateToken();
+  }
+
 
   public function sendPasswordResetToken($data, $platform = "api")
   {
@@ -251,5 +291,10 @@ class AuthService
         ];
       }
     }
+
+    return [
+      "userInfo" => [],
+      "favorites" => []
+    ];
   }
 }

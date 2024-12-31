@@ -70,7 +70,7 @@ class Handler extends ExceptionHandler
           'data' => null,
           'status' => false,
           'error' => 'Authentication Error',
-          'message' => $exception->getMessage(),
+          'messages' => $exception->getMessage(),
         ], 401);
       }
 
@@ -79,7 +79,7 @@ class Handler extends ExceptionHandler
           'data' => null,
           'status' => false,
           'error' => 'Authorization Error',
-          'message' => $exception->getMessage(),
+          'messages' => $exception->getMessage(),
         ], 403);
       }
       if ($exception instanceof AlreadyExistsException) {
@@ -87,7 +87,7 @@ class Handler extends ExceptionHandler
           'data' => null,
           'status' => false,
           'error' => 'Resource exists',
-          'message' => $exception->getMessage(),
+          'messages' => $exception->getMessage(),
         ], 403);
       }
       if ($exception instanceof ValidationException) {
@@ -111,7 +111,7 @@ class Handler extends ExceptionHandler
         'data' => null,
         'status' => false,
         'error' => 'Server Error',
-        'message' => 'An unexpected error occurred: '.$exception->getMessage() .'Line: '.$exception->getLine(),
+        'messages' => 'An unexpected error occurred: '.$exception->getMessage()
       ], 500);
     }
 

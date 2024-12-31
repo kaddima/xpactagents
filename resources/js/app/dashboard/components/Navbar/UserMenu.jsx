@@ -42,13 +42,13 @@ const UserMenu = () => {
     <div className='relative' id='userMenu'>
         <div className='flex items-center gap-2'>
             <Link to={`/dashboard/q-r`} className='relative'>
-                <BsChatText  className={`${msgNotifier.length > 0 && 'animation-bell'}`} size={24}/>
-                <div className={`${msgNotifier.length > 0 && 'notification'}`}></div>
+                <BsChatText  className={`${msgNotifier?.length > 0 && 'animation-bell'}`} size={24}/>
+                <div className={`${msgNotifier?.length > 0 && 'notification'}`}></div>
             </Link>
             <Link to={'/dashboard/favorites'} className=''>
                 <div className='relative'>
                     <BsHeart className={``} size={24}/>
-                    <span className='absolute inline-block text-[16px] font-bold -top-2   -right-1'>{favorites.length}</span>
+                    <span className='absolute inline-block text-[16px] font-bold -top-2   -right-1'>{favorites?.length}</span>
                 </div>
             </Link>
             <div onClick={toggleOpen} className='p-2 md:p-4 md:py-1 md:px-2 md:border-[1px] border-neutral-200 flex items-center md:gap-3 rounded-full cursor-pointer hover:shadow-md transition'>

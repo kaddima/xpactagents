@@ -14,8 +14,8 @@ class ValidationRules
     ];
 
     if ($is_user) {
-      $rules['first_name'] = 'required';
-      $rules['last_name'] = 'required';
+      $rules['first_name'] = 'required|min:3';
+      $rules['last_name'] = 'required|min:3';
       $rules['phone'] = 'required|min:11|regex:/^[0-9]+$/';
     }
 

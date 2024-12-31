@@ -18,20 +18,23 @@ class AuthenticationController extends BaseController
 
 	public function register(Request $req)
 	{
-		// Define custom messages
 		$messages = [
 			'reg_type.required' => 'The registration type is required. Please specify either user or agent.',
 			'reg_type.in' => 'The registration type must be either user or agent.'
 		];
 
-		$data = $this->validate($req, ValidationRules::registrationRules(), $messages);
+		$this->validate($req, [
+			'reg_type' => 'required|in:user,agent',
+		], $messages);
 
-		// Determine registration type and adjust rules accordingly
-		if ($req->input('reg_type') == 'user') {
-			$data = $this->validate($req, ValidationRules::registrationRules(true), $messages);
-		}
+		$validationRules = $req->input('reg_type') == 'user'
+			? ValidationRules::registrationRules(true)
+			: ValidationRules::registrationRules();
+
+		$data = $this->validate($req, $validationRules);
 
 		$this->authService->register($data);
+
 		return $this->sendResponse(null, "Account created successfully");
 	}
 

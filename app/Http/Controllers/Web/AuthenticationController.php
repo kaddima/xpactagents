@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Http\Controllers\Api\AuthenticationController as ApiAuthenticationController;
 use App\Http\Controllers\BaseController;
 use App\Rules\ValidationRules;
 use App\Services\AuthService;
@@ -10,29 +11,18 @@ use Illuminate\Http\Request;
 class AuthenticationController extends BaseController
 {
 	protected $authService;
+	protected $apiController;
 
-	public function __construct(AuthService $authService)
+	public function __construct(AuthService $authService, 
+	ApiAuthenticationController $apiController)
 	{
 		$this->authService = $authService;
+		$this->apiController = $apiController;
 	}
 
-	public function register(Request $req)
+	public function register(Request $request)
 	{
-		// Define custom messages
-		$messages = [
-			'reg_type.required' => 'The registration type is required. Please specify either user or agent.',
-			'reg_type.in' => 'The registration type must be either user or agent.'
-		];
-
-		$data = $this->validate($req, ValidationRules::registrationRules(), $messages);
-
-		// Determine registration type and adjust rules accordingly
-		if ($req->input('reg_type') == 'user') {
-			$data = $this->validate($req, ValidationRules::registrationRules(true), $messages);
-		}
-
-		$this->authService->register($data);
-		return $this->sendResponse(null, "Account created successfully");
+		return $this->apiController->register($request);
 	}
 
 
@@ -46,30 +36,29 @@ class AuthenticationController extends BaseController
 
 	public function verifyEmail(Request $request)
 	{
-
 		$data = $this->validate(
 			$request,
 			["email" => "required|email", "otp" => "required|digits:6"]
 		);
 
-		$token = $this->authService->verifyEmailOTP($data);
-		return $this->sendResponse(["token" => $token], "email verified successfully");
+		$data = $this->authService->verifyEmailOTP($data, "web");
+		return $this->sendResponse($data, "email verified successfully");
 	}
 
 	/**
 	 * Handles login functionalities for the api
 	 */
-	public function login(Request $req)
+	public function login(Request $request)
 	{
-		$data = $this->validate($req, ValidationRules::loginRules());
-		$token = $this->authService->login($data);
-		return $this->sendResponse(['token' => $token]);
+		$data = $this->validate($request, ValidationRules::loginRules());
+		$result = $this->authService->login($data,"web", $request);
+		return $this->sendResponse($result);
 	}
 
 	/** Logout logic-- deletes user api token */
-	public function logout(Request $req)
+	public function logout(Request $request)
 	{
-		$req->user()->tokens()->delete();
+		$this->authService->webLogout($request);
 		return $this->sendResponse(null, "logout successful");
 	}
 
@@ -84,6 +73,6 @@ class AuthenticationController extends BaseController
 	{
 		$data = $this->validate($request, ValidationRules::resetPasswordRules("web"));
 		$this->authService->resetPassword($data,"web");
-		return $this->sendResponse(null, "Password changed successfully");
+		return $this->sendResponse(null, "Password Reset successful");
 	}
 }

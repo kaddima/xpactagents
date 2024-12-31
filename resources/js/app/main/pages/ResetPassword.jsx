@@ -29,7 +29,7 @@ const ResetPassword = () => {
 			$("#reset-success").slideDown();
 			reset();
 		}).catch(e => {
-			errorHandler(e.response.data)
+			errorHandler(e)
 		}).finally(() => {
 			hideLoading();
 		})

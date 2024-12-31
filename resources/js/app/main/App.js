@@ -40,7 +40,7 @@ function App() {
 	useEffect(() => {
 
 		Axios.get('/users/verify/authentication').then(data => {
-			if (data.data?.redirect) {
+			if (data.data.data?.redirect) {
 				location.href = '/dashboard'
 			}
 
