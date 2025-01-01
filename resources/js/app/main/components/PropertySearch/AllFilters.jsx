@@ -36,8 +36,6 @@ const AllFilters = ({isOpen,onClose}) => {
 
     }
 
-    
-
     useEffect(()=>{
         setShowAllFilter(isOpen)
     },[isOpen])

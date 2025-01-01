@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\BaseController;
-use App\Rules\ValidationRules;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -134,63 +133,6 @@ class ListingController extends BaseController
 		return json_encode(['data' => $listings]);
 	}
 
-	public function latestProperty()
-	{
-
-		//get land for sell
-		$properties = DB::table('property')
-			->where('setup', 1)
-			->orderBy('created_at', 'desc')
-			->limit(6)
-			->get();
-
-		$properties = $this->GetImage($properties);
-
-		return json_encode(['data' => $properties]);
-	}
-
-	public function PropertyByCategory(Request $request)
-	{
-
-		$category = $request->get('category');
-
-		//get land for sell
-		$properties = DB::table('property')
-			->where('category', $category)
-			->orderBy('created_at', 'desc')
-			->paginate(12);
-
-		$properties = $this->GetImage($properties);
-
-		return json_encode(['data' => $properties]);
-	}
-
-	/**Append image names to the properties */
-	public function GetImage($obj)
-	{
-
-		foreach ($obj as $key => $value) {
-
-			//get the first image name of that property and append to the obj
-			$image = DB::table('photos')
-				->where('property_id', $value->id)
-				->first();
-
-			//check if image is empty
-			if (empty($image)) {
-				unset($obj[$key]);
-				continue;
-			}
-
-			$value->image = $image->name;
-
-
-			# code...
-		}
-
-		return $obj;
-	}
-
 	public function deleteProperty(Request $request, $id)
 	{
 		return $this->apiController->deleteProperty($request, $id);
@@ -211,62 +153,6 @@ class ListingController extends BaseController
 	public function getFavorites(Request $request)
 	{
 		return $this->apiController->getFavoriteProperties($request);
-	}
-
-	public function searchProperty(Request $request)
-	{
-
-		$searchTerms = $request->all();
-		$column_value = [];
-
-		foreach ($searchTerms as $key => $value) {
-
-			if (isset($key)) {
-
-				if ($key == 'baths') {
-					if (strtolower($value) == 'any') {
-						$column_value[] = ['bathrooms', '>=', 1];
-						continue;
-					}
-					if ($value < 5) {
-						$column_value['bathrooms'] = $value;
-					} else {
-						$column_value[] = ['bathrooms', '>=', $value];
-					}
-					continue;
-				} else if ($key == 'beds') {
-
-					if (strtolower($value) == 'any') {
-						$column_value[] = ['bedrooms', '>=', 1];
-						continue;
-					}
-
-					if ($value < 5) {
-						$column_value['bedrooms'] = $value;
-					} else {
-						$column_value[] = ['bedrooms', '>=', $value];
-					}
-					continue;
-				} else if ($key == 'min_price') {
-					$column_value[] = ['amount', '>=', $value];
-					continue;
-				} else if ($key == 'max_price') {
-					$column_value[] = ['amount', '<=', $value];
-					continue;
-				} else if ($key == 'page') {
-					continue;
-				}
-
-				$column_value[$key] = $value;
-			}
-		}
-
-		$properties = DB::table('property')
-			->where($column_value)
-			->where('published', 1)
-			->paginate(20);
-
-		return json_encode(['data' => $properties]);
 	}
 
 	public function agentSearchProperty(Request $request)

@@ -37,7 +37,7 @@ class AccountController extends BaseController
 		return $this->apiController->getuserDetails($request, $user_id);
 	}
 
-	public function generalAgentData(Request $request)
+	public function agentOverviewData(Request $request)
 	{
 		$data = $this->generalDataService->agentOverviewData($request->user());
 		return $this->sendResponse($data);

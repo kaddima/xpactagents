@@ -22,13 +22,24 @@ class PropertyRepository extends BaseRepository
     $query = $this->getQuery();
 
     if ($agent_id) {
-      $query->where("creator_id", $agent_id);
+      $query = $query->where("creator_id", $agent_id);
     }
-    $obj->forSellCount = $query->where("category", "sell");
-    $obj->rentCount = $query->where("category", "rent");
-    $obj->landCount = $query->where("category", "land");
-    $obj->shortLetCount = $query->where("category", "short_let");
-    $obj->propertyCount = $query->count();
+    // Use a single query to get counts for all categories
+    $counts = $query
+      ->selectRaw('
+            COUNT(CASE WHEN category = "sell" THEN 1 END) as forSellCount,
+            COUNT(CASE WHEN category = "rent" THEN 1 END) as rentCount,
+            COUNT(CASE WHEN category = "land" THEN 1 END) as landCount,
+            COUNT(CASE WHEN category = "short_let" THEN 1 END) as shortLetCount,
+            COUNT(*) as propertyCount
+        ')
+      ->first();
+
+    $obj->forSellCount = $counts->forSellCount;
+    $obj->rentCount = $counts->rentCount;
+    $obj->landCount = $counts->landCount;
+    $obj->shortLetCount = $counts->shortLetCount;
+    $obj->propertyCount = $counts->propertyCount;
 
     return $obj;
   }
@@ -40,7 +51,6 @@ class PropertyRepository extends BaseRepository
     if ($agent_id) {
       $query->where("creator_id", $agent_id);
     }
-
     return $query->where("published", "0")->count();
   }
 
@@ -51,7 +61,6 @@ class PropertyRepository extends BaseRepository
     if ($agent_id) {
       $query->where("creator_id", $agent_id);
     }
-
     return $query->where("published", "1")->count();
   }
 

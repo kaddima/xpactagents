@@ -119,7 +119,7 @@ class PropertyController extends BaseController
 	{
 		$data = $this->validateParams(
 			['agent_id' => $agent_id],
-			['agent_id' => 'required|uuid|exists:users,id']
+			['agent_id' => 'required|uuid']
 		);
 
 		$filters = $this->validate($request, ValidationRules::propertyFiltersRules());

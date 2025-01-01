@@ -1,16 +1,12 @@
 import React from 'react'
 import _ from 'lodash'
-import { Link, NavLink,Outlet, useNavigate } from 'react-router-dom'
-
-
-import { FaEllipsisH,FaHouseUser,FaUsers,FaThList, FaRegUserCircle, FaUserCircle } from 'react-icons/fa'
-import { MdOutlineShowChart,MdBungalow,MdHouse,MdLandscape, MdClose, MdCheck, MdApartment, MdHourglassEmpty } from 'react-icons/md'
+import { useNavigate } from 'react-router-dom'
+import {MdLandscape,MdApartment, MdHourglassEmpty } from 'react-icons/md'
 import { useSelector } from 'react-redux'
-import Categories from '../components/Categories'
 import { BsEye, BsHouseDoor, BsPieChartFill } from 'react-icons/bs'
-import { TbChartCandle, TbHourglassEmpty } from 'react-icons/tb'
+import { TbChartCandle} from 'react-icons/tb'
 import MessageLayout from './Messages/MessageLayout'
-import EmptyState from '../components/EmptyState'
+
 
 
 const Card = ({icon,name,number})=>{

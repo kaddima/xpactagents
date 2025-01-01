@@ -45,7 +45,6 @@ Route::middleware("auth")->group(function () {
 	Route::post('/properties/{id}/favorite', [ListingController::class, 'addFavorite']);
 	Route::delete('/properties/{id}/favorite', [ListingController::class, 'removeFavorite']);
 	Route::get('/properties/favorites', [ListingController::class, 'getFavorites']);
-	Route::get('/property/listings/search', [ListingController::class, 'searchProperty']);
 	Route::post('/properties/{id}/images', [ListingController::class, 'uploadPropertyImage']);
 	Route::delete('/properties/{id}/images', [ListingController::class, 'deletePropertyImage']);
 	Route::put('/properties/{id}', [ListingController::class, 'updateProperty']);
@@ -54,10 +53,10 @@ Route::middleware("auth")->group(function () {
 
 	//===== SPECIFIC AGENT ROUTES =====
 	Route::get('/agents/properties', [ListingController::class, 'agentListings']);
-	Route::get('/agent/property/listings/search', [ListingController::class, 'agentSearchProperty']);
+	Route::get('/agents/properties/search', [ListingController::class, 'agentListings']);
 	Route::get('/agents/properties/{id}', [ListingController::class, 'agentPropertyDetails']);
 
-	Route::get('/agents/general-data', [AccountController::class, 'generalAgentData']);
+	Route::get('/agents/general-data', [AccountController::class, 'agentOverviewData']);
 	Route::post('/dashboard/user-action', [UserActionController::class, 'store']);
 	Route::post('/dashboard/appointments/resolve', [UserActionController::class, 'resolveAppointments']);
 	Route::post('/dashboard/create-account', [AccountController::class, 'createAccount']);
@@ -142,4 +141,5 @@ Route::get('/app/{path?}', function () {
 })->where('path', '.*');
 
 Route::get('/properties', [ListingController::class, 'getProperties']);
+Route::get('/properties/search', [ListingController::class, 'getProperties']);
 Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);;
