@@ -2,15 +2,15 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Axios from "../../utility/axios";
 
 export const getPropertyOfInterest = createAsyncThunk('message/propertyOfInterest',async ()=>{
-    const response = await Axios.get('/users/message/property-of-interest')
+    const response = await Axios.get('/properties/conversations')
     return response.data
 })
 
 const initialState = {
     active_conversation:null,
-    propertyOfInterest:[],
+    propertyOfInterest:{data:[], meta:{}},
     participants:null,
-    messages: [],
+    messages: {data:[], meta:{}},
     notification:[]
   
 }
@@ -34,7 +34,7 @@ const messageSlice = createSlice({
     },
     extraReducers : (builder)=>{
         builder.addCase(getPropertyOfInterest.fulfilled, (state,action)=>{
-            state.propertyOfInterest = action.payload.data.property_of_interest
+            state.propertyOfInterest = action.payload.data
            // state.participants = action.payload.data.participants
         })
     }

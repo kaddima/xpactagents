@@ -31,7 +31,7 @@ const UserProfile = ({activeUserInfo}) => {
         
         <div className='text-center text-sm font-semibold'>
             {activeUserInfo?.photo ? 
-            <img src={`/uploads/users/${activeUserInfo.id}/profile-photo/${activeUserInfo.photo}`} className='block mx-auto w-24 h-24 rounded-full object-cover' alt="" />
+            <img src={activeUserInfo.photo} className='block mx-auto w-24 h-24 rounded-full object-cover' alt="" />
             : <div className=''><FaRegUserCircle size={48} className='mx-auto'/></div>}
             
             <h1>{activeUserInfo?.first_name} {activeUserInfo?.last_name}</h1>

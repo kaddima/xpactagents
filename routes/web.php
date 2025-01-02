@@ -5,7 +5,7 @@ use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\ListingController;
 use App\Http\Controllers\UserActionController;
 use App\Http\Controllers\TourController;
-use App\Http\Controllers\MessageController;
+use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\AdmsController;
 use App\Http\Controllers\Web\AuthenticationController;
 
@@ -43,10 +43,15 @@ Route::middleware("auth")->group(function () {
 	Route::post('/change-password', [AccountController::class, 'changePassword']);
 
 	//===== PROPERTIES ROUTE =====
-	Route::post('/properties/conversations', [MessageController::class, 'createConversation']);
 	Route::get('/properties/favorites', [ListingController::class, 'getFavorites']);
 	Route::post('/properties/{id}/favorite', [ListingController::class, 'addFavorite']);
 	Route::delete('/properties/{id}/favorite', [ListingController::class, 'removeFavorite']);
+//===== PROPERTY MESSAGES AND CONVERSATIONS =====
+	Route::post('/properties/conversations', [MessageController::class, 'createConversation']);
+	Route::post('/properties/messages', [MessageController::class, 'sendMessage']);
+	Route::get('/properties/conversations', [MessageController::class, 'getUserConversations']);
+	Route::post('/properties/conversations/{id}/messages/read', [MessageController::class, 'markMessagesRead']);
+	Route::get('/properties/conversations/{id}/messages', [MessageController::class, 'getMessages']);
 
 	Route::middleware(["auth", "agent_or_admin"])->group(function () {
 
@@ -56,11 +61,11 @@ Route::middleware("auth")->group(function () {
 		Route::delete('/properties/{id}', [ListingController::class, 'deleteProperty']);
 		Route::Post('/properties/{id}/published/{status}', [ListingController::class, 'publishProperty']);
 
-		//===== PROPERTY MESSAGES AND CONVERSATIONS =====
-		Route::get('/properties/conversations', [MessageController::class, 'getUserConversations']);
-		Route::post('/properties/messages', [MessageController::class, 'sendMessage']);
-		Route::post('/properties/conversations/{id}/messages/read', [MessageController::class, 'markMessagesRead']);
-		Route::get('/properties/conversations/{id}/messages', [MessageController::class, 'getMessages']);
+		//===== AGENT PROPERTY MESSAGES AND CONVERSATIONS =====
+		Route::post('/agents/properties/conversation/resolve', [MessageController::class, 'resolveConversation']);
+		Route::get('/agents/properties/{id}/conversations', [MessageController::class, 'getPropertyConversations']);
+		Route::get('/agent/message/property-of-interest', [MessageController::class, 'agentsPropertyOfInterest']);
+		Route::get('/users/message/property-of-interest', [MessageController::class, 'usersPropertyOfInterest']);
 
 		//===== SPECIFIC AGENT ROUTES =====
 		Route::get('/agents/properties', [ListingController::class, 'agentListings']);
@@ -89,22 +94,12 @@ Route::middleware("auth")->group(function () {
 	Route::post('/tours/resolve', [TourController::class, 'resolveTour']);
 
 	Route::get('/users/search', [AccountController::class, 'searchUser']);
-	Route::post('/update-last-seen', [AccountController::class, 'updateLastSeen']);
+	Route::post('/users/lastseen', [AccountController::class, 'updateLastSeen']);
 	Route::post('/users/update', [UserActionController::class, 'updateUser']);
 	Route::post('/users/delete', [UserActionController::class, 'deleteUser']);
 	Route::post('/users/block', [UserActionController::class, 'blockUser']);
 	Route::post('/users/image', [UserActionController::class, 'uploadPhoto']);
 	Route::post('/users/id-verification', [UserActionController::class, 'idVerifyRequest']);
-
-	Route::post('/question/send-messge', [MessageController::class, 'store']);
-	Route::post('/agents/message/send', [MessageController::class, 'saveMessage']);
-	Route::get('/agent/message/property-of-interest', [MessageController::class, 'agentsPropertyOfInterest']);
-	Route::get('/users/message/property-of-interest', [MessageController::class, 'usersPropertyOfInterest']);
-	Route::get('/agents/properties/{id}/conversations', [MessageController::class, 'getPropertyConversations']);
-	Route::get('/agent/message/messages', [MessageController::class, 'agentsUserMessages']);
-	Route::get('/user/message/messages', [MessageController::class, 'userMessages']);
-	Route::post('/user/message/resolve', [MessageController::class, 'resolveMessage']);
-	Route::post('/message/read', [MessageController::class, 'readMessage']);
 
 	//ADMIN LINKS
 

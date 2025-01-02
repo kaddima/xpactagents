@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Axios from '../../../utility/axios'
-import { formatDistance, parseISO, differenceInMinutes } from 'date-fns'
+import { formatDistance, differenceInMinutes } from 'date-fns'
 import $ from 'jquery'
 import { updateNotification, updateParticipants } from '../../store/messageSlice'
 import errorHandler from '../../../utility/errorHandler'
@@ -72,7 +72,7 @@ const Chat = ({ messages, setMsg, activeUserInfo }) => {
 			dispatch(updateNotification(notifier))
 
 		}).catch(e => {
-			console.log(e.response)
+			errorHandler(e)
 		})
 
 		if (participants?.length) {
@@ -91,9 +91,6 @@ const Chat = ({ messages, setMsg, activeUserInfo }) => {
 
 			dispatch(updateParticipants(newArr))
 		}
-
-
-
 	}, [])
 
 	return (

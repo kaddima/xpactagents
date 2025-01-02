@@ -62,7 +62,7 @@ const Message = () => {
 		}
 
 		return () => {
-			setMessages([])
+			setMessages({data:[],meta:{}})
 		}
 	}, [searchParams])
 

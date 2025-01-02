@@ -64,7 +64,8 @@ class MessageServices
       //add the agent conversation
       $this->agentConversationRepo->create([
         "agent_id" => $property->creator_id,
-        "conversation_id" => $conversation->id
+        "conversation_id" => $conversation->id,
+        'property_id' => $data['property_id'],
       ]);
     }
 
