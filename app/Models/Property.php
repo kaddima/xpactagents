@@ -221,4 +221,9 @@ class Property extends Model
 	{
 		return $this->hasMany(Conversation::class,'property_id');
 	}
+
+	public function agentConversations()
+	{
+		return $this->hasMany(AgentConversation::class,'property_id');
+	}
 }

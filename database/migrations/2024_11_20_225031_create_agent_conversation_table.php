@@ -17,6 +17,7 @@ class CreateAgentConversationTable extends Migration
             $table->id();
             $table->uuid('agent_id');
             $table->uuid('conversation_id');
+            $table->uuid("property_id");
             $table->timestamps();
         });
     }

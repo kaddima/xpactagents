@@ -13,13 +13,21 @@ class AgentConversation extends Model
 
 	protected $fillable = [
 		"agent_id",
-		"conversation_id"
+		"conversation_id",
+		"property_id"
 	];
 
-	// Define the relationship with the agent through the pivot table
-	public function agents()
+	/**
+	 * Define the relationship between AgentConversation and Property.
+	 * Each AgentConversation belongs to one Property.
+	 */
+	public function propertyDetails()
 	{
-			return $this->belongsToMany(User::class, 'agent_conversation', 'agent_id', 'conversation_id')
-					->withTimestamps();
+		return $this->belongsTo(Property::class, 'property_id', 'id'); // 'property_id' as the foreign key, 'id' as the local key
 	}
+
+	public function messages()
+  {
+    return $this->hasMany(Message::class, "conversation_id","conversation_id");
+  }
 }

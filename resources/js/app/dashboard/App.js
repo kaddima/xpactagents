@@ -26,10 +26,7 @@ import EditProfile from './pages/account/EditProfile';
 import MessageLayout from './pages/Messages/MessageLayout';
 import Favorites from './pages/Favorites';
 import SearchPage from './pages/SearchPage';
-import checkMessage from '../utility/checkMessages';
-import { updateNotification } from './store/messageSlice';
 import IdVerification from './pages/account/IdVerification';
-import errorHandler from '../utility/errorHandler';
 
 function App() {
 	const displayMode = useSelector(state => state.main.displayMode)
@@ -40,16 +37,7 @@ function App() {
 		dispatch(getGeneralData())
 	}, [])
 
-	useEffect(() => {
-		checkMessage('agent').then(data => {
-			dispatch(updateNotification(data.data))
-
-		}).catch(e => {
-			errorHandler(e)
-		})
-	}, [])
-
-
+	
 	return (
 		<div className={displayMode}>
 			<BrowserRouter>

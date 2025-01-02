@@ -120,16 +120,21 @@ class MessageServices
 
     return new ConversationCollection($conversations);
   }
+
   /**
    * this methods gets the properties users are interested in
-   * the once they send a message of enquiry for
+   * the ones they send a message of enquiry for
    */
-  public function getAgentPoi($currentUser, $agent_id = null)
+  public function getAgentPoi($currentUser)
   {
     $poi = $currentUser->agentConversations()
+      ->withCount(['messages' => function ($query) use ($currentUser) {
+        $query->where("sender_id", "!=", $currentUser->id);
+        $query->where("read", "=", 0);
+      }])
       ->latest()
+      ->with('propertyDetails')
       ->paginate(env("PAGINATE_NUMBER"));
-
     return new ConversationCollection($poi);
   }
 
@@ -147,6 +152,8 @@ class MessageServices
         $query->where("sender_id", "!=", $currentUser->id);
         $query->where("read", "=", 0);
       }])
+      ->with("user")
+      ->with(["lastmessage"])
       ->latest()
       ->paginate(env("PAGINATE_NUMBER"));
 

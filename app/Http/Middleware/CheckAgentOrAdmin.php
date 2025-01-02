@@ -18,8 +18,7 @@ class CheckAgentOrAdmin
    */
   public function handle(Request $request, Closure $next)
   {
- 
-     // Get the authenticated user
+    // Get the authenticated user
     $user = Auth::user();
 
     // Check if the user is an agent or admin
@@ -27,7 +26,11 @@ class CheckAgentOrAdmin
       return $next($request);
     }
 
-    // If not authorized, return a 403 Forbidden response
-    return response()->json(['message' => 'Forbidden: operation for agent accounts'], 403);
+    if ($request->expectsJson()) {
+      //If not authorized, return a 403 Forbidden response
+      return response()->json(['message' => 'Forbidden: operation for agent accounts'], 403);
+    }else{
+      redirect("/");
+    }
   }
 }

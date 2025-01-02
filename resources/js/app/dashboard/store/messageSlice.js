@@ -8,9 +8,9 @@ export const getPropertyOfInterest = createAsyncThunk('message/propertyOfInteres
 
 let initialState = {
     active_conversation:null,
-    propertyOfInterest:[],
-    participants:null,
-    messages: [],
+    propertyOfInterest:{data:[], meta:{}},
+    participants:{data:[], meta:{}},
+    messages: {data:[], meta:{}},
     notification:[]
   
 }
@@ -34,9 +34,7 @@ const messageSlice = createSlice({
     },
     extraReducers : (builder)=>{
         builder.addCase(getPropertyOfInterest.fulfilled, (state,action)=>{
-
-            state.propertyOfInterest = action.payload.data.property_of_interest
-           // state.participants = action.payload.data.participants
+            state.propertyOfInterest = action.payload.data
         })
     }
 })

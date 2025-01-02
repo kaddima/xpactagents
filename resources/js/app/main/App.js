@@ -21,8 +21,6 @@ import Favorites from './pages/Favorites';
 import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './components/modals/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import checkMessage from '../utility/checkMessages';
-import { updateNotification } from './store/messageSlice';
 import errorHandler from '../utility/errorHandler';
 
 const Index = () => {
@@ -51,17 +49,6 @@ function App() {
 			errorHandler(e)
 		})
 
-	}, [])
-
-
-	useEffect(() => {
-		checkMessage().then(data => {
-
-			dispatch(updateNotification(data.data))
-
-		}).catch(e => {
-			console.log(e)
-		})
 	}, [])
 
 	return (

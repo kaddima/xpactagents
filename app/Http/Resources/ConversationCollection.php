@@ -16,7 +16,7 @@ class ConversationCollection extends ResourceCollection
 	{
 		return [
 			'data' => $this->collection->map(function ($conversation) {
-				return new ConversationResource($conversation); // Wrap each property with PropertyResource
+				return new ConversationResource($conversation);
 			}),
 			
 			"meta" => [

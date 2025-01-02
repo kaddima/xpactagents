@@ -19,6 +19,7 @@ use App\Http\Controllers\Web\AuthenticationController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
 Route::view('/', 'app.main');
 Route::view('/terms-and-condition', 'terms');
 Route::view('/contact-us', 'contact-us');
@@ -42,33 +43,44 @@ Route::middleware("auth")->group(function () {
 	Route::post('/change-password', [AccountController::class, 'changePassword']);
 
 	//===== PROPERTIES ROUTE =====
+	Route::post('/properties/conversations', [MessageController::class, 'createConversation']);
+	Route::get('/properties/favorites', [ListingController::class, 'getFavorites']);
 	Route::post('/properties/{id}/favorite', [ListingController::class, 'addFavorite']);
 	Route::delete('/properties/{id}/favorite', [ListingController::class, 'removeFavorite']);
-	Route::get('/properties/favorites', [ListingController::class, 'getFavorites']);
-	Route::post('/properties/{id}/images', [ListingController::class, 'uploadPropertyImage']);
-	Route::delete('/properties/{id}/images', [ListingController::class, 'deletePropertyImage']);
-	Route::put('/properties/{id}', [ListingController::class, 'updateProperty']);
-	Route::delete('/properties/{id}', [ListingController::class, 'deleteProperty']);
-	Route::Post('/properties/{id}/published/{status}', [ListingController::class, 'publishProperty']);
 
-	//===== SPECIFIC AGENT ROUTES =====
-	Route::get('/agents/properties', [ListingController::class, 'agentListings']);
-	Route::get('/agents/properties/search', [ListingController::class, 'agentListings']);
-	Route::get('/agents/properties/{id}', [ListingController::class, 'agentPropertyDetails']);
+	Route::middleware(["auth", "agent_or_admin"])->group(function () {
 
-	Route::get('/agents/general-data', [AccountController::class, 'agentOverviewData']);
-	Route::post('/dashboard/user-action', [UserActionController::class, 'store']);
-	Route::post('/dashboard/appointments/resolve', [UserActionController::class, 'resolveAppointments']);
-	Route::post('/dashboard/create-account', [AccountController::class, 'createAccount']);
-	Route::post('/dashboard/listings', [ListingController::class, 'listings']);
+		Route::post('/properties/{id}/images', [ListingController::class, 'uploadPropertyImage']);
+		Route::delete('/properties/{id}/images', [ListingController::class, 'deletePropertyImage']);
+		Route::put('/properties/{id}', [ListingController::class, 'updateProperty']);
+		Route::delete('/properties/{id}', [ListingController::class, 'deleteProperty']);
+		Route::Post('/properties/{id}/published/{status}', [ListingController::class, 'publishProperty']);
 
-	Route::post('/dashboard/add-property', [ListingController::class, 'createProperty']);
+		//===== PROPERTY MESSAGES AND CONVERSATIONS =====
+		Route::get('/properties/conversations', [MessageController::class, 'getUserConversations']);
+		Route::post('/properties/messages', [MessageController::class, 'sendMessage']);
+		Route::post('/properties/conversations/{id}/messages/read', [MessageController::class, 'markMessagesRead']);
+		Route::get('/properties/conversations/{id}/messages', [MessageController::class, 'getMessages']);
 
-	Route::post('/dashboard/create-property', [ListingController::class, 'createProperty']);
-	Route::post('/dashboard/property-listings', [ListingController::class, 'propertyListings']);
-	Route::get('/dashboard/property/category', [ListingController::class, 'PropertyByCategory']);
-	Route::post('/dashboard/get-latest-properties', [ListingController::class, 'latestProperty']);
-	Route::post('/dashboard/property/user-action', [ListingController::class, 'userAction']);
+		//===== SPECIFIC AGENT ROUTES =====
+		Route::get('/agents/properties', [ListingController::class, 'agentListings']);
+		Route::get('/agents/properties/search', [ListingController::class, 'agentListings']);
+		Route::get('/agents/properties/{id}', [ListingController::class, 'agentPropertyDetails']);
+
+		Route::get('/agents/general-data', [AccountController::class, 'agentOverviewData']);
+		Route::post('/dashboard/user-action', [UserActionController::class, 'store']);
+		Route::post('/dashboard/appointments/resolve', [UserActionController::class, 'resolveAppointments']);
+		Route::post('/dashboard/create-account', [AccountController::class, 'createAccount']);
+		Route::post('/dashboard/listings', [ListingController::class, 'listings']);
+
+		Route::post('/dashboard/add-property', [ListingController::class, 'createProperty']);
+
+		Route::post('/dashboard/create-property', [ListingController::class, 'createProperty']);
+		Route::post('/dashboard/property-listings', [ListingController::class, 'propertyListings']);
+		Route::get('/dashboard/property/category', [ListingController::class, 'PropertyByCategory']);
+		Route::post('/dashboard/get-latest-properties', [ListingController::class, 'latestProperty']);
+		Route::post('/dashboard/property/user-action', [ListingController::class, 'userAction']);
+	});
 
 
 
@@ -88,10 +100,9 @@ Route::middleware("auth")->group(function () {
 	Route::post('/agents/message/send', [MessageController::class, 'saveMessage']);
 	Route::get('/agent/message/property-of-interest', [MessageController::class, 'agentsPropertyOfInterest']);
 	Route::get('/users/message/property-of-interest', [MessageController::class, 'usersPropertyOfInterest']);
-	Route::get('/agent/message/participants', [MessageController::class, 'agentsUsersInterested']);
+	Route::get('/agents/properties/{id}/conversations', [MessageController::class, 'getPropertyConversations']);
 	Route::get('/agent/message/messages', [MessageController::class, 'agentsUserMessages']);
 	Route::get('/user/message/messages', [MessageController::class, 'userMessages']);
-	Route::get('/user/message/notifier', [MessageController::class, 'messageNotifier']);
 	Route::post('/user/message/resolve', [MessageController::class, 'resolveMessage']);
 	Route::post('/message/read', [MessageController::class, 'readMessage']);
 
@@ -116,22 +127,18 @@ Route::middleware("auth")->group(function () {
 	Route::post('/adms/make-admin', [AdmsController::class, 'admsMakeAdmin']);
 
 	Route::get('/dashboard/{path?}', function () {
-
-		if ((auth()->check()  && auth()->user()['is_agent'] == 1) || (auth()->check() && auth()->user()['is_admin'] == 1)) {
-
+		if ((auth()->check()  && auth()->user()['is_agent'] == 1)
+			|| (auth()->check() && auth()->user()['is_admin'] == 1)
+		) {
 			return view('app.dashboard');
 		}
-
 		return redirect('/');
 	})->where('path', '.*');
 
 	Route::get('/admin/{path?}', function () {
-
 		if (auth()->check()  && auth()->user()['is_admin'] == 1) {
-
 			return view('app.admin_dashboard');
 		}
-
 		return redirect('/');
 	})->where('path', '.*');
 });

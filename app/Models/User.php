@@ -100,11 +100,9 @@ class User extends Authenticatable
 		return $this->hasMany(Conversation::class, 'created_by');
 	}
 
-	// Define the relationship with the conversations through the pivot table
 	public function agentConversations()
 	{
-		return $this->belongsToMany(Conversation::class, 'agent_conversation', 'agent_id', 'conversation_id')
-			->withTimestamps();
+		return $this->hasMany(AgentConversation::class, 'agent_id', "id");
 	}
 
 	public function messages()

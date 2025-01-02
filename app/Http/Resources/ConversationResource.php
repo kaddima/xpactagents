@@ -14,9 +14,11 @@ class ConversationResource extends JsonResource
 	 */
 	public function toArray($request) {
 		return [
-			"id"=>$this->id,
+			"conversation_id"=>$this->id ?? $this->conversation_id,
 			"created_by"=>$this->created_by,
 			"unread_messages_count"=>$this->messages_count,
+			"user_details"=>$this->user,
+			"last_msg"=>$this->lastMessage,
 			"property_details"=> new PropertyResource($this->propertyDetails)
 		];
 	}
