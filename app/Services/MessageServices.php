@@ -80,18 +80,15 @@ class MessageServices
 
   public function sendMessage($data, $currentUser)
   {
-
     try {
       $conversation = $this->conversationRepo->findById($data['conversation_id']);
     } catch (ModelNotFoundException $e) {
       throw new NotFoundException("conversation does not exist");
     }
-
     /**
      * Make sure the user is either the one who created the conversation
      * or the property creator
      */
-
     $property = $conversation->propertyDetails;
 
     if ($currentUser->id !== $conversation->created_by && $currentUser->id !== $property->creator_id) {
@@ -105,7 +102,11 @@ class MessageServices
       'body' => $data['message']
     ]);
 
-    return new MessageResource($message);
+    $messages = $conversation->messages()
+      ->latest()
+      ->paginate(env("PAGINATE_NUMBER"));
+
+    return new MessageCollection($messages);
   }
 
   public function getUserconversations($currentUser)

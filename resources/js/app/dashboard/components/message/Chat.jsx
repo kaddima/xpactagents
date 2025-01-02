@@ -9,6 +9,7 @@ import Axios from '../../../utility/axios'
 import { formatDistance, parseISO, differenceInMinutes } from 'date-fns'
 import $ from 'jquery'
 import { updateNotification, updateParticipants } from '../../store/messageSlice'
+import errorHandler from '../../../utility/errorHandler'
 
 const Chat = ({ messages, setMsg, activeUserInfo }) => {
 	const currentUser = useSelector(state => state.user.profile)
@@ -22,7 +23,6 @@ const Chat = ({ messages, setMsg, activeUserInfo }) => {
 	const { register, handleSubmit, reset } = useForm()
 
 	const onlineStatus = useMemo(() => {
-
 		if (activeUserInfo) {
 			let laterDate = new Date(activeUserInfo.last_seen)
 			let minuteDiff = differenceInMinutes(new Date(), new Date(laterDate))
@@ -37,20 +37,17 @@ const Chat = ({ messages, setMsg, activeUserInfo }) => {
 
 	const onSendMessage = (formData) => {
 		reset()
-		Axios.post('/agents/message/send', {
+		Axios.post('/properties/messages', {
 			...formData,
-			property_of_interest_id,
 			conversation_id,
-			last_seen: onlineStatus ? 1 : 0,
-			//email of the user receiving message
-			user_email: activeUserInfo.email
 		}).then(data => {
-
-			setMsg(data.data.data.reverse())
+			let reverseData = data.data.data.data.reverse()
+			let meta = data.data.data.meta
+			setMsg({data:reverseData, meta})
 			let target = $('#chat-box')
 			target.animate({ scrollTop: target.prop('scrollHeight') });
 		}).catch(e => {
-			console.log(e.response)
+			errorHandler(e)
 		})
 
 	}
@@ -60,8 +57,9 @@ const Chat = ({ messages, setMsg, activeUserInfo }) => {
 		target.animate({ scrollTop: target.prop('scrollHeight') });
 
 		//mark the users messages as read
-		Axios.post('/message/read', { user_id: activeUserInfo.id, conversation_id }).then(data => {
+		Axios.post(`/properties/conversations/${conversation_id}/messages/read`).then(data => {
 
+			// update the property of interest unread_messages_cpunt
 			let notifier = [...msgNotifier]
 
 			for (let i = 0, len = notifier?.length; i < len; i++) {

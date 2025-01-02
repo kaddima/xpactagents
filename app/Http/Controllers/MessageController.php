@@ -25,6 +25,10 @@ class MessageController extends Controller
 		return $this->apiController->createConversation($request);
 	}
 
+	public function sendMessage(Request $request){
+		return $this->apiController->sendMessage($request);
+	}
+
 	public function agentsPropertyOfInterest(Request $request)
 	{
 		return $this->apiController->getAgentPoi($request);
