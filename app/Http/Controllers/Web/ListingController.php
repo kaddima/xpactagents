@@ -13,8 +13,10 @@ class ListingController extends BaseController
 	protected $propertyService;
 	protected $apiController;
 
-	public function __construct(PropertyService $propertyService, PropertyController $apiController)
-	{
+	public function __construct(
+		PropertyService $propertyService,
+		PropertyController $apiController
+	) {
 		$this->propertyService = $propertyService;
 		$this->apiController = $apiController;
 	}
@@ -42,10 +44,11 @@ class ListingController extends BaseController
 
 	public function publishProperty(Request $request, $id, $status)
 	{
-		return $this->apiController->publishedStatus($request,$id,$status);
+		return $this->apiController->publishedStatus($request, $id, $status);
 	}
 
-	public function uploadPropertyImage(Request $request) {
+	public function uploadPropertyImage(Request $request)
+	{
 		return $this->apiController->uploadFile($request);
 	}
 
@@ -64,73 +67,18 @@ class ListingController extends BaseController
 	public function agentPropertyDetails(Request $request, $id)
 	{
 		$agent_id = $request->user()->id;
-		return $this->apiController->agentPropertyDetails($request,$agent_id,$id);
+		return $this->apiController->agentPropertyDetails($request, $agent_id, $id);
 	}
 
-	public function adminAgentListings(Request $request)
+	public function agentSearchProperty(Request $request)
 	{
+		return $this->apiController->searchAgentProperties($request, $request->user()->id);
+	}
 
-		$currentUser = auth()->user();
-
-		$searchTerms = $request->all();
-
-		$column_value = ['creator_id' => $request->get('agent_id')];
-
-
-		foreach ($searchTerms as $key => $value) {
-
-			if (isset($key)) {
-
-				if ($key == 'baths') {
-					if (strtolower($value) == 'any') {
-						$column_value[] = ['bathrooms', '>=', 1];
-						continue;
-					}
-					if ($value < 5) {
-						$column_value['bathrooms'] = $value;
-					} else {
-						$column_value[] = ['bathrooms', '>=', $value];
-					}
-					continue;
-				} else if ($key == 'beds') {
-
-					if (strtolower($value) == 'any') {
-						$column_value[] = ['bedrooms', '>=', 1];
-						continue;
-					}
-
-					if ($value < 5) {
-						$column_value['bedrooms'] = $value;
-					} else {
-						$column_value[] = ['bedrooms', '>=', $value];
-					}
-					continue;
-				} else if ($key == 'min_price') {
-					$column_value[] = ['amount', '>=', $value];
-					continue;
-				} else if ($key == 'max_price') {
-					$column_value[] = ['amount', '<=', $value];
-					continue;
-				} else if ($key == 'other-category') {
-					if (strtolower($value) == 'any') {
-						continue;
-					}
-					$column_value['other_category'] = $value;
-					continue;
-				} else if ($key == 'page' || $key == 'list-type' || $key == 'agent_id') {
-					continue;
-				}
-
-				$column_value[$key] = $value;
-			}
-		}
-
-		$listings = DB::table('property')
-			->where($column_value)
-			->orderBy('created_at', 'desc')
-			->paginate(20);
-
-		return json_encode(['data' => $listings]);
+	// ====== ADMIN 
+	public function adminAgentListings(Request $request, $agent_id)
+	{
+		return $this->apiController->agentProperties($request, $agent_id);
 	}
 
 	public function deleteProperty(Request $request, $id)
@@ -146,71 +94,14 @@ class ListingController extends BaseController
 		return $this->apiController->addFavorite($request, $id);
 	}
 
-	public function removeFavorite(Request $request, $id){
+	public function removeFavorite(Request $request, $id)
+	{
 		return $this->apiController->removeFavorite($request, $id);
 	}
 
 	public function getFavorites(Request $request)
 	{
 		return $this->apiController->getFavoriteProperties($request);
-	}
-
-	public function agentSearchProperty(Request $request)
-	{
-
-		$currentUser = auth()->user();
-
-		$searchTerms = $request->all();
-		$column_value = ['creator_id' => $currentUser->id];
-
-		foreach ($searchTerms as $key => $value) {
-
-			if (isset($key)) {
-
-				if ($key == 'baths') {
-					if (strtolower($value) == 'any') {
-						$column_value[] = ['bathrooms', '>=', 1];
-						continue;
-					}
-					if ($value < 5) {
-						$column_value['bathrooms'] = $value;
-					} else {
-						$column_value[] = ['bathrooms', '>=', $value];
-					}
-					continue;
-				} else if ($key == 'beds') {
-
-					if (strtolower($value) == 'any') {
-						$column_value[] = ['bedrooms', '>=', 1];
-						continue;
-					}
-
-					if ($value < 5) {
-						$column_value['bedrooms'] = $value;
-					} else {
-						$column_value[] = ['bedrooms', '>=', $value];
-					}
-					continue;
-				} else if ($key == 'min_price') {
-					$column_value[] = ['amount', '>=', $value];
-					continue;
-				} else if ($key == 'max_price') {
-					$column_value[] = ['amount', '<=', $value];
-					continue;
-				} else if ($key == 'page') {
-					continue;
-				}
-
-				$column_value[$key] = $value;
-			}
-		}
-
-		$properties = DB::table('property')
-			->where($column_value)
-			->where('published', 1)
-			->paginate(20);
-
-		return json_encode(['data' => $properties]);
 	}
 
 	public function adminPropertiesOverview()

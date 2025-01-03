@@ -30,7 +30,7 @@ Route::prefix('v1')->group(function () {
 		Route::post('/password/reset', 'resetPassword');
 	});
 
-	Route::controller(TourController::class)->group(function(){
+	Route::controller(TourController::class)->group(function () {
 		Route::post("/tours", "addNewTour");
 	});
 
@@ -63,6 +63,7 @@ Route::prefix('v1')->group(function () {
 		Route::get('/agents/properties/properties-of-interest', [MessageController::class, 'getAgentPoi']);
 		Route::get('/agents/properties/{id}/conversations', [MessageController::class, 'getPropertyConversations']);
 		Route::post('/agents/properties/conversation/resolve', [MessageController::class, 'resolveConversation']);
+		Route::get('/agents/overview', [UserController::class, 'agentOverviewData']);
 
 		Route::controller(PropertyController::class)->group(function () {
 			Route::post('/properties', 'create');
@@ -71,7 +72,6 @@ Route::prefix('v1')->group(function () {
 			Route::put('/properties/{id}/published/{published}', 'publishedStatus');
 			Route::delete('/properties/images', 'deletePropertyImages');
 			Route::delete('/properties/{id}',  'deleteProperty');
-			Route::get('/agents/{agent_id}/dashboard/overview', 'agentOverview');
 			Route::get('/agents/{agent_id}/properties', 'agentProperties');
 			Route::get('/agents/{agent_id}/properties/search', 'searchAgentProperties');
 			Route::get('/agents/{agent_id}/properties/{id}', 'agentPropertyDetails');
@@ -88,5 +88,4 @@ Route::prefix('v1')->group(function () {
 	Route::get('/properties/search', [PropertyController::class, 'searchProperties']);
 	Route::get('/properties/{id}', [PropertyController::class, 'getPropertyDetails']);
 	Route::get('/properties/{id}/images', [PropertyController::class, 'getPropertyImages']);
-
 });

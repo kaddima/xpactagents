@@ -35,8 +35,12 @@ class PropertyController extends BaseController
 		$data = $this->validate($request, ValidationRules::storeProductRules());
 		/**Get the current signed user */
 		$currentUser = $request->user();
-		$productId = $this->propertyService->create($data, $currentUser);
-		return $this->sendResponse(['productId' => $productId], "Product created successfully");
+		return $this->sendResponse(
+			[
+				'property_id' => $this->propertyService->create($data, $currentUser)
+			],
+			"Product created successfully"
+		);
 	}
 
 	public function updateProperty(Request $request, $id)

@@ -54,7 +54,7 @@ Route::middleware("auth")->group(function () {
 	Route::get('/properties/conversations/{id}/messages', [MessageController::class, 'getMessages']);
 
 	Route::middleware(["auth", "agent_or_admin"])->group(function () {
-
+		Route::post('/properties', [ListingController::class, 'createProperty']);
 		Route::post('/properties/{id}/images', [ListingController::class, 'uploadPropertyImage']);
 		Route::delete('/properties/{id}/images', [ListingController::class, 'deletePropertyImage']);
 		Route::put('/properties/{id}', [ListingController::class, 'updateProperty']);
@@ -65,29 +65,14 @@ Route::middleware("auth")->group(function () {
 		Route::post('/agents/properties/conversation/resolve', [MessageController::class, 'resolveConversation']);
 		Route::get('/agents/properties/{id}/conversations', [MessageController::class, 'getPropertyConversations']);
 		Route::get('/agent/message/property-of-interest', [MessageController::class, 'agentsPropertyOfInterest']);
-		Route::get('/users/message/property-of-interest', [MessageController::class, 'usersPropertyOfInterest']);
 
 		//===== SPECIFIC AGENT ROUTES =====
 		Route::get('/agents/properties', [ListingController::class, 'agentListings']);
 		Route::get('/agents/properties/search', [ListingController::class, 'agentListings']);
 		Route::get('/agents/properties/{id}', [ListingController::class, 'agentPropertyDetails']);
-
 		Route::get('/agents/general-data', [AccountController::class, 'agentOverviewData']);
-		Route::post('/dashboard/user-action', [UserActionController::class, 'store']);
 		Route::post('/dashboard/appointments/resolve', [UserActionController::class, 'resolveAppointments']);
-		Route::post('/dashboard/create-account', [AccountController::class, 'createAccount']);
-		Route::post('/dashboard/listings', [ListingController::class, 'listings']);
-
-		Route::post('/dashboard/add-property', [ListingController::class, 'createProperty']);
-
-		Route::post('/dashboard/create-property', [ListingController::class, 'createProperty']);
-		Route::post('/dashboard/property-listings', [ListingController::class, 'propertyListings']);
-		Route::get('/dashboard/property/category', [ListingController::class, 'PropertyByCategory']);
-		Route::post('/dashboard/get-latest-properties', [ListingController::class, 'latestProperty']);
-		Route::post('/dashboard/property/user-action', [ListingController::class, 'userAction']);
 	});
-
-
 
 	Route::get('/tours/agent/all', [TourController::class, 'getAgentTour']);
 	Route::post('/tours/add', [TourController::class, 'store']);
@@ -138,9 +123,7 @@ Route::middleware("auth")->group(function () {
 	})->where('path', '.*');
 });
 
-Route::get('/app/{path?}', function () {
-	return view('app.main');
-})->where('path', '.*');
+Route::view('/app/{path?}','app.main')->where('path', '.*');
 
 Route::get('/properties', [ListingController::class, 'getProperties']);
 Route::get('/properties/search', [ListingController::class, 'getProperties']);

@@ -4,16 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\BaseController;
 use App\Rules\ValidationRules;
+use App\Services\GeneralDataService;
 use App\Services\UserServices;
 use Illuminate\Http\Request;
 
 class UserController extends BaseController
 {
 	protected $userServices;
+	protected $generalDataService;
 
-	public function __construct(UserServices $userServices)
-	{
+	public function __construct(
+		UserServices $userServices,
+		GeneralDataService $generalDataService
+	) {
 		$this->userServices = $userServices;
+		$this->generalDataService = $generalDataService;
 	}
 
 	public function getuserDetails(Request $request, $user_id)
@@ -34,34 +39,45 @@ class UserController extends BaseController
 		return $this->sendResponse($userDetails);
 	}
 
-	public function updateUserdetails(Request $request){
+	public function updateUserdetails(Request $request)
+	{
 		$data = $this->validate($request, ValidationRules::updateUserDetailsRules());
 		$this->userServices->updateUserDetails($data, $request->user());
 		return $this->sendResponse(null, "user info updated");
 	}
 
-	public function changePassword(Request $request){
+	public function changePassword(Request $request)
+	{
 		$data = $this->validate($request, ValidationRules::changePasswordRules());
 		$this->userServices->changePassword($data, $request->user());
 		return $this->sendResponse(null, "Password changed successfully");
 	}
 
-	public function uploadUserimage(Request $request){
+	public function uploadUserimage(Request $request)
+	{
 		$data = $this->validate($request, ValidationRules::userImageRule());
 		$file = $request->file("image");
 
-		$imagePath = $this->userServices->uploadUserimage($file,$request->user());
+		$imagePath = $this->userServices->uploadUserimage($file, $request->user());
 		return $this->sendResponse($imagePath, "Image uploaded successfully");
 	}
 
-	public function IdVerificationRequest(Request $request){
+	public function IdVerificationRequest(Request $request)
+	{
 		$data = $this->validate($request, ValidationRules::idVerificationRequestRules());
 		$this->userServices->IdVerificationRequest($data, $request->file('image'), $request->user());
 		return $this->sendResponse(null, "Id verification in progress");
 	}
 
-	public function updateUserLastSeen(Request $request){
+	public function updateUserLastSeen(Request $request)
+	{
 		$this->userServices->updateUserLastSeen($request->user());
 		return $this->sendResponse(null, "Last seen updated");
+	}
+
+	public function agentOverviewData(Request $request)
+	{
+		$data = $this->generalDataService->agentOverviewData($request->user());
+		return $this->sendResponse($data);
 	}
 }
