@@ -27,6 +27,7 @@ import MessageLayout from './pages/Messages/MessageLayout';
 import Favorites from './pages/Favorites';
 import SearchPage from './pages/SearchPage';
 import IdVerification from './pages/account/IdVerification';
+import { getPropertyOfInterest } from './store/messageSlice';
 
 function App() {
 	const displayMode = useSelector(state => state.main.displayMode)
@@ -35,9 +36,11 @@ function App() {
 
 	useEffect(() => {
 		dispatch(getGeneralData())
+		//load the user's message as well
+		dispatch(getPropertyOfInterest())
 	}, [])
 
-	
+
 	return (
 		<div className={displayMode}>
 			<BrowserRouter>

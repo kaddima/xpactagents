@@ -22,6 +22,7 @@ import VerifyEmail from './pages/VerifyEmail';
 import ForgotPassword from './components/modals/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import errorHandler from '../utility/errorHandler';
+import { getPropertyOfInterest } from './store/messageSlice';
 
 const Index = () => {
 
@@ -31,12 +32,10 @@ const Index = () => {
 function App() {
 
 	const dispatch = useDispatch()
-	const user = useSelector(state=>state.user.userInfo)
-
+	const user = useSelector(state => state.user.userInfo)
 	const displayMode = useSelector(state => state.main.displayMode)
 
 	useEffect(() => {
-
 		Axios.get('/users/verify/authentication').then(data => {
 			if (data.data.data?.redirect) {
 				location.href = '/dashboard'
@@ -44,6 +43,11 @@ function App() {
 
 			dispatch(updateUserInfo(data.data.data.userInfo))
 			dispatch(updateFavorites(data.data.data.favorites))
+			if (data.data.data.userInfo.email) {
+				//load the user's message as well
+				dispatch(getPropertyOfInterest())
+			}
+
 
 		}).catch(e => {
 			errorHandler(e)

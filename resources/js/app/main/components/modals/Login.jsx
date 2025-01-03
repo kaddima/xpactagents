@@ -14,6 +14,7 @@ import Axios from "../../../utility/axios"
 import Button from "../Button"
 import { hideLoading, showLoading } from "../../../utility/loading"
 import errorHandler from "../../../utility/errorHandler"
+import { getPropertyOfInterest } from "../../store/messageSlice"
 
 const Login = () => {
 
@@ -53,7 +54,6 @@ const Login = () => {
 				location.href = '/dashboard'
 				return
 			} else if (data.data.userInfo.is_admin == 1) {
-
 				location.href = '/admin/dashboard'
 				return
 			}
@@ -61,6 +61,8 @@ const Login = () => {
 			dispatch(loginModalClose())
 			dispatch(updateUserInfo(data.data.userInfo))
 			dispatch(updateFavorites(data.data.favorites))
+			//log the users conversations
+			dispatch(getPropertyOfInterest())
 
 		} catch (error) {
 			errorHandler(error)

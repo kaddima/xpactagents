@@ -4,6 +4,7 @@ import Categories from "../components/Categories"
 import Axios from '../../utility/axios'
 import { useSearchParams } from 'react-router-dom'
 import EmptyState from '../components/EmptyState'
+import errorHandler from '../../utility/errorHandler'
 
 const ListingsPage = () => {
 
@@ -12,15 +13,17 @@ const ListingsPage = () => {
 
   useEffect(() => {
 
+    const other_category = searchParams.get('other-category')
     Axios.get('/properties',
       {
-        params: { 'other_category': searchParams.get('other-category')}
+        // only pass in the other_category value if its not "any"
+        params: other_category && other_category.toLocaleLowerCase() !== "any" ?
+          { 'other_category': other_category } : {}
+
       }).then(data => {
         setPropertyListing(data.data.data)
-
       }).catch(e => {
-
-        console.log(e)
+        errorHandler(e)
       })
 
   }, [searchParams])

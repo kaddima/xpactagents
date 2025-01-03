@@ -30,7 +30,6 @@ const Message = () => {
 
 			for (let i = 0, len = participants.data.length; i < len; i++) {
 				if (participants.data[i].user_details.id == activeUser) {
-
 					return participants.data[i].user_details
 				}
 			}
@@ -66,7 +65,7 @@ const Message = () => {
 		}
 	}, [searchParams])
 
-	if (!participants) {
+	if (!participants.data.length) {
 		return <EmptyState title='Empty user interest' subtitle='Click on a property of interest to display messages' />
 	}
 

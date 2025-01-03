@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { BsEye } from 'react-icons/bs'
 import { BsHouseDoor } from "react-icons/bs"
 import { useDispatch, useSelector } from 'react-redux'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { getPropertyOfInterest } from '../../store/messageSlice'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Message from '../../components/message/Message'
 import EmptyState from '../../components/EmptyState'
 import Axios from '../../../utility/axios'
@@ -17,11 +16,6 @@ const MessageLayout = () => {
 
 	const [searchParams, setSearchParams] = useSearchParams();
 	const [showPOI, setShowPOI] = useState(false)
-
-
-	useEffect(() => {
-		dispatch(getPropertyOfInterest())
-	}, [])
 
 	useEffect(() => {
 		// update the last seen

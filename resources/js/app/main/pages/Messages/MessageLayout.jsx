@@ -3,7 +3,6 @@ import { BsEye } from 'react-icons/bs'
 import { BsHouseDoor } from "react-icons/bs"
 import { useDispatch, useSelector } from 'react-redux'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { getPropertyOfInterest } from '../../store/messageSlice'
 import Message from '../../components/message/Message'
 import EmptyState from '../../components/EmptyState'
 import Axios from '../../../utility/axios'
@@ -16,11 +15,6 @@ const MessageLayout = () => {
 	const navigate = useNavigate()
 	const [showPOI, setShowPOI] = useState(false)
 	const [searchParams, setSearchParams] = useSearchParams();
-
-
-	useEffect(() => {
-		dispatch(getPropertyOfInterest())
-	}, [])
 
 	useEffect(() => {
 		// update the last seen
