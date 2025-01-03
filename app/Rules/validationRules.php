@@ -182,7 +182,7 @@ class ValidationRules
       "phone" => "required",
       "date" => "required|date|after:today",
       "notes" => "nullable",
-      "best_contact" => ["required",new CaseInsensitiveIn(['text', 'call',])],
+      "best_contact" => ["required",new CaseInsensitiveIn(['text', 'call',"email"])],
       "property_id" => "required|uuid",
     ];
   }

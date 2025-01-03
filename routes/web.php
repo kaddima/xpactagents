@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\ListingController;
 use App\Http\Controllers\UserActionController;
-use App\Http\Controllers\TourController;
+use App\Http\Controllers\Web\TourController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\AdmsController;
 use App\Http\Controllers\Web\AuthenticationController;
@@ -37,6 +37,8 @@ Route::controller(AuthenticationController::class)->group(function () {
 
 // check if the user is still logged
 Route::get('/users/verify/authentication', [AccountController::class, "verifyAuthentication"]);
+
+Route::post('/tours', [TourController::class, 'addNewTour']);
 
 Route::middleware("auth")->group(function () {
 	//===== AccountCOntroller =====
@@ -71,12 +73,11 @@ Route::middleware("auth")->group(function () {
 		Route::get('/agents/properties/search', [ListingController::class, 'agentListings']);
 		Route::get('/agents/properties/{id}', [ListingController::class, 'agentPropertyDetails']);
 		Route::get('/agents/general-data', [AccountController::class, 'agentOverviewData']);
-		Route::post('/dashboard/appointments/resolve', [UserActionController::class, 'resolveAppointments']);
-	});
 
-	Route::get('/tours/agent/all', [TourController::class, 'getAgentTour']);
-	Route::post('/tours/add', [TourController::class, 'store']);
-	Route::post('/tours/resolve', [TourController::class, 'resolveTour']);
+		// ===== AGENT TOURS
+		Route::get("/tours", [TourController::class, "agentTours"]);
+		Route::patch("tours/{tour_id}", [TourController::class, "resolveTour"]);
+	});
 
 	Route::get('/users/search', [AccountController::class, 'searchUser']);
 	Route::post('/users/lastseen', [AccountController::class, 'updateLastSeen']);
@@ -105,24 +106,23 @@ Route::middleware("auth")->group(function () {
 	Route::get('/adms/admins', [AdmsController::class, 'admsAdmins']);
 	Route::post('/adms/create-admin', [AdmsController::class, 'admsCreateAdmin']);
 	Route::post('/adms/make-admin', [AdmsController::class, 'admsMakeAdmin']);
-
-	Route::get('/dashboard/{path?}', function () {
-		if ((auth()->check()  && auth()->user()['is_agent'] == 1)
-			|| (auth()->check() && auth()->user()['is_admin'] == 1)
-		) {
-			return view('app.dashboard');
-		}
-		return redirect('/');
-	})->where('path', '.*');
-
-	Route::get('/admin/{path?}', function () {
-		if (auth()->check()  && auth()->user()['is_admin'] == 1) {
-			return view('app.admin_dashboard');
-		}
-		return redirect('/');
-	})->where('path', '.*');
 });
 
+Route::get('/dashboard/{path?}', function () {
+	if ((auth()->check()  && auth()->user()['is_agent'] == 1)
+		|| (auth()->check() && auth()->user()['is_admin'] == 1)
+	) {
+		return view('app.dashboard');
+	}
+	return redirect('/');
+})->where('path', '.*');
+
+Route::get('/admin/{path?}', function () {
+	if (auth()->check()  && auth()->user()['is_admin'] == 1) {
+		return view('app.admin_dashboard');
+	}
+	return redirect('/');
+})->where('path', '.*');
 Route::view('/app/{path?}','app.main')->where('path', '.*');
 
 Route::get('/properties', [ListingController::class, 'getProperties']);

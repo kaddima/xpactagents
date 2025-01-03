@@ -275,7 +275,7 @@ class AuthService
         return ['redirect' => true];
       } else {
         return [
-          "userInfo" => $currentUser ?? [],
+          "userInfo" => $currentUser ?? null,
           "favorites" => $currentUser ? PropertyResource::collection($currentUser->favorites) : []
         ];
       }

@@ -225,21 +225,6 @@ class UserActionController extends Controller
 		return json_encode(['status' => 1, 'data' => $statements]);
 	}
 
-	public function resolveAppointments(Request $request)
-	{
-
-		$appointment_id = $request->get('appointment_id');
-
-		DB::table('appointments')
-			->where('id', $appointment_id)
-			->update(['resolved' => 1]);
-
-		$appointments = DB::table('appointments')
-			->where('resolved', 0)
-			->get();
-
-		return json_encode(['data' => $appointments]);
-	}
 
 	public function idVerifyRequest(Request $request)
 	{

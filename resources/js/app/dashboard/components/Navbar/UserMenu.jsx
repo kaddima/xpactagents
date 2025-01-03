@@ -77,7 +77,10 @@ const UserMenu = () => {
 								icon={<FaSignal />}
 								label={<div className='flex justify-between w-full items-center'>
 									<h1>Account Status</h1>
-									<p className={`font-semibold ${currentUser?.profile_complete == 1 ? 'text-green-600 border border-green-600 px-2 rounded-md' : 'text-red-600'}`}>{currentUser?.profile_complete == 1 ? 'Active' : 'Inactive'}</p>
+									<p className={`font-semibold ${currentUser?.profile_complete == 1 ? 
+										'text-green-600 border border-green-600 px-2 rounded-md' : 'text-red-600'}`}>
+											{currentUser?.profile_complete == 1 ? 'Active' : 'Inactive'}
+											</p>
 								</div>} />
 
 							<div className=''>

@@ -8,6 +8,7 @@ use App\Http\Resources\TourCollection;
 use App\Mail\TourCreationMail;
 use App\Repository\PropertyRepository;
 use App\Repository\TourRepository;
+use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -72,7 +73,11 @@ class TourService
     $data["agent_id"] = $property->creator_id;
     $tour = $this->tourRepo->create($data);
 
-    $this->sendTourCreationEmail($tour);
+    try{
+      $this->sendTourCreationEmail($tour);
+    }catch(Exception $e){
+    }
+    
   }
 
   public function getAgentTours($agent_id, $filter = [])

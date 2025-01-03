@@ -44,30 +44,28 @@ function App() {
 	return (
 		<div className={displayMode}>
 			<BrowserRouter>
-				<div className='md:flex w-screen h-screen relative overflow-hidden dark:bg-main-dark-bg bg-white text-black dark:text-slate-400'>
-
-					{/* {accountModalDisplay && <AccountModal/>} */}
-
+				<div className='md:flex w-screen h-screen relative overflow-hidden dark:bg-main-dark-bg
+				 bg-white text-black dark:text-slate-400'>
 
 					<div className='h-full w-48 sidebar hidden md:block'>
 						<SideBar />
 					</div>
 
 
-					<div id='spinner' className='fixed left-0 w-screen h-screen z-[9999] hidden' style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}>
-						<div className='fixed bottom-2 right-5 w-10 h-10 md:w-16 md:h-16 rounded-full border-4 border-green-600 border-l-white animate-spin '>
+					<div id='spinner' className='fixed left-0 w-screen h-screen z-[9999] hidden' 
+					style={{ backgroundColor: 'rgba(0,0,0,0.1)' }}>
+						<div className='fixed bottom-2 right-5 w-10 h-10 md:w-16 md:h-16 rounded-full border-4 
+						border-green-600 border-l-white animate-spin '>
 						</div>
 					</div>
 
-					<div className={`h-full w-full xl:w-[calc(100vw-192px)]
-                        `}>
-
+					<div className={`h-full w-full xl:w-[calc(100vw-192px)]`}>
 						<div className={`flex z-[100] bg-neutral-100 dark:bg-slate-900 w-full`}>
 							<Navbar />
 						</div>
-
-
-						<div className='overflow-auto w-full overflow-x-hidden md:px-8' id='main' style={{ height: "calc(100% - 90px)" }}>
+						
+						<div className='overflow-auto w-full overflow-x-hidden md:px-8' 
+						id='main' style={{ height: "calc(100% - 90px)" }}>
 							<Routes>
 								{/* Dashbord */}
 								<Route path='/dashboard' element={<Dashboard />} />

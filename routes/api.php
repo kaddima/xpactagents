@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\PropertyController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ListingController;
 use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\UserController;
