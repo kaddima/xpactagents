@@ -21,29 +21,31 @@ const CreateProperty = () => {
 		address: '',
 		amount: '',
 		description: '',
-		duration: '',
+		duration: 'year',
 		bedrooms: '',
 		bathrooms: '',
 		toilets: '',
-		property_category: '',
+		category: '',
 		property_fact: {
 			unit: 'sq.ft',
-			property_size: 0,
-			upload_time: new Date().toString()
+			size: 0,
+			upload_time: new Date().toString(),
+			flooring: "Tiles"
 		}
 	}
+
+	const [propertyID, setPropertyID] = useState(null)
+	const [descriptionValue, setDescriptionValue] = useState('');
+	const [amenities, setAmenities] = useState([])
 
 	const { register,
 		handleSubmit,
 		watch,
 		formState: { errors } } = useForm({ defaultValues: initialValue })
 
-	const [propertyID, setPropertyID] = useState(null)
-	const [descriptionValue, setDescriptionValue] = useState('');
-	const [amenities, setAmenities] = useState([])
 
 	// WATCH FORM VALUES
-	const property_category = watch('property_category')
+	const property_category = watch('category')
 	const unit = watch('property_fact.unit')
 
 	const submitForm = (data) => {
@@ -51,7 +53,12 @@ const CreateProperty = () => {
 		//display spinner
 		$('#spinner').fadeIn()
 
-		let values = { ...data, description: descriptionValue, amenities }
+		let values = {
+			...data,
+			property_fact: { ...data.property_fact },
+			description: descriptionValue,
+			amenities
+		}
 
 		Axios.post('/properties', values).then(data => {
 			toast('Listing created successfully', { type: 'success' })
@@ -66,20 +73,16 @@ const CreateProperty = () => {
 			let target = $('#main #create-property')
 
 			if (target.length) {
-
 				const pos = $(target).offset().top
 				// animated top scrolling
 				$('#main').animate({ scrollTop: pos });
 			}
-
 		})
-
 	}
 
 	return (
 
 		<div className='relative' id='create-property'>
-
 			<div className='md:w-11/12 mx-auto'>
 				<div className='px-5 md:px-0'>
 					<div className='pt-5'>
@@ -122,7 +125,6 @@ const CreateProperty = () => {
 														</ul>
 													</div>
 												</div>)}
-
 										</div>
 
 										<div>
@@ -179,8 +181,8 @@ const CreateProperty = () => {
 
 										<div>
 											<label htmlFor="" className='block'>Property category</label>
-											<select name="property_category"
-												{...register('property_category', { required: "Please choose the property category" })}
+											<select name="category"
+												{...register('category', { required: "Please choose the property category" })}
 												className='form-select bg-transparent border w-full'    >
 												<option value="">Choose property type</option>
 												<option value="sell">For sell</option>
@@ -189,14 +191,14 @@ const CreateProperty = () => {
 												<option value="land">Land</option>
 											</select>
 
-											{errors.property_category && (
-												<p className="text-red-400 text-xs">{errors.property_category.message}</p>
+											{errors.category && (
+												<p className="text-red-400 text-xs">{errors.category.message}</p>
 											)}
 										</div>
 
 										<div>
 											<label htmlFor="" className='block'>other category</label>
-											<select name="property_category"
+											<select name="other_category"
 												{...register('other_category', { required: "Please choose the property category" })}
 												defaultValue={'any'}
 												className='form-select bg-transparent border w-full'>
@@ -344,7 +346,7 @@ const CreateProperty = () => {
 												<div className='flex items-center w-full space-x-2'>
 													<div className='w-[60%] flex-1'>
 														<input type="number"
-															{...register('property_fact.property_size', { required: "Please provide property size" })}
+															{...register('property_fact.size', { required: "Please provide property size" })}
 															className='form-input bg-transparent border w-full'
 															placeholder='Enter property size' />
 													</div>
@@ -366,7 +368,7 @@ const CreateProperty = () => {
 												</div>
 												{errors.property_fact && (
 													<p className="text-red-400 text-xs">
-														{errors.property_fact?.property_size.message}
+														{errors.property_fact?.size.message}
 													</p>
 												)}
 												{errors.property_fact && (
@@ -383,7 +385,6 @@ const CreateProperty = () => {
 														className='form-input bg-transparent border w-full ' />
 												</div>
 											</>}
-
 										</div>
 
 									</div>
@@ -395,17 +396,14 @@ const CreateProperty = () => {
 											<div className='mt-3'>
 												<div className='bg-slate-600'>
 													<div className='flex flex-wrap items-center gap-2'>
-
-														{amenities.map((amenitie, i) => {
+														{amenities?.map((amenitie, i) => {
 															return <SelectedContainer key={i}
-																name={amenitie.amenities}
-																setValues={setAmenities} />
+																name={amenitie} setValues={setAmenities} />
 														})}
-
 													</div>
 												</div>
 												<div className='relative'>
-													<Datalist setValues={setAmenities} />
+													<Datalist setAmenities={setAmenities} />
 												</div>
 
 											</div>

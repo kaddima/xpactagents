@@ -16,6 +16,7 @@ import { BsCardImage } from 'react-icons/bs';
 import Axios from '../../utility/axios';
 import { hideLoading, showLoading } from '../../utility/loading';
 import States from '../components/PropertySearch/States';
+import errorHandler from '../../utility/errorHandler';
 
 const EditProperty = () => {
 
@@ -73,7 +74,7 @@ const EditProperty = () => {
 		Axios.put(`/properties/${property_id}`, values).then(data => {
 			toast('Update successful', { type: 'success' })
 		}).catch(e => {
-			console.log(e.response)
+			errorHandler(e)
 		}).finally(() => {
 			//display spinner
 			$('#spinner').fadeOut()
@@ -107,10 +108,8 @@ const EditProperty = () => {
 				return { ...prev, published: prev.published == 1 ? 0 : 1 }
 			})
 		}).catch(e => {
-
-			console.log(e.response)
+			errorHandler(e)
 		}).finally(() => {
-
 			hideLoading()
 		})
 
@@ -127,8 +126,7 @@ const EditProperty = () => {
 			setPropertyDetails(property)
 			setAmenities(property.amenities)
 		}).catch(e => {
-
-			console.log(e.response)
+			errorHandler(e)
 		})
 	}, [])
 
@@ -258,7 +256,9 @@ const EditProperty = () => {
 
 										<div>
 											<label htmlFor="" className='block'>Property category</label>
-											<select name="property_category" {...register('property_category', { required: "Please choose the property category" })} className='form-select bg-transparent border w-full dark:border-slate-800'    >
+											<select name="property_category" 
+											{...register('category', { required: "Please choose the property category" })} 
+											className='form-select bg-transparent border w-full dark:border-slate-800'    >
 												<option value="">Choose property type</option>
 												<option value="sell">For sell</option>
 												<option value="rent">For rent</option>
@@ -273,7 +273,7 @@ const EditProperty = () => {
 
 										<div>
 											<label htmlFor="" className='block'>other category</label>
-											<select name="property_category" {...register('other_category', { required: "Please choose the property category" })} defaultValue={'any'} className='form-select bg-transparent border w-full dark:border-slate-800'>
+											<select name="other_category" {...register('other_category', { required: "Please choose the property category" })} defaultValue={'any'} className='form-select bg-transparent border w-full dark:border-slate-800'>
 												<option value="modern">Modern</option>
 												<option value="lux">Luxury</option>
 												<option value="beach">Beach</option>

@@ -6,9 +6,11 @@ import $ from 'jquery'
 const Datalist = ({ setAmenities=()=>{} }) => {
 
 	const [showForm, setShowForm] = useState(false)
-	const [btnDisabled, setBtnDisabled] = useState(false)
+	const [btnDisabled] = useState(false)
 
-	const { handleSubmit, register, formState: { errors }, reset } = useForm()
+	const { handleSubmit, 
+		register, 
+		formState: { errors }, reset } = useForm()
 
 	const onAdd = (data) => {
 		//empty the form
@@ -16,14 +18,12 @@ const Datalist = ({ setAmenities=()=>{} }) => {
 
 		setAmenities(state => {
 			let arr = []
-
 			//prevent duplicate amenities
 			for (let i = 0; i < state.length; i++) {
 				if (state[i] == data.amenities) {
 					return state
 				}
 			}
-
 			return [...state, data.amenities]
 		})
 

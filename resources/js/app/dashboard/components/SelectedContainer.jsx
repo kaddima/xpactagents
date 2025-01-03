@@ -1,5 +1,4 @@
 import React from 'react'
-
 import { MdRemove } from "react-icons/md"
 
 const SelectedContainer = ({ name, setValues }) => {
