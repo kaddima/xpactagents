@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { useMemo } from 'react'
 import { updateFavorites, updateProfile } from '../store/userSlice'
+import errorHandler from '../../utility/errorHandler'
 
 
 const PropertyCard = ({ data: v, listState = false }) => {

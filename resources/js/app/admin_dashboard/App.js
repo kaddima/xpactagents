@@ -15,7 +15,6 @@ import { getGeneralData } from './store/userSlice';
 import "./App.css"
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
-import CreateProperty from './pages/CreateProperty';
 import ListingsPage from './pages/ListingsPage';
 import Account from './pages/account/Account';
 import CompleteRegistration from './pages/account/CompleteRegistration';
@@ -47,7 +46,6 @@ function App() {
 
 	useEffect(() => {
 		dispatch(getGeneralData())
-
 	}, [])
 
 	return (

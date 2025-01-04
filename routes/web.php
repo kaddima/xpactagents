@@ -96,7 +96,7 @@ Route::middleware("auth")->group(function () {
 		Route::post('/admin/users/verification-response', [AccountController::class, 'verificationResponse']);
 		Route::get('/admin/users/agent-lists', [AccountController::class, 'adminUsersAgent']);
 		Route::get('/admin/users/user-details', [AccountController::class, 'getUserAccount']);
-		Route::get('/admin/properties/overview', [ListingController::class, 'adminPropertiesOverview']);
+		Route::get('/admin/overview', [ListingController::class, 'adminOverviewData']);
 		Route::get('/admin/properties', [ListingController::class, 'adminAllListings']);
 		Route::get('/admin/properties/{id}', [ListingController::class, 'adminPropertyDetails']);
 		Route::get('/admin/agents/{agent_id}/properties', [ListingController::class, 'adminAgentListings']);

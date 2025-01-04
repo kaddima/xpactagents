@@ -100,8 +100,8 @@ class PropertyController extends BaseController
 
 	public function getFavoriteProperties(Request $request)
 	{
-		$currentUser = $request->user();
-		$properties = $this->propertyService->getFavoriteProperties($currentUser);
+		$filter = $this->validate($request, ValidationRules::propertyFiltersRules());
+		$properties = $this->propertyService->getFavoriteProperties($request->user(), $filter);
 		return $this->sendResponse($properties);
 	}
 

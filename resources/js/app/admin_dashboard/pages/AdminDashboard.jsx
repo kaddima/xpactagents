@@ -12,6 +12,7 @@ import { useEffect } from 'react'
 import Axios from '../../utility/axios'
 import VerificationRequest from '../components/verification/VerificationRequest'
 import errorHandler from '../../utility/errorHandler'
+import { useSelector } from 'react-redux'
 
 
 const Card = ({ icon, name, number }) => {
@@ -30,19 +31,9 @@ const Card = ({ icon, name, number }) => {
 }
 
 const AdminDashboard = () => {
-	const [propertyDetails, setPropertyDetails] = useState()
+	const propertyDetails = useSelector(state=>state.user.propertyDetails)
 	//get state account
 	const navigate = useNavigate()
-
-	useEffect(() => {
-
-		Axios.get('/admin/properties/overview').then(data => {
-			setPropertyDetails(data.data.data.propertyDetails)
-		}).catch(e => {
-			errorHandler(e)
-		})
-
-	}, [])
 
 	return (
 		<div className='w-full h-full px-3'>
@@ -118,8 +109,6 @@ const AdminDashboard = () => {
 													</div>
 												</li>
 											})}
-
-
 										</ul>) :
 
 										<div className='h-[calc(100%-3rem)] flex items-center justify-center'>

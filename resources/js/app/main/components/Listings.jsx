@@ -3,8 +3,13 @@ import { Link, useSearchParams } from 'react-router-dom'
 import PropertyCard from './PropertyCard'
 import { hideLoading, showLoading } from '../../utility/loading'
 import Axios from '../../utility/axios'
+import errorHandler from '../../utility/errorHandler'
 
-const Listings = ({ propertyListing = [], pagination = false, setProperty = () => { } }) => {
+const Listings = ({ 
+	setProperty,
+	propertyListing = [], 
+	pagination = false, 
+}) => {
 	const [showMore, setShowMore] = useState(pagination)
 	const [searchParams, setSearchParams] = useSearchParams()
 
@@ -15,7 +20,6 @@ const Listings = ({ propertyListing = [], pagination = false, setProperty = () =
 			param[key] = value;
 		})
 		return param
-
 	}, [searchParams])
 
 	const onshowMore = (url) => {
@@ -31,8 +35,7 @@ const Listings = ({ propertyListing = [], pagination = false, setProperty = () =
 				return { data: prev.data.concat(data.data.data.data), meta: data.data.data.meta }
 			})
 		}).catch(e => {
-
-			console.log(e)
+			errorHandler(e)
 		}).finally(() => {
 			hideLoading()
 		})

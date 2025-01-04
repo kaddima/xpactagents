@@ -3,11 +3,13 @@ import { Link, useSearchParams } from 'react-router-dom'
 import PropertyCard from './PropertyCard'
 import { hideLoading, showLoading } from '../../utility/loading'
 import Axios from '../../utility/axios'
-import qs from 'query-string';
 import errorHandler from '../../utility/errorHandler'
 
-const Listings = ({ propertyListing = [], listState = [], pagination = false, setProperty = () => { }, moreParams = {} }) => {
-
+const Listings = ({ propertyListing = [], 
+	setProperty, 
+	listState = [], 
+	pagination = false
+}) => {
 	const [showMore, setShowMore] = useState(pagination)
 	const [searchParams, setSearchParams] = useSearchParams()
 
@@ -21,7 +23,6 @@ const Listings = ({ propertyListing = [], listState = [], pagination = false, se
 	}, [searchParams])
 
 	const onshowMore = (url) => {
-
 		//parse the url
 		let link = new URL(url)
 		let path = link.pathname
@@ -30,15 +31,13 @@ const Listings = ({ propertyListing = [], listState = [], pagination = false, se
 		showLoading()
 		Axios.get(path, { params: { ...params, page: pageParam } }).then(data => {
 			setProperty(prev => {
-				let appendedListing = { data: prev.data.concat(data.data.data.data), meta: data.data.data.meta }
-				return { ...data.data.data, ...appendedListing }
+				return { data: prev.data.concat(data.data.data.data), meta: data.data.data.meta }
 			})
 		}).catch(e => {
 			errorHandler(e)
 		}).finally(() => {
 			hideLoading()
 		})
-
 	}
 
 	useEffect(() => {

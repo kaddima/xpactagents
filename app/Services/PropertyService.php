@@ -195,11 +195,13 @@ class PropertyService
     return $currentUser->favorites; // Return the fresh favorites collection
   }
 
-  public function getFavoriteProperties($currentUser)
+  public function getFavoriteProperties($currentUser, $filters = [])
   {
-    return PropertyResource::collection($currentUser->favorites->map(function ($property) {
-      return new PropertyResource($property, true); // Wrap each property with PropertyResource
-    }));
+    $perPage = isset($filters['limit']) ? (int)$filters['limit'] : env("PAGINATE_NUMBER"); // Default to 25
+    $page = isset($filters['page']) ? (int)$filters['page'] : 1; // Default to page 1
+
+    $properties = $currentUser->favorites()->paginate($perPage);
+    return new PropertyCollection($properties);
   }
 
   public function deleteProperty($property_id, $currentUser)

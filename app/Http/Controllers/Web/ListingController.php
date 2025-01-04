@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Api\PropertyController;
 use App\Http\Controllers\BaseController;
 use App\Rules\ValidationRules;
+use App\Services\GeneralDataService;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,13 +14,16 @@ class ListingController extends BaseController
 {
 	protected $propertyService;
 	protected $apiController;
+	protected $generalDataService;
 
 	public function __construct(
 		PropertyService $propertyService,
-		PropertyController $apiController
+		PropertyController $apiController,
+		GeneralDataService $generalDataService
 	) {
 		$this->propertyService = $propertyService;
 		$this->apiController = $apiController;
+		$this->generalDataService = $generalDataService;
 	}
 	
 	// ===== GENERAL CONTROLLER
@@ -102,60 +106,12 @@ class ListingController extends BaseController
 		return $this->apiController->deleteProperty($request, $id);
 	}
 
-
-
 	// ===== ADMIN PROPERTY CONTROLLER
-	public function adminPropertiesOverview()
+	public function adminOverviewData(Request $request)
 	{
-
-		if (auth()->check()) {
-
-			$obj = new \stdClass();
-
-			//get count for rent,land,house for sell,short-let
-			$forSellCount  = DB::table('property')
-				->where(['category' => 'sell'])
-				->count();
-
-			$rentCount  = DB::table('property')
-				->where(['category' => 'rent',])
-				->count();
-
-			$landCount  = DB::table('property')
-				->where(['category' => 'land',])
-				->count();
-
-			$short_letCount  = DB::table('property')
-				->where(['category' => 'short_let',])
-				->count();
-
-			$propertyCount  = DB::table('property')
-				->count();
-			$unpublishedPropertyCount  = DB::table('property')
-				->where(['published' => 0])
-				->count();
-
-			$unpublishedProperty = DB::table('property')
-				->where(['published' => 0])
-				->limit(3)
-				->get();
-
-			$obj->forSellCount = $forSellCount;
-			$obj->rentCount = $rentCount;
-			$obj->landCount = $landCount;
-			$obj->shortLetCount = $short_letCount;
-			$obj->propertyCount = $propertyCount;
-			$obj->unpublishedProperty = $unpublishedProperty;
-			$obj->unpublishedPropertyCount = $unpublishedPropertyCount;
-
-			return json_encode([
-				'status' => 1,
-				'data' => [
-					'propertyDetails' => $obj
-
-				]
-			]);
-		}
+		return $this->sendResponse(
+			$this->generalDataService->adminOverviewData($request->user())
+		);
 	}
 
 	public function adminAllListings(Request $request)
