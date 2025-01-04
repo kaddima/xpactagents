@@ -69,7 +69,7 @@ function App() {
 						<div className={`flex z-[100] bg-neutral-100 dark:bg-slate-900 w-full`}>
 							<Navbar />
 						</div>
-						<div className='overflow-auto w-full overflow-x-hidden md:px-5 pt-1'
+						<div className='overflow-auto w-full overflow-x-hidden md:px-2 pt-1'
 							id='main'
 							style={{ height: "calc(100% - 94px)" }}>
 							<Routes>

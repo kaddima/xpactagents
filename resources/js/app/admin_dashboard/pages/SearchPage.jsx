@@ -7,7 +7,7 @@ import errorHandler from '../../utility/errorHandler'
 
 const SearchPage = () => {
 
-  const [propertyListing, setPropertyListing] = useState({data:[],meta:{}})
+  const [propertyListing, setPropertyListing] = useState({ data: [], meta: {} })
   const [searchParams, setSearchParams] = useSearchParams()
 
   useEffect(() => {
@@ -28,14 +28,12 @@ const SearchPage = () => {
   }
 
   return (
-    <div className='h-full w-full px-5 pb-5 pt-3 overflow-scroll'>
+    <div className='h-full w-full px-1 pb-5 pt-3 overflow-scroll'>
       <div className='mb-2'>
         <h1 className='text-2xl font-bold'>Search</h1>
         <p className='text-xs'>All search matches are available here</p>
       </div>
-
       <Listings propertyListing={propertyListing?.data} pagination={propertyListing.meta} setProperty={setPropertyListing} />
-
     </div>
   )
 }

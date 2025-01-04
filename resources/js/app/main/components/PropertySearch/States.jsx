@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { states_n_lga } from '../../data/data'
 
-const States = ({setSearchValues}) => {
+const States = ({setSearchValues=()=>{},register=()=>{},rounded=false,className,optState}) => {
 
     const [state,setState] = useState({state:null,lga:null})
 
@@ -11,6 +11,11 @@ const States = ({setSearchValues}) => {
         let value = e.target.value
 
         setSearchValues(prev=>{
+
+            if(name == 'state'){
+
+                return {...prev, state_lga:{[name]:value}}
+            }
 
            return {...prev, state_lga:{...prev.state_lga, [name]:value}}
         })
@@ -30,9 +35,13 @@ const States = ({setSearchValues}) => {
 
                 return states_n_lga[i].lgas
             }
+
+            if(optState && states_n_lga[i].name.toLowerCase() == optState?.toLowerCase()){
+                return states_n_lga[i].lgas
+            }
         }
 
-    },[state])
+    },[state,optState])
 
     useEffect(()=>{
 
@@ -41,30 +50,28 @@ const States = ({setSearchValues}) => {
             setState({state:null,lga:null})
         }
     },[])
-    
+
   return (
     <div className='w-full'>
         <div className='flex items-center space-x-3 w-full'>
             <div className='flex-1'>
-                <input list="states" name="state" onChange={onChange} className='form-select w-full dark:bg-transparent dark:border-slate-600' placeholder='Choose States'/>
+                <select  {...register('state',{required:"Please choose a state"})} name="state" onChange={onChange} className={`${rounded} form-select w-full dark:bg-transparent dark:border-slate-800 ${className}`} placeholder='Choose States'>
+                    <option value="">Select the state</option>
+                     {states_n_lga.map((v,i)=>{
 
-                <datalist id="states" className='form-select w-full'>
-                {states_n_lga.map((v,i)=>{
-
-                    return <option key={i} value={v.name}/>
-                })}
-                </datalist>
+                        return <option key={i} value={v.name}>{v.name}</option>
+                    })}
+                </select>
             </div>
 
             <div className='flex-1'>
-                <input list="lga" name="lga" onChange={onChange} className='form-select w-full dark:bg-transparent dark:border-slate-600' placeholder='Choose LGA'/>
+                <select {...register('lga',{required:"Choose the Lga"})} name='lga' defaultValue={'Epe'} onChange={onChange} className={`${rounded} form-select w-full dark:bg-transparent dark:border-slate-800 ${className}`} placeholder='Choose LGA'>
+                    <option value="">Select lga</option>
+                    {lgas ? lgas.map((v,i)=>{
 
-                <datalist id="lga" className='form-select w-full'>
-                {lgas ? lgas.map((v,i)=>{
-
-                    return <option key={i} value={v}/>
-                }) : null}
-                </datalist>
+                    return <option key={i} value={v}>{v}</option>
+                    }) : null}
+                </select>
             </div>
         </div>
        

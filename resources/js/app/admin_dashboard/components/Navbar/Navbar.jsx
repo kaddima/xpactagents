@@ -82,7 +82,7 @@ const Navbar = () => {
 				</button>
 			</div>
 			<div className='flex items-center md:justify-between justify-end gap-2 w-full'>
-				<div >
+				<div>
 					<PropertySearch/>
 				</div>
 				<div>

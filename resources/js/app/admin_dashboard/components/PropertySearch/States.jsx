@@ -1,70 +1,83 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { states_n_lga } from '../../data/data'
 
-const States = ({ setSearchValues }) => {
+const States = ({setSearchValues=()=>{},register=()=>{},rounded=false,className,optState}) => {
 
-	const [state, setState] = useState({ state: null, lga: null })
+    const [state,setState] = useState({state:null,lga:null})
 
-	const onChange = (e) => {
-		let name = e.target.name
-		let value = e.target.value
+    const onChange = (e)=>{
 
-		setSearchValues(prev => {
-			return { ...prev, state_lga: { ...prev.state_lga, [name]: value } }
-		})
+        let name = e.target.name
+        let value = e.target.value
 
-		setState(prev => {
-			return { ...prev, [name]: value }
-		})
-	}
+        setSearchValues(prev=>{
 
-	const lgas = useMemo(() => {
-		for (let i = 0, len = states_n_lga.length; i < len; i++) {
+            if(name == 'state'){
 
-			if (state.state && states_n_lga[i].name.toLowerCase() == state.state.toLowerCase()) {
-				return states_n_lga[i].lgas
-			}
-		}
-	}, [state])
+                return {...prev, state_lga:{[name]:value}}
+            }
 
-	useEffect(() => {
-		return () => {
-			setState({ state: null, lga: null })
-		}
-	}, [])
+           return {...prev, state_lga:{...prev.state_lga, [name]:value}}
+        })
 
-	return (
-		<div className='w-full'>
-			<div className='flex items-center space-x-3 w-full'>
-				<div className='flex-1'>
-					<input list="states"
-						name="state"
-						onChange={onChange}
-						className='form-select w-full dark:bg-transparent dark:border-slate-600'
-						placeholder='Choose States' />
+        setState(prev=>{
 
-					<datalist id="states" className='form-select w-full'>
-						{states_n_lga.map((v, i) => {
-							return <option key={i} value={v.name} />
-						})}
-					</datalist>
-				</div>
+            return {...prev, [name]:value}
+        })
+        
+    }
 
-				<div className='flex-1'>
-					<input list="lga"
-						name="lga"
-						onChange={onChange}
-						className='form-select w-full dark:bg-transparent dark:border-slate-600'
-						placeholder='Choose LGA' />
-					<datalist id="lga" className='form-select w-full'>
-						{lgas ? lgas.map((v, i) => {
-							return <option key={i} value={v} />
-						}) : null}
-					</datalist>
-				</div>
-			</div>
-		</div>
-	)
+    const lgas = useMemo(()=>{
+
+        for(let i=0,len=states_n_lga.length; i<len; i++){
+
+            if(state.state && states_n_lga[i].name.toLowerCase() == state.state.toLowerCase()){
+
+                return states_n_lga[i].lgas
+            }
+
+            if(optState && states_n_lga[i].name.toLowerCase() == optState?.toLowerCase()){
+                return states_n_lga[i].lgas
+            }
+        }
+
+    },[state,optState])
+
+    useEffect(()=>{
+
+        return ()=>{
+
+            setState({state:null,lga:null})
+        }
+    },[])
+
+  return (
+    <div className='w-full'>
+        <div className='flex items-center space-x-3 w-full'>
+            <div className='flex-1'>
+                <select  {...register('state',{required:"Please choose a state"})} name="state" onChange={onChange} className={`${rounded} form-select w-full dark:bg-transparent dark:border-slate-800 ${className}`} placeholder='Choose States'>
+                    <option value="">Select the state</option>
+                     {states_n_lga.map((v,i)=>{
+
+                        return <option key={i} value={v.name}>{v.name}</option>
+                    })}
+                </select>
+            </div>
+
+            <div className='flex-1'>
+                <select {...register('lga',{required:"Choose the Lga"})} name='lga' defaultValue={'Epe'} onChange={onChange} className={`${rounded} form-select w-full dark:bg-transparent dark:border-slate-800 ${className}`} placeholder='Choose LGA'>
+                    <option value="">Select lga</option>
+                    {lgas ? lgas.map((v,i)=>{
+
+                    return <option key={i} value={v}>{v}</option>
+                    }) : null}
+                </select>
+            </div>
+        </div>
+       
+     
+    </div>
+  )
 }
 
 export default States

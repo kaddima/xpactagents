@@ -39,8 +39,6 @@ const PropertySearch = () => {
 		e.stopPropagation()
 		let action = $(e.currentTarget).data('value')
 		setSearchNav(action)
-		// console.log(action)qaq1qqzqaq
-
 	}
 
 	useEffect(() => {
@@ -55,7 +53,7 @@ const PropertySearch = () => {
 	}, [])
 
 	return (
-		<div className='property-search w-full   max-w-[850px] mx-auto absolute md:relative z-[800]'>
+		<div className='property-search w-full max-w-[850px] mx-auto z-[800]'>
 			<div className='flex items-center justify-between'>
 				<div className='flex items-center space-x-3'>
 					<div className='hidden md:flex flex-col max-w-[150px] '>
@@ -158,20 +156,20 @@ const PropertySearch = () => {
 					</div>
 				</div>
 
-
 				<div className='flex flex-col md:max-w-[150px]'>
 					<button data-value={'allfilters'} onClick={onSearchNavClick} className='hidden border dark:border-slate-800 px-3 h-[2.5rem] rounded md:flex items-center space-x-3 text-sm '>
 						<TbChartCandle size={24} className='text-slate-600' />
 						<span>All Filters </span>
 					</button>
+					<div data-value={'allfilters'} onClick={onSearchNavClick} className="p-2 bg-rose-500 rounded-full block md:hidden text-slate-200">
+						<BiSearch size={18} />
+					</div>
 
 					<div className={`relative w-0 h-0 overflow-visible z-[800] cursor-auto`}>
 						<AllFilters isOpen={searchNav == 'allfilters' ? true : false} onClose={() => { setSearchNav(null); setShowSearch(false) }} />
 					</div>
 				</div>
-
 			</div>
-
 		</div>
 	)
 }

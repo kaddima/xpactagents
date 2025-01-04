@@ -64,7 +64,7 @@ function App() {
 							<Navbar />
 						</div>
 						
-						<div className='overflow-auto w-full overflow-x-hidden md:px-8' 
+						<div className='overflow-auto w-full overflow-x-hidden md:px-2' 
 						id='main' style={{ height: "calc(100% - 90px)" }}>
 							<Routes>
 								{/* Dashbord */}
