@@ -25,14 +25,6 @@ const BedsNBaths = ({setSearchValues}) => {
         })
 
     }
-
-    // useEffect(()=>{
-
-    //     setSearchValues(prev=>{
-
-    //         return {...prev, beds_baths:value}
-    //      })
-    // },[])
     
   return (
     <div className='w-full  '>

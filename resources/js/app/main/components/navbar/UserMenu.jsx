@@ -110,7 +110,9 @@ const UserMenu = () => {
 
 							<MenuItem onClick={() => {
 								dispatch(resetUserInfo())
-								Axios.post('/logout')
+								Axios.post('/logout').then(data=>{
+									location.href = "/"
+								})
 								toggleOpen()
 								toast('You are logged out', { type: 'success' })
 

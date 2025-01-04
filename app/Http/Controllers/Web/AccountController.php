@@ -139,11 +139,8 @@ class AccountController extends BaseController
 
 	public function updateLastSeen()
 	{
-
 		$currentUser = auth()->user();
-
 		$date = date('Y-m-d H:i:s');
-
 		$currentUser->last_seen = $date;
 
 		DB::table('users')

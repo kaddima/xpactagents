@@ -53,6 +53,11 @@ class MessageServices
       'created_by' => $currentUser->id
     ])->first();
 
+    $agentConversation = $this->agentConversationRepo
+    ->getQuery()
+    ->where("property_id", $data['property_id'])
+    ->where("agent_id",$property->creator_id)
+    ->first();
 
     if (!$conversation) {
       // add the user conversation
@@ -60,7 +65,9 @@ class MessageServices
         'property_id' => $data['property_id'],
         'created_by' => $currentUser->id
       ]);
+    }
 
+    if(!$agentConversation){
       //add the agent conversation
       $this->agentConversationRepo->create([
         "agent_id" => $property->creator_id,

@@ -7,6 +7,7 @@ import Message from '../../components/message/Message'
 import EmptyState from '../../components/EmptyState'
 import Axios from '../../../utility/axios'
 import { FaEllipsisV } from 'react-icons/fa'
+import errorHandler from '../../../utility/errorHandler'
 
 const MessageLayout = () => {
 
@@ -22,14 +23,12 @@ const MessageLayout = () => {
 		Axios.post('/users/lastseen').then(data => {
 			dispatch(updateUserInfo(data.data.data))
 		}).catch(e => {
-			console.log(e.response)
+			errorHandler(e)
 		})
-
 	}, [])
 
 
 	if (!propertyOfInterest.data?.length) {
-
 		return <EmptyState title='Empty messages' subtitle='You currently do not have any messages' />
 	}
 
@@ -50,7 +49,6 @@ const MessageLayout = () => {
 						<h1 className='text-xs uppercase font-bold pb-3 mb-3 px-2 border-b dark:border-b-slate-700'>Properties of interest</h1>
 						<div className='space-y-5 max-h-[60vh] overflow-y-scroll'>
 							{propertyOfInterest.data.map((v, i) => {
-
 								return <div key={i}
 									onClick={() => { setSearchParams({ 'property-of-interest': v.property_details.id }) }}
 									className={`w-full px-2 text-[10px] relative transition cursor-pointer 

@@ -27,7 +27,7 @@ const UsersCard = ({ data, conversation_id, lastMsg, unreadCount }) => {
 				</div>
 				<div className='flex-1 w-[170px]'>
 					<div className='flex justify-between items-center mb-1 text-[11px]'>
-						<h1 className=' font-bold text-sky-600'>{data.first_name} {data.last_name}</h1>
+						<h1 className=' font-bold text-sky-600'>{data.first_name}</h1>
 						<p className='text-[9px] font-semibold'>
 							{formatDistance(new Date(lastMsg.created_at), new Date(), { addSuffix: false })}</p>
 					</div>

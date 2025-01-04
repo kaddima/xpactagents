@@ -9,6 +9,7 @@ import {MdDashboard, MdOutlineCreateNewFolder,MdOutlineLogout} from 'react-icons
 import {navLinks} from '../../data/data'
 import { TbDashboard } from 'react-icons/tb'
 import { FaUserShield } from 'react-icons/fa'
+import Axios from '../../../utility/axios'
 
 const Aside = ({setIsOpen}) => {
 
@@ -73,9 +74,9 @@ const Aside = ({setIsOpen}) => {
 						<NavLink 
 							to={`/admin/adms`} 
 							onClick={handleCloseSideBar}
-							className={({isActive})=>isActive ? 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800' : 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}
-							
-						>
+							className={({isActive})=>isActive ? 
+							'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800' 
+							: 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}>
 							<span className='text-xl'><FaUserShield /></span>
 							<div>
 								<p>ADMS</p>
@@ -96,13 +97,16 @@ const Aside = ({setIsOpen}) => {
 						</a>	
 					</div>
 					<div className='w-full '>
-						<a href="/logout" className="mt-3 py-2 pl-5 flex space-x-2 items-center text-sm font-semibold hover:bg-gray-100 dark:hover:bg-slate-800">
+						<a onClick={()=>{
+							Axios.post("/logout")
+							location.href = "/"
+						}} 
+						className="mt-3 py-2 pl-5 flex space-x-2 items-center text-sm font-semibold hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer">
 							<span className='text-xl'><MdOutlineLogout/></span>
 							<p>Logout</p>
 						</a>
 					</div>
 				</div>
-
 			</div>
 		</div>
 	)

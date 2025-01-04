@@ -83,8 +83,8 @@ const Price = ({setSearchValues}) => {
         </div>
 
         <div className='flex items-center space-x-4 mt-7'>
-            <input type="text" onChange={(e)=>{let v = e.target.value;onChange(v)}} className='form-input rounded border-slate-300 dark:bg-transparent dark:border-slate-800 font-[400] w-full' value={rangeValue[0] ? Number(rangeValue[0]) : ''} placeholder='Enter min'/>
-            <input type="text" onChange={(e)=>{let v = e.target.value;onChange(null,v)}}  className='form-input rounded border-slate-300 dark:bg-transparent dark:border-slate-800 font-[400] w-full' value={rangeValue[1] ? Number(rangeValue[1]) : ''} placeholder='Enter max'/>
+            <input type="number" onChange={(e)=>{let v = e.target.value;onChange(v)}} className='form-input rounded dark:bg-transparent border-slate-300 dark:border-slate-600 font-[400] w-full' value={rangeValue[0] ? Number(rangeValue[0]) : ''} placeholder='Enter min'/>
+            <input type="number" onChange={(e)=>{let v = e.target.value;onChange(null,v)}}  className='form-input rounded  dark:bg-transparent border-slate-300 dark:border-slate-600 font-[400] w-full' value={rangeValue[1] ? Number(rangeValue[1]) : ''} placeholder='Enter max'/>
         </div>
         
     </div>

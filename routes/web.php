@@ -88,7 +88,6 @@ Route::middleware("auth")->group(function () {
 	Route::post('/users/id-verification', [UserActionController::class, 'idVerifyRequest']);
 
 	//ADMIN LINKS
-
 	Route::middleware(["auth", "admin"])->group(function(){
 		Route::get('/admin/users/overview-data', [AccountController::class, 'adminUsersOverview']);
 		Route::get('/admin/users/regular', [AccountController::class, 'adminUsersRegular']);

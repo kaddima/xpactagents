@@ -6,7 +6,7 @@ import { homeType } from '../../data/data'
 
 const HomeType = ({setSearchValues}) => {
 
-    const [value, setValue] = useState()
+    const [value, setValue] = useState(null)
     
     const onClick = (e)=>{
         e.preventDefault()

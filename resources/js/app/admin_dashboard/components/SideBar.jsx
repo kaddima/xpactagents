@@ -1,11 +1,9 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { NavLink, useNavigate } from "react-router-dom"
-
+import { NavLink } from "react-router-dom"
 import {
 	MdDarkMode,
 	MdDashboard,
-	MdOutlineCreateNewFolder,
 	MdOutlineDarkMode,
 	MdOutlineLogout
 } from 'react-icons/md'
@@ -15,21 +13,22 @@ import { setActiveMenu_screenSize, changeDisplayMode } from '../store/mainSlice'
 import { navLinks } from '../data/data'
 import { TbDashboard } from 'react-icons/tb'
 import { FaUserShield } from 'react-icons/fa'
+import Axios from '../../utility/axios'
 
 const Sidebar = () => {
 
 	const dispatch = useDispatch()
 	const activeMenu = useSelector(state => state.main.navMenu.activeMenu)
 	const screenSize = useSelector(state => state.main.screenSize)
-
 	const currentUser = useSelector(state => state.user.profile)
+	const displayMode = useSelector(state => state.main.displayMode)
+
 	const handleCloseSideBar = () => {
 		if (activeMenu && screenSize <= 900) {
 			dispatch(setActiveMenu_screenSize({ active: false }))
 		}
 	}
 
-	const displayMode = useSelector(state => state.main.displayMode)
 	const changeDIsplayMode = () => {
 		let mode;
 		if (displayMode == "dark") {
@@ -39,7 +38,6 @@ const Sidebar = () => {
 		}
 		dispatch(changeDisplayMode(mode))
 	}
-
 
 	return (
 		<div className='h-full md:overflow-hidden overflow-auto flex flex-col bg-neutral-100 dark:bg-slate-900'>
@@ -142,9 +140,12 @@ const Sidebar = () => {
 							</div>
 						</a>
 					</div>
-					<div className='w-full '>
-						<a href="/logout" className="mt-3 py-2 pl-5 flex space-x-2 items-center text-sm font-semibold
-						 hover:bg-gray-100 dark:hover:bg-slate-800">
+					<div className='w-full'>
+						<a onClick={() => {
+							Axios.post('/logout')
+							location.href = "/"
+						}} className="mt-3 py-2 pl-5 flex space-x-2 items-center text-sm font-semibold
+						 hover:bg-gray-100 dark:hover:bg-slate-800 cursor-pointer">
 							<span className='text-xl'><MdOutlineLogout /></span>
 							<p>Logout</p>
 						</a>
