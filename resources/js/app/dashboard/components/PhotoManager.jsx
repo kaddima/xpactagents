@@ -5,6 +5,7 @@ import { BsTrash } from 'react-icons/bs'
 import $ from 'jquery'
 import { toast } from 'react-toastify'
 import Axios from '../../utility/axios'
+import errorHandler from '../../utility/errorHandler'
 
 const PhotoManager = ({ property_id, images = [],
 	setFn, closePhotoManager }) => {
@@ -20,7 +21,7 @@ const PhotoManager = ({ property_id, images = [],
 			let newImages = images.filter((v) => v.id != image.id);
 			setFn(newImages)
 		}).catch((e) => {
-			console.log(e.response)
+			errorHandler(e)
 		}).finally(() => {
 
 			//display spinner

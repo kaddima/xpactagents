@@ -1,9 +1,6 @@
 import React, { useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Link, NavLink, useNavigate } from "react-router-dom"
-import axios from 'axios'
-import $ from 'jquery'
-
 import {
 	MdDarkMode,
 	MdDashboard,
@@ -18,6 +15,7 @@ import {
 } from '../store/mainSlice'
 
 import { navLinks } from '../data/data'
+import Axios from '../../utility/axios'
 
 const Sidebar = () => {
 	const currentUser = useSelector(state => state.user.profile)
@@ -98,8 +96,7 @@ const Sidebar = () => {
 								className={({ isActive }) => isActive ? 
 								`flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 
 								dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800` : 
-								'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}
-							>
+								'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}>
 								<span className='text-xl'>{link.icon}</span>
 								<div>
 									<p>{link.name}</p>
@@ -126,7 +123,7 @@ const Sidebar = () => {
 						</div>
 					</a>
 				</div>}
-				<div className='w-full '>
+				<div className='w-full cursor-pointer'>
 					<a onClick={() => {
 						Axios.post('/logout').then(data => {
 							location.href = "/"
@@ -135,7 +132,7 @@ const Sidebar = () => {
 						className="mt-3 py-2 pl-5 flex space-x-2 items-center text-sm font-semibold 
 						hover:bg-gray-100 dark:hover:bg-slate-800">
 						<span className='text-xl'><MdOutlineLogout /></span>
-						<p>Logout</p>
+						<span>Logout</span>
 					</a>
 				</div>
 

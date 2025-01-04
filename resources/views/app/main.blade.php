@@ -1,9 +1,9 @@
 @extends('layout')
 
-@section('title', 'heyyy')
+@section('title', 'xpactAgents')
 
 @section('app-style')
-<link rel="stylesheet" href="{{asset("css/app.css")}}">
+<link rel="stylesheet" href="{{asset('css/app.css')}}">
 
 @endsection
 

@@ -93,13 +93,6 @@ const EditProperty = () => {
 	}
 
 	const onPublished = (property_id, status) => {
-
-		if (currentUser.profile_complete != 1) {
-			toast('You have to complete your registration before you can publish your properties',
-				{ type: 'error' })
-			return
-		}
-
 		showLoading()
 
 		Axios.post(`/properties/${property_id}/published/${status}`).then(data => {

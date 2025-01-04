@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import $ from 'jquery'
 import { hideLoading, showLoading } from '../../utility/loading';
 import Axios from '../../utility/axios';
+import errorHandler from '../../utility/errorHandler';
 
 const ImageUpload = ({ uploadType = "property", property_id = null, getPhoto = false, fn }) => {
 
@@ -99,12 +100,10 @@ const ImageUpload = ({ uploadType = "property", property_id = null, getPhoto = f
 						if (getPhoto) {
 							fn(data.data.data)
 						}
-
 					}).catch(e => {
-						console.log(e.response)
+						errorHandler(e)
 					}).finally(() => {
 						hideLoading()
-
 					})
 
 				}, 'image/jpeg', quality)
@@ -115,27 +114,19 @@ const ImageUpload = ({ uploadType = "property", property_id = null, getPhoto = f
 
 
 	return (
-
 		<div className='w-full'>
 			<div className='w-full md:min-h-[150px] max-h-[220px] rounded-lg bg-gray-200 dark:bg-slate-900 overflow-hidden relative'>
 				<img src={image && URL.createObjectURL(image)} alt="" className='w-full md:min-h-[150px] max-h-[220px] object-cover' />
-
 				{image !== null && (<div className='w-10 h-10 rounded-full overflow-hidden bg-theme-color absolute bottom-1 right-0'>
 					<button className='text-white w-full h-full flex justify-center items-center ' onClick={uploadImage}><FaUpload /></button>
 				</div>)}
-
 			</div>
-
 			<div className='mt-2 border dark:border-slate-800 overflow-hidden w-full'>
 				<input id='property_image' className='w-full overflow-hidden' type="file" onChange={(e) => {
-
 					setImage(e.target.files[0])
-
 				}} />
 			</div>
-
 		</div>
-
 	)
 }
 

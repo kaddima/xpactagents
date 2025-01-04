@@ -13,6 +13,7 @@ import 'react-date-range/dist/theme/default.css'; // theme css file
 import { useSelector } from 'react-redux';
 import PhotoManager from '../components/PhotoManager';
 import Axios from '../../utility/axios';
+import errorHandler from '../../utility/errorHandler';
 
 
 const PropertyDetails = () => {
@@ -29,49 +30,6 @@ const PropertyDetails = () => {
 
 	const location = useLocation().hash
 
-	const handlePublish = () => {
-
-		$('#spinner').fadeIn()
-
-		Axios.post('/dashboard/property/user-action', { property_id: propertyID, type: 'publish_property' }).then(data => {
-
-			$('#spinner').fadeOut()
-
-			setPropertyDetails({ ...propertyDetails, published: data.data.data })
-
-		}).catch(e => {
-			$('#spinner').fadeOut()
-			console.log(e)
-		})
-
-	}
-
-	const handleYes = () => {
-
-		setModelVisible(false)
-
-		$('#spinner').fadeIn()
-
-		Axios.post('/dashboard/property/user-action', { property_id: propertyID, type: 'delete-property' }).then(data => {
-
-			$('#spinner').fadeOut()
-
-			if (data.data.data == 1) {
-
-				toast('property deleted successfully', { type: 'success' })
-
-				navigate(`/dashboard/listings`)
-			}
-
-		}).catch(e => {
-			$('#spinner').fadeOut()
-			console.log(e)
-		})
-
-	}
-	const handleNo = () => { setModelVisible(false) }
-
-
 	// Update property image
 	const setPropertyImage = (image) => {
 		setPropertyDetails(prev => {
@@ -85,7 +43,6 @@ const PropertyDetails = () => {
 
 	//scroll function
 	useEffect(() => {
-
 		let target = $(location)
 		if (location.length && target.length) {
 
@@ -101,14 +58,13 @@ const PropertyDetails = () => {
 		Axios.get(`/agents/properties/${propertyID}`).then(data => {
 			setPropertyDetails(data.data.data)
 		}).catch(e => {
-			console.log(e.response)
+			errorHandler(e)
 		})
 	}, [])
 
 
 
 	if (propertyDetails === null) {
-
 		return <div className='w-full h-full   flex items-center justify-center'>
 			<h1>Loading...</h1>
 		</div>

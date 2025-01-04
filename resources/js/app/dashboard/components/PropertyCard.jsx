@@ -36,11 +36,9 @@ const PropertyCard = ({ data: v, listState = false }) => {
 				toast('Property deleted', { type: 'success' })
 
 				if (listState !== false) {
-
 					listState(prev => {
 
 						let data = prev.data
-
 						data = data.filter((v, i) => {
 							return v.id !== property_id
 						})
@@ -49,9 +47,8 @@ const PropertyCard = ({ data: v, listState = false }) => {
 					})
 				}
 
-
 			}).catch(e => {
-				console.log(e)
+				errorHandler(e)
 			}).finally(() => {
 				hideLoading()
 			})
@@ -78,7 +75,6 @@ const PropertyCard = ({ data: v, listState = false }) => {
 
 
 	return (
-
 		<div className="max-h-[400px] relative">
 
 			{v.published == 0 && <div className='absolute top-5 left-2 px-1 bg-theme-color
@@ -166,7 +162,6 @@ const PropertyCard = ({ data: v, listState = false }) => {
 				</div>
 			</div>
 		</div>
-
 	)
 }
 
