@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
 use App\Repository\PropertyRepository;
 use App\Repository\UserRepository;
@@ -19,18 +20,66 @@ class AdminUserService
     $this->propertyRepo = $propertyRepo;
   }
 
-  public function userOverviewData(){
+  public function userOverviewData()
+  {
     $obj = $this->userRepo->userCountData();
     $obj->latestUsers = UserResource::collection($this->userRepo
-    ->getQuery()
-    ->where("is_admin", 0)
-    ->latest("created_at")
-    ->limit(6)
-    ->get());
+      ->getQuery()
+      ->where("is_admin", 0)
+      ->latest("created_at")
+      ->limit(6)
+      ->get());
 
     return $obj;
   }
-  public function blockUser(){}
-  public function deleteUser(){}
 
+  public function userSearch($filters = [])
+  {
+    $query = $this->userRepo->getQuery();
+
+    switch ($filters['search_type']) {
+      case "agent":
+        $query = $query->agent();
+        break;
+      case "admin":
+        $query = $query->admin();
+        break;
+
+      default:
+        $query = $query->user();
+        break;
+    }
+
+    $query->filter($filters);
+
+    $perPage = isset($filters['limit']) ? (int)$filters['limit'] : env("PAGINATE_NUMBER"); // Default to 25
+    $userCollection = $query->paginate($perPage);
+
+    return new UserCollection($userCollection);
+  }
+
+  public function getusers($data)
+  {
+    $query = $this->userRepo->getQuery();
+
+    switch ($data['type']) {
+      case "agent":
+        $query = $query->agent();
+        break;
+      case "admin":
+        $query = $query->admin();
+        break;
+
+      default:
+        $query = $query->user();
+        break;
+    }
+
+    $perPage = isset($filters['limit']) ? (int)$filters['limit'] : env("PAGINATE_NUMBER"); // Default to 25
+    $userCollection = $query->paginate($perPage);
+    return new UserCollection($userCollection);
+  }
+
+  public function blockUser() {}
+  public function deleteUser() {}
 }

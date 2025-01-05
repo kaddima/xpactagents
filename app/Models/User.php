@@ -85,6 +85,56 @@ class User extends Authenticatable
 		});
 	}
 
+	public function scopeUser($query){
+		return $query->where("is_agent", "0");
+	}
+
+	public function scopeAgent($query) {
+		return $query->where("is_agent", 1);
+	}
+
+	public function scopeAdmin($query){
+		return $query->where("is_admin", 1);
+	}
+
+	public function scopeFilter($query, $filters)
+	{
+		$column_value = [];
+
+		foreach ($filters as $key => $value) {
+			if($key == "search_type"){
+				continue;
+			}
+			if($key == "name"){
+				$name = explode(" ", $value);
+				/**
+				 * if searching by first name and last name a WHERE AND clause
+				 * is used in the query and if only a single name is provided
+				 * check for matches in first_name or last_name column
+				 * */
+				if(count($name) > 1){
+					$column_value[] = ["first_name", "Like", "%{$name[0]}%"];
+					$column_value[] = ["last_name", "Like", "%{$name[1]}%"];
+				}else{
+					$query->where("first_name", "LIKE", "%{$name[0]}%")
+					->orWhere("last_name", "LIKE", "%{$name[0]}%");
+				}
+				continue;
+			}
+			// Other filters can be added here
+			$column_value[$key] = is_string($value) && !is_numeric($value) ? strtolower($value) : $value;
+		}
+		// Apply the dynamic conditions to the query
+		foreach ($column_value as $key => $condition) {
+			if (is_array($condition)) {
+				$query->where(...$condition);
+			} else {
+				$query->where($key, $condition);
+			}
+		}
+		return $query->orderBy('created_at', 'desc');
+	}
+
 	public function properties()
 	{
 		return $this->hasMany(Property::class, "creator_id");

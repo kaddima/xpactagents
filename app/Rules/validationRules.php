@@ -54,7 +54,7 @@ class ValidationRules
       "confirm_password" => "required|same:password"
     ];
 
-    if($platform == "api"){
+    if ($platform == "api") {
       $rules["email"] = "required|email";
     }
     return $rules;
@@ -182,17 +182,32 @@ class ValidationRules
       "phone" => "required",
       "date" => "required|date|after:today",
       "notes" => "nullable",
-      "best_contact" => ["required",new CaseInsensitiveIn(['text', 'call',"email"])],
+      "best_contact" => ["required", new CaseInsensitiveIn(['text', 'call', "email"])],
       "property_id" => "required|uuid",
     ];
   }
+
   public static function toursFilterRules()
   {
     return [
-     
-      "type" => ["nullable",new CaseInsensitiveIn(['resolved', 'unresolved',])],
+      "type" => ["nullable", new CaseInsensitiveIn(['resolved', 'unresolved',])],
       "limit" => "nullable|numeric",
       "page" => "nullable|numeric",
+    ];
+  }
+
+  public static function userSearchRules()
+  {
+    return [
+      "search_type" => ["required", new CaseInsensitiveIn(["user", "agent", "admin"])],
+      "name" => "nullable",
+      "phone" => "nullable|numeric"
+    ];
+  }
+  public static function getUsersRules()
+  {
+    return [
+      "type" => ["required", new CaseInsensitiveIn(["user", "agent", "admin"])],
     ];
   }
 }
