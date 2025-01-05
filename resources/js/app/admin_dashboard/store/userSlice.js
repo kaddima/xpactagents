@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import Axios from "../../utility/axios";
 
 export const getGeneralData = createAsyncThunk('account/general-data', async () => {
-	const response = await Axios.get('/admin/overview')
+	const response = await Axios.get('/admin/properties/overview')
 	return response.data
 })
 

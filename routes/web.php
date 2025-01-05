@@ -7,6 +7,7 @@ use App\Http\Controllers\UserActionController;
 use App\Http\Controllers\Web\TourController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\AdmsController;
+use App\Http\Controllers\Web\AdminUserController;
 use App\Http\Controllers\Web\AuthenticationController;
 
 /*
@@ -89,13 +90,13 @@ Route::middleware("auth")->group(function () {
 
 	//ADMIN LINKS
 	Route::middleware(["auth", "admin"])->group(function(){
-		Route::get('/admin/users/overview-data', [AccountController::class, 'adminUsersOverview']);
+		Route::get('/admin/properties/overview', [ListingController::class, 'adminOverviewData']);
+		Route::get('/admin/users/overview', [AdminUserController::class, 'adminUsersOverview']);
 		Route::get('/admin/users/regular', [AccountController::class, 'adminUsersRegular']);
 		Route::get('/admin/users/verification-request', [AccountController::class, 'verificationRequest']);
 		Route::post('/admin/users/verification-response', [AccountController::class, 'verificationResponse']);
 		Route::get('/admin/users/agent-lists', [AccountController::class, 'adminUsersAgent']);
 		Route::get('/admin/users/user-details', [AccountController::class, 'getUserAccount']);
-		Route::get('/admin/overview', [ListingController::class, 'adminOverviewData']);
 		Route::get('/admin/properties', [ListingController::class, 'adminAllListings']);
 		Route::get('/admin/properties/{id}', [ListingController::class, 'adminPropertyDetails']);
 		Route::get('/admin/agents/{agent_id}/properties', [ListingController::class, 'adminAgentListings']);
