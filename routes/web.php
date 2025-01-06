@@ -101,8 +101,9 @@ Route::middleware("auth")->group(function () {
 		Route::get('/admin/users', [AdminUserController::class, 'getUsers']);
 		Route::get('/admin/users/search', [AdminUserController::class, 'searchUsers']);
 
-		Route::get('/admin/users/verification-request', [AccountController::class, 'verificationRequest']);
-		Route::post('/admin/users/verification-response', [AccountController::class, 'verificationResponse']);
+		Route::get('/admin/users/verification-request', [AdminUserController::class, 'verificationRequest']);
+		Route::post('/admin/users/verification/verify', [AdminUserController::class, 'idVerificationAccept']);
+		Route::post('/admin/users/verification/deny', [AdminUserController::class, 'idVerificationDecline']);
 		Route::get('/admin/users/{user_id}', [AdminUserController::class, 'getUserDetails']);
 
 		Route::post('/users/update', [UserActionController::class, 'updateUser']);

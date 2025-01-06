@@ -38,4 +38,26 @@ class AdminUserController extends BaseController
 		["user_id"=>"required|uuid|exists:users,id"]);
 		return $this->sendResponse($this->adminUserService->userDetails($data['user_id']));	
 	}
+
+	public function verificationRequest()
+	{
+		return $this->sendResponse($this->adminUserService->getAllVerificationRequests());
+	}
+
+	public function idVerificationAccept(Request $request){
+		$data = $this->validate($request,
+		["email"=>"required|email",
+		"user_id"=>"required|uuid|exists:users,id"]);
+		$this->adminUserService->idVerifcationAccept($data);
+		return $this->sendResponse(null, "id verifcation accepted");
+	}
+
+	public function idVerificationDecline(Request $request){
+		$data = $this->validate($request,
+		["email"=>"required|email",
+		"user_id"=>"required|uuid|exists:users,id"]);
+		$this->adminUserService->idVerifcationDecline($data);
+		return $this->sendResponse(null, "id verifcation declined");
+	}
+
 }
