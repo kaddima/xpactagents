@@ -127,19 +127,6 @@ const Sidebar = () => {
 							</div>
 						</NavLink>
 					</div>}
-
-					<div className="">
-						<a
-							href={`/dashboard`}
-							onClick={handleCloseSideBar}
-							className={`flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100
-								 dark:hover:bg-slate-800 relative`}>
-							<span className='text-xl'><TbDashboard /></span>
-							<div>
-								<p>Agent Dashboard</p>
-							</div>
-						</a>
-					</div>
 					<div className='w-full'>
 						<a onClick={() => {
 							Axios.post('/logout')

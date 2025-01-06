@@ -34,27 +34,15 @@ const Aside = ({setIsOpen}) => {
 							</div>
 						</NavLink>	
 					</div>
-					
-					<div className="hover:opacity-80 ">
-						<NavLink 
-							to={`/admin/create-property`} 
-							onClick={handleCloseSideBar}
-							className={({isActive})=>isActive ? 'flex space-x-2 items-center bg-[#238f5d] transition-all text-white py-3 pl-5 text-sm font-semibold hover:opacity-95 relative dark:bg-slate-800':'flex space-x-2 items-center bg-[#238f5d] transition-all text-white py-3 pl-5 text-sm font-semibold hover:opacity-95 relative'}
-							
-						>
-							<span className='text-xl'><MdOutlineCreateNewFolder/></span>
-							<div>
-								<p></p>Create Listing
-							</div>
-						</NavLink>	
-					</div>	
 					{navLinks.map((link, i)=>(
 						<div key={i} className="">
 							<NavLink 
 								to={`/admin/${link.name.toLowerCase().replace(/(\/)|\s/,'-')}`} 
 								key={link.name}
 								onClick={handleCloseSideBar}
-								className={({isActive})=>isActive ? 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800' : 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}
+								className={({isActive})=>isActive ? `flex space-x-2 items-center py-2 pl-5 text-sm font-semibold
+								 hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800`
+								: 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}
 							>
 								<span className='text-xl'>{link.icon}</span>
 								<div>
@@ -83,19 +71,6 @@ const Aside = ({setIsOpen}) => {
 							</div>
 						</NavLink>	
 					</div>	}
-
-					<div className="">
-						<a
-							href={`/dashboard`} 
-							onClick={handleCloseSideBar}
-							className={`flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative`}
-						>
-							<span className='text-xl'><TbDashboard/></span>
-							<div>
-								<p>Agent Dashboard</p>
-							</div>
-						</a>	
-					</div>
 					<div className='w-full '>
 						<a onClick={()=>{
 							Axios.post("/logout")

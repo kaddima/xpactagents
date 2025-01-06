@@ -8,6 +8,7 @@ import { toast } from 'react-toastify'
 import { hideLoading, showLoading } from '../../../utility/loading'
 import { updateProfile } from '../../store/userSlice'
 import Axios from '../../../utility/axios'
+import EmptyState from '../../components/EmptyState'
 
 const EditProfile = () => {
     const {register,reset,watch,handleSubmit,formState:{errors}} = useForm()

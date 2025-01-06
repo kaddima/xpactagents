@@ -198,12 +198,6 @@ class MessageServices
       throw new NotFoundException("Invalid user id");
     }
 
-    Log::debug([
-      "cu_id"=>$currentUser->id,
-      "convo_creator" => $conversation->created_by,
-      "convo_details_creator_id"=>$conversation->propertyDetails->creator_id
-    ]);
-
     if (
       $conversation->created_by !== $currentUser->id
       && $conversation->propertyDetails->creator_id !== $currentUser->id
