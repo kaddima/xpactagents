@@ -10,10 +10,12 @@ use App\Repository\AgentConversationRepository;
 use App\Repository\ConversationRepository;
 use App\Repository\MessageRepository;
 use App\Repository\PropertyRepository;
+use App\Repository\UserRepository;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MessageServices
 {
@@ -21,18 +23,21 @@ class MessageServices
   protected $propertyRepo;
   protected $conversationRepo;
   protected $agentConversationRepo;
+  protected $userRepo;
 
   public function __construct(
     MessageRepository $messageRepo,
     PropertyRepository $propertyRepo,
     ConversationRepository $conversationRepo,
-    AgentConversationRepository $agentConversationRepo
+    AgentConversationRepository $agentConversationRepo,
+    UserRepository $userRepo
 
   ) {
     $this->messageRepo = $messageRepo;
     $this->conversationRepo = $conversationRepo;
     $this->propertyRepo = $propertyRepo;
     $this->agentConversationRepo = $agentConversationRepo;
+    $this->userRepo = $userRepo;
   }
 
   public function createConversation($data, $currentUser)
@@ -54,10 +59,10 @@ class MessageServices
     ])->first();
 
     $agentConversation = $this->agentConversationRepo
-    ->getQuery()
-    ->where("property_id", $data['property_id'])
-    ->where("agent_id",$property->creator_id)
-    ->first();
+      ->getQuery()
+      ->where("property_id", $data['property_id'])
+      ->where("agent_id", $property->creator_id)
+      ->first();
 
     if (!$conversation) {
       // add the user conversation
@@ -67,7 +72,7 @@ class MessageServices
       ]);
     }
 
-    if(!$agentConversation){
+    if (!$agentConversation) {
       //add the agent conversation
       $this->agentConversationRepo->create([
         "agent_id" => $property->creator_id,
@@ -134,8 +139,11 @@ class MessageServices
    * this methods gets the properties users are interested in
    * the ones they send a message of enquiry for
    */
-  public function getAgentPoi($currentUser)
+  public function getAgentPoi($currentUser = null, $agent_id = null)
   {
+    if ($agent_id) {
+      $currentUser = $this->userRepo->findById($agent_id);
+    }
     $poi = $currentUser->agentConversations()
       ->withCount(['messages' => function ($query) use ($currentUser) {
         $query->where("sender_id", "!=", $currentUser->id);
@@ -147,9 +155,14 @@ class MessageServices
     return new ConversationCollection($poi);
   }
 
-  public function getpropertyConversations($property_id)
+  public function getpropertyConversations($property_id, $agent_id = null)
   {
-    $currentUser = Auth::user();
+    if ($agent_id) {
+      $currentUser = $this->userRepo->findById($agent_id);
+    } else {
+      $currentUser = Auth::user();
+    }
+
     try {
       $property = $this->propertyRepo->findById($property_id);
     } catch (ModelNotFoundException $e) {
@@ -169,13 +182,27 @@ class MessageServices
     return new ConversationCollection($conversations);
   }
 
-  public function getMessages($conversation_id, $currentUser)
+  public function getMessages($conversation_id, $currentUser,$user_id=null)
   {
     try {
       $conversation = $this->conversationRepo->findById($conversation_id);
     } catch (ModelNotFoundException $e) {
       throw new NotFoundException("Invalid conversation id");
     }
+
+    try {
+      if($user_id){
+        $currentUser = $this->userRepo->findById($user_id);
+      }
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("Invalid user id");
+    }
+
+    Log::debug([
+      "cu_id"=>$currentUser->id,
+      "convo_creator" => $conversation->created_by,
+      "convo_details_creator_id"=>$conversation->propertyDetails->creator_id
+    ]);
 
     if (
       $conversation->created_by !== $currentUser->id

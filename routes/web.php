@@ -93,7 +93,10 @@ Route::middleware("auth")->group(function () {
 		Route::get('/admin/agents/{agent_id}/properties', [ListingController::class, 'adminAgentListings']);
 		Route::get('/admin/agents/{agent_id}/overview', [ListingController::class, 'adminAgentOverview']);
 		Route::get('/admin/agents/{agent_id}/tours', [TourController::class, 'agentTours']);
-		
+		Route::get('/admin/agents/{agent_id}/messages/poi', [MessageController::class, 'agentsPropertyOfInterest']);
+		Route::get('/admin/agents/{agent_id}/properties/{id}/conversations', [MessageController::class, 'getAgentPropertyConversations']);
+		Route::get('/admin/agents/{agent_id}/conversations/{id}/messages', [MessageController::class, 'getAgentMessages']);
+
 		Route::get('/admin/users/overview', [AdminUserController::class, 'adminUsersOverview']);
 		Route::get('/admin/users', [AdminUserController::class, 'getUsers']);
 		Route::get('/admin/users/search', [AdminUserController::class, 'searchUsers']);

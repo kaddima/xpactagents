@@ -25,9 +25,9 @@ class MessageController extends BaseController
 		return $this->apiController->sendMessage($request);
 	}
 
-	public function agentsPropertyOfInterest(Request $request)
+	public function agentsPropertyOfInterest(Request $request, $agent_id=null)
 	{
-		return $this->apiController->getAgentPoi($request);
+		return $this->apiController->getAgentPoi($request,$agent_id);
 	}
 
 	public function getUserConversations(Request $request)
@@ -40,8 +40,19 @@ class MessageController extends BaseController
 		return $this->apiController->getPropertyConversations($request, $id);
 	}
 
+	public function getAgentPropertyConversations(Request $request, $agent_id, $id)
+	{
+		return $this->apiController->getPropertyConversations($request, $id, $agent_id);
+	}
+
 	public function getMessages(Request $request, $id){
 		return $this->apiController->getMessages($request,$id);
+	}
+	/**
+	 * gets the messages for an agent using their id and conversation_id
+	 */
+	public function getAgentMessages(Request $request, $agent_id, $id){
+		return $this->apiController->getMessages($request,$id,$agent_id);
 	}
 
 	public function resolveConversation(Request $request)

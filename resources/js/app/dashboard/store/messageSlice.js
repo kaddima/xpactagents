@@ -15,8 +15,6 @@ let initialState = {
 
 }
 
-let a = []
-
 const messageSlice = createSlice({
 	initialState,
 	name: 'message',

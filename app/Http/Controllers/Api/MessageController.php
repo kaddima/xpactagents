@@ -36,28 +36,28 @@ class MessageController extends BaseController
 		return $this->sendResponse($conversations);
 	}
 
-	public function getAgentPoi(Request $request)
+	public function getAgentPoi(Request $request,$agent_id=null)
 	{
 		//$this->validateParams(['agent_id'=>$agent_id],['agent_id'=>"required|uuid"]);
-		$poi = $this->messageServices->getAgentPoi($request->user());
+		$poi = $this->messageServices->getAgentPoi($request->user(), $agent_id);
 		return $this->sendResponse($poi);
 	}
 
-	public function getPropertyConversations(Request $request, $id)
+	public function getPropertyConversations(Request $request, $id, $agent_id=null)
 	{
 		$data = $this->validateParams(["id" => $id], ["id" => "required|uuid"]);
-		$conversations = $this->messageServices->getPropertyConversations($id);
+		$conversations = $this->messageServices->getPropertyConversations($id, $agent_id);
 		return $this->sendResponse($conversations);
 	}
 
-	public function getMessages(Request $request, $id)
+	public function getMessages(Request $request, $id, $user_id=null)
 	{
 		$this->validateParams(
 			['id' => $id],
 			['id' => "required|uuid"]
 		);
 
-		$messages = $this->messageServices->getMessages($id, $request->user());
+		$messages = $this->messageServices->getMessages($id, $request->user(), $user_id);
 		return $this->sendResponse($messages);
 	}
 
