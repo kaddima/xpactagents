@@ -224,8 +224,7 @@ class UserActionController extends Controller
 
 		return json_encode(['status' => 1, 'data' => $statements]);
 	}
-
-
+	
 	public function idVerifyRequest(Request $request)
 	{
 		return $this->apiController->IdVerificationRequest($request);

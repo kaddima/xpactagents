@@ -49,7 +49,7 @@ Route::middleware("auth")->group(function () {
 	Route::get('/properties/favorites', [ListingController::class, 'getFavorites']);
 	Route::post('/properties/{id}/favorite', [ListingController::class, 'addFavorite']);
 	Route::delete('/properties/{id}/favorite', [ListingController::class, 'removeFavorite']);
-//===== PROPERTY MESSAGES AND CONVERSATIONS =====
+	//===== PROPERTY MESSAGES AND CONVERSATIONS =====
 	Route::post('/properties/conversations', [MessageController::class, 'createConversation']);
 	Route::post('/properties/messages', [MessageController::class, 'sendMessage']);
 	Route::get('/properties/conversations', [MessageController::class, 'getUserConversations']);
@@ -78,31 +78,34 @@ Route::middleware("auth")->group(function () {
 		// ===== AGENT TOURS
 		Route::get("/tours", [TourController::class, "agentTours"]);
 		Route::patch("tours/{tour_id}", [TourController::class, "resolveTour"]);
+
+		Route::post('/users/lastseen', [AccountController::class, 'updateLastSeen']);
+		Route::post('/users/image', [UserActionController::class, 'uploadPhoto']);
+		Route::post('/users/id-verification', [UserActionController::class, 'idVerifyRequest']);
 	});
 
-	Route::post('/users/lastseen', [AccountController::class, 'updateLastSeen']);
-	Route::post('/users/update', [UserActionController::class, 'updateUser']);
-	Route::post('/users/delete', [UserActionController::class, 'deleteUser']);
-	Route::post('/users/block', [UserActionController::class, 'blockUser']);
-	Route::post('/users/image', [UserActionController::class, 'uploadPhoto']);
-	Route::post('/users/id-verification', [UserActionController::class, 'idVerifyRequest']);
-
 	//ADMIN LINKS
-	Route::middleware(["auth", "admin"])->group(function(){
+	Route::middleware(["auth", "admin"])->group(function () {
 		// ===== ADMIN PROPERTIES
 		Route::get('/admin/properties/overview', [ListingController::class, 'adminOverviewData']);
 		Route::get('/admin/properties', [ListingController::class, 'adminAllListings']);
 		Route::get('/admin/properties/{id}', [ListingController::class, 'adminPropertyDetails']);
 		Route::get('/admin/agents/{agent_id}/properties', [ListingController::class, 'adminAgentListings']);
+		Route::get('/admin/agents/{agent_id}/overview', [ListingController::class, 'adminAgentOverview']);
+		Route::get('/admin/agents/{agent_id}/tours', [TourController::class, 'agentTours']);
 		
 		Route::get('/admin/users/overview', [AdminUserController::class, 'adminUsersOverview']);
 		Route::get('/admin/users', [AdminUserController::class, 'getUsers']);
 		Route::get('/admin/users/search', [AdminUserController::class, 'searchUsers']);
-	
+
 		Route::get('/admin/users/verification-request', [AccountController::class, 'verificationRequest']);
 		Route::post('/admin/users/verification-response', [AccountController::class, 'verificationResponse']);
-		Route::get('/admin/users/user-details', [AccountController::class, 'getUserAccount']);
-	
+		Route::get('/admin/users/{user_id}', [AdminUserController::class, 'getUserDetails']);
+
+		Route::post('/users/update', [UserActionController::class, 'updateUser']);
+		Route::post('/users/delete', [UserActionController::class, 'deleteUser']);
+		Route::post('/users/block', [UserActionController::class, 'blockUser']);
+
 		//ADMS LINK
 		Route::get('/adms/overview', [AdmsController::class, 'admsOverview']);
 		Route::get('/adms/users', [AdmsController::class, 'admsUsers']);
@@ -110,7 +113,6 @@ Route::middleware("auth")->group(function () {
 		Route::post('/adms/create-admin', [AdmsController::class, 'admsCreateAdmin']);
 		Route::post('/adms/make-admin', [AdmsController::class, 'admsMakeAdmin']);
 	});
-
 });
 
 Route::get('/dashboard/{path?}', function () {
@@ -128,7 +130,7 @@ Route::get('/admin/{path?}', function () {
 	}
 	return redirect('/');
 })->where('path', '.*');
-Route::view('/app/{path?}','app.main')->where('path', '.*');
+Route::view('/app/{path?}', 'app.main')->where('path', '.*');
 
 Route::get('/properties', [ListingController::class, 'getProperties']);
 Route::get('/properties/search', [ListingController::class, 'getProperties']);

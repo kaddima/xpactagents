@@ -11,13 +11,16 @@ class AdminUserService
 {
   protected $userRepo;
   protected $propertyRepo;
+  protected $userService;
 
   public function __construct(
     UserRepository $userRepo,
-    PropertyRepository $propertyRepo
+    PropertyRepository $propertyRepo,
+    UserServices $userService
   ) {
     $this->userRepo = $userRepo;
     $this->propertyRepo = $propertyRepo;
+    $this->userService = $userService;
   }
 
   public function userOverviewData()
@@ -78,6 +81,10 @@ class AdminUserService
     $perPage = isset($filters['limit']) ? (int)$filters['limit'] : env("PAGINATE_NUMBER"); // Default to 25
     $userCollection = $query->paginate($perPage);
     return new UserCollection($userCollection);
+  }
+
+  public function userDetails($user_id){
+    return $this->userService->getUserDetails($user_id);
   }
 
   public function blockUser() {}

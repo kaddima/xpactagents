@@ -20,9 +20,9 @@ class TourController extends BaseController
 		return $this->apiController->addNewTour($request);
 	}
 
-	public function agentTours(Request $request)
+	public function agentTours(Request $request, $agent_id=null)
 	{
-		return $this->apiController->agentTours($request);
+		return $this->apiController->agentTours($request, $agent_id);
 	}
 
 	public function resolveTour(Request $request, $tour_id)

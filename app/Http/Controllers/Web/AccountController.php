@@ -43,7 +43,6 @@ class AccountController extends BaseController
 		return $this->sendResponse($data);
 	}
 
-
 	public function changePassword(Request $request){
 		return $this->apiController->changePassword($request);
 	}

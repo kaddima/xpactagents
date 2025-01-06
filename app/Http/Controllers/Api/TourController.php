@@ -22,9 +22,13 @@ class TourController extends BaseController
 		return $this->sendResponse(null, "Tour request completed");
 	}
 
-	public function agentTours(Request $request){
+	public function agentTours(Request $request, $agent_id=null){
+		if($agent_id){
+			$this->validateParams(["agent_id"=>$agent_id],
+			["agent_id"=>"required|uuid|exists:users,id"]);
+		}
 		$data = $this->validate($request, ValidationRules::toursFilterRules());
-		$tours = $this->tourService->getAgentTours($request->user()->id, $data);
+		$tours = $this->tourService->getAgentTours($agent_id ?? $request->user()->id, $data);
 		return $this->sendResponse($tours);
 	}
 

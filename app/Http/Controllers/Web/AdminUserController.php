@@ -25,8 +25,17 @@ class AdminUserController extends BaseController
 		return $this->sendResponse($this->adminUserService->userSearch($data));
 	}
 
+	/**
+	 * gets users by filters, eg admin,agents,and users
+	 */
 	public function getUsers(Request $request){
 		$data = $this->validate($request,ValidationRules::getUsersRules());
 		return $this->sendResponse($this->adminUserService->getUsers($data));
+	}
+
+	public function getUserDetails(Request $request, $user_id){
+		$data = $this->validateParams(["user_id"=>$user_id],
+		["user_id"=>"required|uuid|exists:users,id"]);
+		return $this->sendResponse($this->adminUserService->userDetails($data['user_id']));	
 	}
 }

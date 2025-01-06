@@ -9,6 +9,7 @@ use App\Services\GeneralDataService;
 use App\Services\PropertyService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class ListingController extends BaseController
 {
@@ -123,5 +124,11 @@ class ListingController extends BaseController
 	public function adminPropertyDetails(Request $request, $id){
 		$details = $this->propertyService->propertyDetails($id, false);
 		return $this->sendResponse($details);
+	}
+
+	public function adminAgentOverview(Request $request,$agent_id){
+		$data = $this->validateParams(["agent_id"=>$agent_id], 
+		["agent_id"=>"required|uuid|exists:users,id"]);
+		return $this->sendResponse($this->generalDataService->agentOverviewData(null,$data["agent_id"]));
 	}
 }
