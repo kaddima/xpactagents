@@ -103,7 +103,7 @@ const AgentOverview = () => {
 														<p className='overflow-ellipsis font-semibold overflow-hidden whitespace-nowrap w-full'>{v.address}</p>
 														<div className='flex justify-between items-center'>
 															<p><BsEye size={20} 
-															onClick={(e) => { e.stopPropagation(); navigate(`/admin/listings/${v?.id}/edit`) }} 
+															onClick={(e) => { e.stopPropagation(); navigate(`/admins/listings/${v?.id}/edit`) }} 
 															className='cursor-pointer' /></p>
 															<p className=''>{v.bedrooms}beds | {v.bathrooms}baths </p>
 														</div>

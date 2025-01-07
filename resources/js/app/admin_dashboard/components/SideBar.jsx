@@ -60,7 +60,7 @@ const Sidebar = () => {
 
 					<div className="">
 						<NavLink
-							to={`/admin/dashboard`}
+							to={`/admins/dashboard`}
 							onClick={handleCloseSideBar}
 							className={`flex space-x-2 items-center py-2 pl-5 text-sm font-semibold 
 								hover:bg-slate-100 dark:hover:bg-slate-800 relative`}>
@@ -73,7 +73,7 @@ const Sidebar = () => {
 
 					{/* <div className="hover:opacity-80 ">
 						<NavLink
-							to={`/admin/create-property`}
+							to={`/admins/create-property`}
 							onClick={handleCloseSideBar}
 							className={({ isActive }) => isActive ?
 								`flex space-x-2 items-center bg-[#238f5d] transition-all text-white py-3
@@ -90,7 +90,7 @@ const Sidebar = () => {
 					{navLinks.map((link, i) => (
 						<div key={i} className="">
 							<NavLink
-								to={`/admin/${link.name.toLowerCase().replace(/(\/)|\s/, '-')}`}
+								to={`/admins/${link.name.toLowerCase().replace(/(\/)|\s/, '-')}`}
 								key={link.name}
 								onClick={handleCloseSideBar}
 								className={({ isActive }) => isActive ?
@@ -114,7 +114,7 @@ const Sidebar = () => {
 
 					{currentUser.super_admin == 1 && <div className="hover:opacity-80 ">
 						<NavLink
-							to={`/admin/adms`}
+							to={`/admins/adms`}
 							onClick={handleCloseSideBar}
 							className={({ isActive }) => isActive ?
 								`flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100

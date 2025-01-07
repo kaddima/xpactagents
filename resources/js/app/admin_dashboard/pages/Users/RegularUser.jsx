@@ -16,7 +16,7 @@ const TableRow = ({ data, setUsersDetails }) => {
 		if (window.confirm('Delete the user?')) {
 			showLoading()
 
-			Axios.post('/users/delete', { user_id: data.id }).then(result => {
+			Axios.delete(`/admin/users/${data.id}`, { data: { type: "user" } }).then(result => {
 				toast('User deleted', { type: 'success' })
 				setUsersDetails(prev => {
 					let newUsers = prev.data.filter((v, i) => {
@@ -34,28 +34,26 @@ const TableRow = ({ data, setUsersDetails }) => {
 
 	}
 
-	const onBlock = () => {
+	const onBlock = (type) => {
+		console.log(`/users/${data.id}/${type}`)
+		return
+
 		showLoading()
-		Axios.post('/users/block', { user_id: data.id }).then(result => {
+		Axios.post(`/users/${data.id}/${type}`).then(result => {
 			setUsersDetails(prev => {
-				let users = { ...prev }
-
-				for (let user of users.data) {
-
+				let usersData = prev.data
+				for (let user of usersData) {
 					if (user.id == data.id) {
 
-						let is_blocked = user.block
-
-						if (is_blocked == 0) {
-							is_blocked = 1
+						if (user.block == 0) {
+							user.block = 1
 						} else {
-							is_blocked = 0
+							user.block = 0
 						}
-						user.block = is_blocked
 						break
 					}
 				}
-				return users
+				return { ...prev, data: usersData }
 			})
 
 		}).catch(e => {
@@ -80,9 +78,11 @@ const TableRow = ({ data, setUsersDetails }) => {
 		<td className='text-sm border-b dark:border-b-slate-800'>{data.created_at && format(parseISO(data.created_at), 'dd MMM Y')}</td>
 		<td className='border-b dark:border-b-slate-800'>
 			<div className='space-x-2'>
-				<button className='text-red-600' title='Block user' onClick={onBlock}>
+				<button className='text-red-600'
+					data-type={data.block == 1 ? "unblock" : "block"}
+					title={data.block == 0 ? "block user" : "unblock user"}
+					onClick={(e) => { onBlock(e.currentTarget.getAttribute("data-type")) }}>
 					{data.block == 1 ? <FaLockOpen size={18} className='text-sky-600' /> : <MdBlock size={18} />}
-
 				</button>
 				<button className='text-red-600' title='Delete user' onClick={onDelete}>
 					<BsTrash size={18} />
@@ -114,7 +114,7 @@ const RegularUser = () => {
 		let page = link.searchParams.get("page");
 		showLoading()
 
-		Axios.get(path, { params: { page, type:"user", ...params } }).then(data => {
+		Axios.get(path, { params: { page, type: "user", ...params } }).then(data => {
 			setUsersDetails(data.data.data)
 		}).catch(e => {
 			errorHandler(e)
@@ -124,7 +124,7 @@ const RegularUser = () => {
 	}
 
 	useEffect(() => {
-		Axios.get('/admin/users', {params:{type:"user"}}).then(data => {
+		Axios.get('/admin/users', { params: { type: "user" } }).then(data => {
 			let users = data.data.data
 			setUsersDetails(users)
 		}).catch(e => {

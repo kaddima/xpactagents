@@ -30,7 +30,7 @@ const PropertySearch = () => {
 		if (searchValues[type]) {
 			setSearchNav(null)
 			let queryStr = '?' + new URLSearchParams(searchValues[type]).toString()
-			navigate(`/admin/listings/search${queryStr}`)
+			navigate(`/admins/listings/search${queryStr}`)
 
 		}
 	})

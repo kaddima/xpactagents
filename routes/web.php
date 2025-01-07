@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\AccountController;
 use App\Http\Controllers\Web\ListingController;
-use App\Http\Controllers\UserActionController;
 use App\Http\Controllers\Web\TourController;
 use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\AdmsController;
@@ -44,7 +43,9 @@ Route::post('/tours', [TourController::class, 'addNewTour']);
 Route::middleware("auth")->group(function () {
 	//===== AccountCOntroller =====
 	Route::post('/change-password', [AccountController::class, 'changePassword']);
-
+	Route::post('/users/update', [AccountController::class, 'updateUser']);
+	Route::post('/users/lastseen', [AccountController::class, 'updateLastSeen']);
+	Route::post('/users/image', [AccountController::class, 'uploadPhoto']);
 	//===== PROPERTIES ROUTE =====
 	Route::get('/properties/favorites', [ListingController::class, 'getFavorites']);
 	Route::post('/properties/{id}/favorite', [ListingController::class, 'addFavorite']);
@@ -78,10 +79,7 @@ Route::middleware("auth")->group(function () {
 		// ===== AGENT TOURS
 		Route::get("/tours", [TourController::class, "agentTours"]);
 		Route::patch("tours/{tour_id}", [TourController::class, "resolveTour"]);
-
-		Route::post('/users/lastseen', [AccountController::class, 'updateLastSeen']);
-		Route::post('/users/image', [UserActionController::class, 'uploadPhoto']);
-		Route::post('/users/id-verification', [UserActionController::class, 'idVerifyRequest']);
+		Route::post('/users/id-verification', [AccountController::class, 'idVerifyRequest']);
 	});
 
 	//ADMIN LINKS
@@ -105,10 +103,9 @@ Route::middleware("auth")->group(function () {
 		Route::post('/admin/users/verification/verify', [AdminUserController::class, 'idVerificationAccept']);
 		Route::post('/admin/users/verification/deny', [AdminUserController::class, 'idVerificationDecline']);
 		Route::get('/admin/users/{user_id}', [AdminUserController::class, 'getUserDetails']);
-
-		Route::post('/users/update', [UserActionController::class, 'updateUser']);
-		Route::post('/users/delete', [UserActionController::class, 'deleteUser']);
-		Route::post('/users/block', [UserActionController::class, 'blockUser']);
+		Route::delete('/admin/users/{user_id}', [AdminUserController::class, 'deleteUser']);
+		Route::post('/users/{user_id}/block', [AdminUserController::class, 'blockUser']);
+		Route::post('/users/{user_id}/unblock', [AdminUserController::class, 'unblockUser']);
 
 		//ADMS LINK
 		Route::get('/adms/overview', [AdmsController::class, 'admsOverview']);
@@ -128,7 +125,7 @@ Route::get('/dashboard/{path?}', function () {
 	return redirect('/');
 })->where('path', '.*');
 
-Route::get('/admin/{path?}', function () {
+Route::get('/admins/{path?}', function () {
 	if (auth()->check()  && auth()->user()['is_admin'] == 1) {
 		return view('app.admin_dashboard');
 	}

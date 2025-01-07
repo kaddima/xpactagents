@@ -37,6 +37,16 @@ class AccountController extends BaseController
 		return $this->apiController->getuserDetails($request, $user_id);
 	}
 
+	public function updateUser(Request $request)
+	{
+		return $this->apiController->updateUserdetails($request);
+	}
+
+	public function uploadPhoto(Request $request)
+	{
+		return $this->apiController->uploadUserimage($request);
+	}
+
 	public function agentOverviewData(Request $request)
 	{
 		$data = $this->generalDataService->agentOverviewData($request->user());
@@ -108,6 +118,11 @@ class AccountController extends BaseController
 				return json_encode(['data' => $obj]);
 			}
 		}
+	}
+
+	public function idVerifyRequest(Request $request)
+	{
+		return $this->apiController->IdVerificationRequest($request);
 	}
 
 }

@@ -43,20 +43,20 @@ useEffect(()=>{
                             <span className='pl-1 text-sm'>Complete profile</span>
                         </NavLink>}
                         
-                        <NavLink to='/admin/account/profile' 
+                        <NavLink to='/admins/account/profile' 
                         style={({isActive})=>(isActive ? {borderColor:currentColor, borderBottomWidth:"2px"}:{})}
                         className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b rounded'>
                             <span className='text-xl text-gray-400'><FaRegUserCircle/></span>
                             <span className='pl-1 text-sm'>Profile</span>
                         </NavLink>
-                        <NavLink to='/admin/account/edit-profile' 
+                        <NavLink to='/admins/account/edit-profile' 
                         style={({isActive})=>(isActive ? {borderColor:currentColor, borderBottomWidth:"2px"}:{})}
                         className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b rounded'>
                             <span className='text-xl text-gray-400'><FaUserEdit/></span>
                             <span className='pl-1 text-sm'>Edit profile</span>
                         </NavLink>
 
-                        <NavLink to='/admin/account/change-password'
+                        <NavLink to='/admins/account/change-password'
                         style={({isActive})=>(isActive ? {borderColor:currentColor, borderBottomWidth:"2px"}:{})}
                         className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b  rounded'>
                             <span className='text-xl text-gray-400'><BsLock/></span>

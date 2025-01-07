@@ -116,7 +116,7 @@ const EditProperty = () => {
 
 			Axios.delete(`/properties/${property_id}`).then(data => {
 				toast('Property deleted', { type: 'success' })
-				navigate('/admin/listings')
+				navigate('/admins/listings')
 			}).catch(e => {
 				errorHandler(e)
 			}).finally(() => {
@@ -380,7 +380,7 @@ const EditProperty = () => {
 													<button type='submit' className='bg-theme-color text-white py-2 px-4 rounded'>
 														Update
 													</button>
-													<Link to={`/admin/listings/${property_id}`}
+													<Link to={`/admins/listings/${property_id}`}
 														className='text-gray-800 bg-gray-300 font-semibold border py-2 rounded px-3'>
 														View
 													</Link>

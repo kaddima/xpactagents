@@ -204,10 +204,19 @@ class ValidationRules
       "phone" => "nullable|numeric"
     ];
   }
+
   public static function getUsersRules()
   {
     return [
       "type" => ["required", new CaseInsensitiveIn(["user", "agent", "admin"])],
+    ];
+  }
+
+  public static function deleteUserRules()
+  {
+    return [
+      "user_id" => "nullable|uuid",
+      "type" => ["required", new CaseInsensitiveIn(["user", "agent", "admin"])]
     ];
   }
 }

@@ -13,25 +13,25 @@ const Adms = () => {
         <div className='h-[calc(100%-44px)] md:flex md:gap-1'>
             <div className='md:w-[200px] pt-2 bg-neutral-100 dark:bg-slate-900'>
                 <div className='flex md:block flex-wrap md:h-full my-1 space-x-1 md:space-x-0'>
-                    <NavLink to={`/admin/adms/overview`}
+                    <NavLink to={`/admins/adms/overview`}
                         className={({isActive})=>isActive ? 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800' : 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}>
                             
                         <span className='text-xl'><MdDashboard/></span>
                         <span className='ml-2 text-xs font-bold capitalize'>Overview</span>
                     </NavLink>
-                    <NavLink to={`/admin/adms/admins`}
+                    <NavLink to={`/admins/adms/admins`}
                         className={({isActive})=>isActive ? 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800' : 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}>
                             
                         <span className='text-xl'><TbUsersGroup /></span>
                         <span className='ml-2 text-xs font-bold capitalize'>All admin</span>
                     </NavLink>
-                    <NavLink to={`/admin/adms/users`}
+                    <NavLink to={`/admins/adms/users`}
                         className={({isActive})=>isActive ? 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative bg-neutral-100 dark:bg-slate-800' : 'flex space-x-2 items-center py-2 pl-5 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 relative'}>
                             
                         <span className='text-xl'><TbUsers /></span>
                         <span className='ml-2 text-xs font-bold capitalize'>Users</span>
                     </NavLink>   
-                    {/* <NavLink to={`/admin/adms/create-admin`}
+                    {/* <NavLink to={`/admins/adms/create-admin`}
                         className='flex hover:dark:bg-slate-800 cursor-pointer border-r-2 border-r-transparent
                             items-center py-3 pl-2'>
                             

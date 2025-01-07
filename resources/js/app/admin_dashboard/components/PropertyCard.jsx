@@ -145,11 +145,11 @@ const PropertyCard = ({ data: v, listState = false }) => {
 
 			<div className='mt-auto'>
 				<div className='flex justify-end space-x-2 md:space-x-4 items-start'>
-					<button onClick={() => navigate(`/admin/listings/${v?.id}`)}
+					<button onClick={() => navigate(`/admins/listings/${v?.id}`)}
 						className='text-sm text-[#d92228] p-2 rounded-md hover:bg-slate-200'>
 						View
 					</button>
-					<button onClick={() => navigate(`/admin/listings/${v?.id}/edit`)}
+					<button onClick={() => navigate(`/admins/listings/${v?.id}/edit`)}
 						className='p-2 rounded-md hover:bg-slate-200'>
 						<FaEdit />
 					</button>

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\AlreadyExistsException;
 use App\Exceptions\NotFoundException;
 use App\Http\Resources\IdVerificationCollection;
 use App\Http\Resources\UserCollection;
@@ -169,6 +170,97 @@ class AdminUserService
     $req->delete();
   }
 
-  public function blockUser() {}
-  public function deleteUser() {}
+  public function deleteAnyUser($type, $user_id)
+  {
+    switch ($type) {
+      case 'agent':
+        $this->deleteAgent($user_id);
+        break;
+      case 'user':
+        $this->deleteUser($user_id);
+        break;
+
+      default:
+        # code...
+        break;
+    }
+  }
+  public function deleteAgent($user_id)
+  {
+    try {
+      $user = $this->userRepo->findById($user_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("User not found");
+    }
+
+    if (Storage::exists($user->id)) {
+      Storage::disk('public')->deleteDirectory($user_id);
+    }
+
+    // delete conversation and messages
+    $user->agentConversations->map(function ($agentConversation) {
+      $agentConversation->conversation()->delete();
+    });
+
+    $user->favorites()->delete();
+    $user->tours()->delete();
+    $user->properties()->delete();
+    $user->delete();
+  }
+
+  public function deleteUser($user_id)
+  {
+    try {
+      $user = $this->userRepo->findById($user_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("User not found");
+    }
+    // delete conversation and messages
+    $user->conversations->map(function ($conversation) {
+      $conversation->delete();
+    });
+
+    $user->favorites()->delete();
+    $user->delete();
+  }
+
+  public function blockUser($user_id)
+  {
+    try {
+      $user = $this->userRepo->findById($user_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("User not found");
+    }
+
+    if ($user->block == 1) {
+      throw new AlreadyExistsException("User is already blocked");
+    }
+
+    if ($user->is_agent == 1) {
+      $user->properties()->update(["published" => 0]);
+    }
+
+    $user->block = 1;
+    $user->save();
+  }
+
+  public function unblockUser($user_id)
+  {
+    try {
+      $user = $this->userRepo->findById($user_id);
+    } catch (ModelNotFoundException $e) {
+      throw new NotFoundException("User not found");
+    }
+
+    if ($user->block == 0) {
+      throw new AlreadyExistsException("User is already unblocked");
+    }
+
+    if ($user->is_agent == 1) {
+      $user->properties()->update(["published" => 1]);
+    }
+
+    $user->block = 0;
+    $user->save();
+  }
 }

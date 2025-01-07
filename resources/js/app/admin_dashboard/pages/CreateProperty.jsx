@@ -97,7 +97,7 @@ const CreateProperty = () => {
 													<ul className='text-xs list-disc ml-4'>
 														<li>You can upload an image for your recently created listing or</li>
 														<li>You can choose to upload an image later on the property
-															<Link to={`/admin/listings/${propertyID}/edit`} className='text-blue-400'>
+															<Link to={`/admins/listings/${propertyID}/edit`} className='text-blue-400'>
 																edit page</Link>
 														</li>
 													</ul>

@@ -55,7 +55,7 @@ const PropertyDetails = () => {
 
 			Axios.delete(`/properties/${property_id}`).then(data => {
 				toast('Property deleted', { type: 'success' })
-				navigate('/admin/listings')
+				navigate('/admins/listings')
 			}).catch(e => {
 				errorHandler(e)
 			}).finally(() => {
@@ -94,7 +94,7 @@ const PropertyDetails = () => {
 	return (
 		<div className="relative w-full h-full overflow-auto" id='property'>
 			<div className='fixed bottom-3 right-3 bg-sky-800 text-white font-[400] rounded'>
-				<NavLink to={`/admin/listings/${propertyID}/edit`} className='px-7 py-2 cursor-pointer inline-block'>
+				<NavLink to={`/admins/listings/${propertyID}/edit`} className='px-7 py-2 cursor-pointer inline-block'>
 					<FaRegEdit size={18} className='inline-block mt-[-5px]' />
 					<span className='inline-block'>Edit</span>
 				</NavLink>

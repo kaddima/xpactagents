@@ -21,7 +21,7 @@ const CompleteRegistration = () => {
         Axios.post('/users/update', data).then((data)=>{
             toast("Registration completed", {type:'success'})
             dispatch(updateProfile(data.data.data))
-            navigate('/admin/account/profile')
+            navigate('/admins/account/profile')
             //console.log(data.data.data)
         }).catch(e=>{
 

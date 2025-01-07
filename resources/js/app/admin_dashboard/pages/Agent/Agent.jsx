@@ -37,32 +37,32 @@ const Agent = () => {
 
 					<div className='flex flex-row flex-wrap gap-3 md:flex-col md:h-full'>
 
-						<NavLink to={`/admin/users/agent/${agent_id}/overview`}
+						<NavLink to={`/admins/users/agent/${agent_id}/overview`}
 							style={({ isActive }) => (isActive ? { borderColor: currentColor, borderBottomWidth: "2px" } : {})}
 							className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b rounded'>
 							<span className='text-xl text-gray-400'><TbDashboard /></span>
 							<span className='pl-1 text-sm'>Overview</span>
 						</NavLink>
-						<NavLink to={`/admin/users/agent/${agent_id}/listings`}
+						<NavLink to={`/admins/users/agent/${agent_id}/listings`}
 							style={({ isActive }) => (isActive ? { borderColor: currentColor, borderBottomWidth: "2px" } : {})}
 							className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b rounded'>
 							<span className='text-xl text-gray-400'><MdDashboard /></span>
 							<span className='pl-1 text-sm'>Listings</span>
 						</NavLink>
-						<NavLink to={`/admin/users/agent/${agent_id}/tours`}
+						<NavLink to={`/admins/users/agent/${agent_id}/tours`}
 							style={({ isActive }) => (isActive ? { borderColor: currentColor, borderBottomWidth: "2px" } : {})}
 							className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b rounded'>
 							<span className='text-xl text-gray-400'><MdList /></span>
 							<span className='pl-1 text-sm'>Tours</span>
 						</NavLink>
 
-						<NavLink to={`/admin/users/agent/${agent_id}/agent-profile`}
+						<NavLink to={`/admins/users/agent/${agent_id}/agent-profile`}
 							style={({ isActive }) => (isActive ? { borderColor: currentColor, borderBottomWidth: "2px" } : {})}
 							className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b  rounded'>
 							<span className='text-xl text-gray-400'><MdSupervisedUserCircle /></span>
 							<span className='pl-1 text-sm'>Profile</span>
 						</NavLink>
-						<NavLink to={`/admin/users/agent/${agent_id}/messages`}
+						<NavLink to={`/admins/users/agent/${agent_id}/messages`}
 							style={({ isActive }) => (isActive ? { borderColor: currentColor, borderBottomWidth: "2px" } : {})}
 							className='flex p-2 mt-2 font-semibold cursor-pointer items-center border-b  rounded'>
 							<span className='text-xl text-gray-400'><BsChatText /></span>

@@ -74,37 +74,37 @@ function App() {
 							style={{ height: "calc(100% - 94px)" }}>
 							<Routes>
 								{/* Dashbord */}
-								<Route path='/admin' element={<AdminDashboard />} />
-								<Route path='/admin/dashboard' element={<AdminDashboard />} />
-								{/* <Route path='/admin/create-property' element={<CreateProperty />} /> */}
-								<Route path='/admin/users' element={<Users />}>
+								<Route path='/admins' element={<AdminDashboard />} />
+								<Route path='/admins/dashboard' element={<AdminDashboard />} />
+								{/* <Route path='/admins/create-property' element={<CreateProperty />} /> */}
+								<Route path='/admins/users' element={<Users />}>
 									<Route index element={<UsersOverview />} />
 									<Route path='overview' element={<UsersOverview />} />
 									<Route path='users' element={<RegularUser />} />
 									<Route path='agents' element={<Agents />} />
 								</Route>
-								<Route path='/admin/adms' element={<Adms />}>
+								<Route path='/admins/adms' element={<Adms />}>
 									<Route index element={<AdminOverview />} />
 									<Route path='overview' element={<AdminOverview />} />
 									<Route path='create-admin' element={<CreateAdmin />} />
 									<Route path='users' element={<AdmsUsers />} />
 									<Route path='admins' element={<AdmsAdmins />} />
 								</Route>
-								<Route path='/admin/listings/:id' element={<PropertyDetails />} />
-								<Route path="/admin/listings/:id/edit" element={<EditProperty />} />
-								<Route path="/admin/tours" element={<Tours />} />
-								<Route path="/admin/listings" element={<ListingsPage />} />
-								<Route path="/admin/listings/search" element={<SearchPage />} />
-								<Route path="/admin/favorites" element={<Favorites />} />
-								<Route path='/admin/property/category/:name' element={<PropertiesByCategory />} />
-								<Route path='/admin/account' element={<Account />}>
+								<Route path='/admins/listings/:id' element={<PropertyDetails />} />
+								<Route path="/admins/listings/:id/edit" element={<EditProperty />} />
+								<Route path="/admins/tours" element={<Tours />} />
+								<Route path="/admins/listings" element={<ListingsPage />} />
+								<Route path="/admins/listings/search" element={<SearchPage />} />
+								<Route path="/admins/favorites" element={<Favorites />} />
+								<Route path='/admins/property/category/:name' element={<PropertiesByCategory />} />
+								<Route path='/admins/account' element={<Account />}>
 									<Route index element={<Profile />} />
 									<Route path='profile' element={<Profile />} />
 									<Route path='edit-profile' element={<EditProfile />} />
 									<Route path='change-password' element={<ChangePassword />} />
 									<Route path='complete-registration' element={<CompleteRegistration />} />
 								</Route>
-								<Route path='/admin/users/agent/:id' element={<Agent />}>
+								<Route path='/admins/users/agent/:id' element={<Agent />}>
 									<Route index element={<AgentOverview />} />
 									<Route path='overview' element={<AgentOverview />} />
 									<Route path='listings' element={<AgentListing />} />
@@ -112,7 +112,7 @@ function App() {
 									<Route path='agent-profile' element={<AgentProfile />} />
 									<Route path='messages' element={<MessageLayout />} />
 								</Route>
-								<Route path='/admin/q-r' element={<MessageLayout />} />
+								<Route path='/admins/q-r' element={<MessageLayout />} />
 							</Routes>
 
 							<ToastContainer />

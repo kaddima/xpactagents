@@ -30,4 +30,8 @@ class AgentConversation extends Model
   {
     return $this->hasMany(Message::class, "conversation_id","conversation_id");
   }
+
+	public function conversation(){
+		return $this->belongsTo(Conversation::class,"conversation_id");
+	}
 }

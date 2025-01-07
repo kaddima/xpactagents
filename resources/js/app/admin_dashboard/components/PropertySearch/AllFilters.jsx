@@ -33,7 +33,7 @@ const AllFilters = ({ isOpen, onClose }) => {
 		}
 
 		let queryStr = '?' + new URLSearchParams(obj).toString()
-		navigate(`/admin/listings/search${queryStr}`)
+		navigate(`/admins/listings/search${queryStr}`)
 
 	}
 

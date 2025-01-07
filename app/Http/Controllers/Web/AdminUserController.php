@@ -16,11 +16,13 @@ class AdminUserController extends BaseController
 		$this->adminUserService = $adminUserService;
 	}
 
-	public function adminUsersOverview(Request $request){
+	public function adminUsersOverview(Request $request)
+	{
 		return $this->sendResponse($this->adminUserService->userOverviewData());
 	}
 
-	public function searchUsers(Request $request){
+	public function searchUsers(Request $request)
+	{
 		$data = $this->validate($request, ValidationRules::userSearchRules());
 		return $this->sendResponse($this->adminUserService->userSearch($data));
 	}
@@ -28,15 +30,19 @@ class AdminUserController extends BaseController
 	/**
 	 * gets users by filters, eg admin,agents,and users
 	 */
-	public function getUsers(Request $request){
-		$data = $this->validate($request,ValidationRules::getUsersRules());
+	public function getUsers(Request $request)
+	{
+		$data = $this->validate($request, ValidationRules::getUsersRules());
 		return $this->sendResponse($this->adminUserService->getUsers($data));
 	}
 
-	public function getUserDetails(Request $request, $user_id){
-		$data = $this->validateParams(["user_id"=>$user_id],
-		["user_id"=>"required|uuid|exists:users,id"]);
-		return $this->sendResponse($this->adminUserService->userDetails($data['user_id']));	
+	public function getUserDetails(Request $request, $user_id)
+	{
+		$data = $this->validateParams(
+			["user_id" => $user_id],
+			["user_id" => "required|uuid|exists:users,id"]
+		);
+		return $this->sendResponse($this->adminUserService->userDetails($data['user_id']));
 	}
 
 	public function verificationRequest()
@@ -44,20 +50,51 @@ class AdminUserController extends BaseController
 		return $this->sendResponse($this->adminUserService->getAllVerificationRequests());
 	}
 
-	public function idVerificationAccept(Request $request){
-		$data = $this->validate($request,
-		["email"=>"required|email",
-		"user_id"=>"required|uuid|exists:users,id"]);
+	public function idVerificationAccept(Request $request)
+	{
+		$data = $this->validate(
+			$request,
+			[
+				"email" => "required|email",
+				"user_id" => "required|uuid|exists:users,id"
+			]
+		);
 		$this->adminUserService->idVerifcationAccept($data);
 		return $this->sendResponse(null, "id verifcation accepted");
 	}
 
-	public function idVerificationDecline(Request $request){
-		$data = $this->validate($request,
-		["email"=>"required|email",
-		"user_id"=>"required|uuid|exists:users,id"]);
+	public function idVerificationDecline(Request $request)
+	{
+		$data = $this->validate(
+			$request,
+			[
+				"email" => "required|email",
+				"user_id" => "required|uuid|exists:users,id"
+			]
+		);
 		$this->adminUserService->idVerifcationDecline($data);
 		return $this->sendResponse(null, "id verifcation declined");
 	}
 
+	public function deleteUser(Request $request, $user_id)
+	{
+		$this->validateParams(["user_id" => $user_id], ["user_id" => "required|uuid"]);
+		$data = $this->validate($request, ValidationRules::deleteUserRules());
+		$this->adminUserService->deleteAnyUser($data['type'], $user_id);
+		return $this->sendResponse(null, "User deleted successfully");
+	}
+
+	public function blockUser(Request $request, $user_id)
+	{
+		$this->validateParams(["user_id" => $user_id], ["user_id" => "required|uuid"]);
+		$this->adminUserService->blockUser($user_id);
+		return $this->sendResponse(null, "User blocked successfully");
+	}
+
+	public function unblockUser(Request $request, $user_id)
+	{
+		$this->validateParams(["user_id" => $user_id], ["user_id" => "required|uuid"]);
+		$this->adminUserService->unblockUser($user_id);
+		return $this->sendResponse(null, "User unblocked successfully");
+	}
 }

@@ -41,8 +41,8 @@ const UserMenu = () => {
   return (
     <div className='relative' id='userMenu'>
         <div className='flex items-center gap-2'>
-            {/* <Link to={`/admin/q-r`} className=''><BsChatText size={24}/></Link> */}
-            <Link to={'/admin/favorites'} className='hidden md:inline-block'>
+            {/* <Link to={`/admins/q-r`} className=''><BsChatText size={24}/></Link> */}
+            <Link to={'/admins/favorites'} className='hidden md:inline-block'>
                 <div className='relative'>
                     <BsHeart className={``} size={24}/>
                     <span className='absolute inline-block text-[16px] font-bold -top-2 -right-1'>{favorites.length}</span>

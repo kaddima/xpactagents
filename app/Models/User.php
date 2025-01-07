@@ -83,17 +83,32 @@ class User extends Authenticatable
 		static::creating(function ($model) {
 			$model->id = (string) Str::uuid(); // Generate a UUID
 		});
+
+		// Deleting the conversation
+		static::deleting(function ($model) {
+			// delete conversation and messages
+			/* $model->agentConversations->map(function ($agentConversation) {
+				$agentConversation->conversation->delete();
+				$agentConversation->delete();
+			});
+			$model->tours()->delete();
+			$model->favorites()->delete();
+			$model->properties()->delete(); */
+		});
 	}
 
-	public function scopeUser($query){
+	public function scopeUser($query)
+	{
 		return $query->where("is_agent", "0");
 	}
 
-	public function scopeAgent($query) {
+	public function scopeAgent($query)
+	{
 		return $query->where("is_agent", 1);
 	}
 
-	public function scopeAdmin($query){
+	public function scopeAdmin($query)
+	{
 		return $query->where("is_admin", 1);
 	}
 
@@ -102,22 +117,22 @@ class User extends Authenticatable
 		$column_value = [];
 
 		foreach ($filters as $key => $value) {
-			if($key == "search_type"){
+			if ($key == "search_type") {
 				continue;
 			}
-			if($key == "name"){
+			if ($key == "name") {
 				$name = explode(" ", $value);
 				/**
 				 * if searching by first name and last name a WHERE AND clause
 				 * is used in the query and if only a single name is provided
 				 * check for matches in first_name or last_name column
 				 * */
-				if(count($name) > 1){
+				if (count($name) > 1) {
 					$column_value[] = ["first_name", "Like", "%{$name[0]}%"];
 					$column_value[] = ["last_name", "Like", "%{$name[1]}%"];
-				}else{
+				} else {
 					$query->where("first_name", "LIKE", "%{$name[0]}%")
-					->orWhere("last_name", "LIKE", "%{$name[0]}%");
+						->orWhere("last_name", "LIKE", "%{$name[0]}%");
 				}
 				continue;
 			}
@@ -138,6 +153,11 @@ class User extends Authenticatable
 	public function properties()
 	{
 		return $this->hasMany(Property::class, "creator_id");
+	}
+
+	public function tours()
+	{
+		return $this->hasMany(Tour::class, "agent_id");
 	}
 
 	public function favorites()

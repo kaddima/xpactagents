@@ -51,7 +51,7 @@ const UserMenu = () => {
 					<BsChatText className={`${unread_messages_count > 0 && 'animation-bell'}`} size={24} />
 					<div className={`${unread_messages_count > 0 && 'notification'}`}></div>
 				</Link>
-				<Link to={'/dashboard/favorites'} className=''>
+				<Link to={'/dashboard/listings/favorites'} className=''>
 					<div className='relative'>
 						<BsHeart className={``} size={24} />
 						<span className='absolute inline-block text-[16px] font-bold -top-2   -right-1'>{favorites?.length}</span>

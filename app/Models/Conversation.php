@@ -29,6 +29,8 @@ class Conversation extends Model
 
     // Deleting the conversation
     static::deleting(function ($model) {
+      //delete agentConversation
+      $model->agentConversation()->delete();
       // Delete all associated messages
       $model->messages()->delete(); // This will delete all associated messages
     });
@@ -52,5 +54,9 @@ class Conversation extends Model
   public function lastMessage()
   {
     return $this->hasOne(Message::class)->latest(); // Get the latest message
+  }
+
+  public function agentConversation(){
+    return $this->hasOne(AgentConversation::class,"conversation_id");
   }
 }

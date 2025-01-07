@@ -30,7 +30,7 @@ const TableRow = ({ data, index }) => {
 			</td>
 			<td className='border-b-1 border-b-gray-300'>
 				<div className='text-xs font-[500] flex items-center flex-wrap'>
-					<Link to={`/admin/listings/${data.property_id}`}><span className='text-theme-color'>view</span></Link>
+					<Link to={`/admins/listings/${data.property_id}`}><span className='text-theme-color'>view</span></Link>
 				</div>
 			</td>
 		</tr>

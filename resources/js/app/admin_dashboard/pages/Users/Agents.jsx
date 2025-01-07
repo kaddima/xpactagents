@@ -20,12 +20,10 @@ const TableRow = ({ data, setAgentsDetails }) => {
 
 			showLoading()
 
-			Axios.post('/users/delete', { user_id: data.id }).then(result => {
-				toast('User deleted', { type: 'success' })
+			Axios.delete(`/admin/users/${data.id}`, { data: { type: "agent" } }).then(result => {
+				toast('Agent deleted', { type: 'success' })
 
 				setAgentsDetails(prev => {
-
-
 					let newUsers = prev.data.filter((v, i) => {
 						return data.id != v.id
 					})
@@ -34,7 +32,7 @@ const TableRow = ({ data, setAgentsDetails }) => {
 				})
 
 			}).catch(e => {
-				console.log(e.response)
+				errorHandler(e)
 			}).finally(() => {
 				hideLoading()
 			})
@@ -42,33 +40,26 @@ const TableRow = ({ data, setAgentsDetails }) => {
 
 	}
 
-	const onBlock = () => {
-
+	const onBlock = (type) => {
+		
 		showLoading()
-		Axios.post('/users/block', { user_id: data.id }).then(result => {
+		Axios.post(`/users/${data.id}/${type}`).then(result => {
 
 			setAgentsDetails(prev => {
 
-				let users = { ...prev }
-
-				for (let user of users.data) {
-
+				let usersData = prev.data
+				for (let user of usersData) {
 					if (user.id == data.id) {
 
-						let is_blocked = user.block
-
-						if (is_blocked == 0) {
-							is_blocked = 1
+						if (user.block == 0) {
+							user.block = 1
 						} else {
-							is_blocked = 0
+							user.block = 0
 						}
-
-						user.block = is_blocked
-
 						break
 					}
 				}
-				return users
+				return { ...prev, data: usersData }
 			})
 
 		}).catch(e => {
@@ -93,8 +84,11 @@ const TableRow = ({ data, setAgentsDetails }) => {
 		<td className='border-b dark:border-b-slate-800'><span className={`inline-block ${data.profile_complete == 1 ? 'bg-green-900' : 'bg-orange-800'}  text-white text-xs font-bold px-1`}>{data.profile_complete == 1 ? 'Verified' : 'Unverified'}</span></td>
 		<td className='border-b dark:border-b-slate-800'>
 			<div className='flex items-center space-x-2'>
-				<Link to={`/admin/users/agent/${data.id}/overview`} className="text-sm text-sky-600 font-semibold">View</Link>
-				<button className='text-red-600' title='Block the agent' onClick={onBlock}>
+				<Link to={`/admins/users/agent/${data.id}/overview`} className="text-sm text-sky-600 font-semibold">View</Link>
+				<button className='text-red-600'
+					data-type={data.block == 1 ? "unblock" : "block"}
+					title={data.block == 0 ? "block user" : "unblock user"}
+					onClick={(e) => { onBlock(e.currentTarget.getAttribute("data-type")) }}>
 					{data.block == 1 ? <FaLockOpen size={18} className='text-sky-600' /> : <MdBlock size={18} />}
 				</button>
 				<button className='text-red-600' title='Delete the agent' onClick={onDelete}>
@@ -128,7 +122,7 @@ const Agents = () => {
 
 		showLoading()
 
-		Axios.get(path, { params: { page,  type:"agent", ...params } }).then(data => {
+		Axios.get(path, { params: { page, type: "agent", ...params } }).then(data => {
 			setAgentsDetails(data.data.data)
 		}).catch(e => {
 			errorHandler(e)
@@ -139,7 +133,7 @@ const Agents = () => {
 	}
 
 	useEffect(() => {
-		Axios.get('/admin/users', {params:{type:"agent"}}).then(data => {
+		Axios.get('/admin/users', { params: { type: "agent" } }).then(data => {
 			let agents = data.data.data
 			setAgentsDetails(agents)
 		}).catch(e => {

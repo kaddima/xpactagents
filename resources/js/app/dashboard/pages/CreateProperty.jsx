@@ -15,7 +15,7 @@ import States from '../components/PropertySearch/States';
 import errorHandler from '../../utility/errorHandler';
 
 const CreateProperty = () => {
-
+	const date = new Date()
 	const initialValue = {
 		name: '',
 		address: '',
@@ -29,7 +29,7 @@ const CreateProperty = () => {
 		property_fact: {
 			unit: 'sq.ft',
 			size: 0,
-			upload_time: new Date().toString(),
+			upload_time: `${date.getMonth()+1}/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`,
 			flooring: "Tiles"
 		}
 	}
@@ -49,7 +49,6 @@ const CreateProperty = () => {
 	const unit = watch('property_fact.unit')
 
 	const submitForm = (data) => {
-
 		//display spinner
 		$('#spinner').fadeIn()
 
@@ -142,10 +141,13 @@ const CreateProperty = () => {
 										<div>
 											<label htmlFor="" className='block'>Amount</label>
 											<input type="number"
-												{...register('amount')}
+												{...register('amount', { required: "Property amount is required" })}
 												className='form-input bg-transparent border w-full'
 												placeholder='Amount'
 											/>
+											{errors.amount && (
+												<p className="text-red-400 text-xs">{errors.amount.message}</p>
+											)}
 										</div>
 
 										<div>
@@ -202,9 +204,8 @@ const CreateProperty = () => {
 												{...register('other_category', { required: "Please choose the property category" })}
 												defaultValue={'any'}
 												className='form-select bg-transparent border w-full'>
-												<option value="any">Any</option>
-												<option value="lux">Luxury</option>
 												<option value="modern">Modern</option>
+												<option value="lux">Luxury</option>
 												<option value="beach">Beach</option>
 												<option value="lake">Lake</option>
 												<option value="pool">Pool</option>
