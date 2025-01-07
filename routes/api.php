@@ -38,6 +38,7 @@ Route::prefix('v1')->group(function () {
 
 		Route::controller(UserController::class)->group(function () {
 			Route::patch('/users/lastseen', 'updateUserLastSeen');
+			Route::put('/users/complete-profile', 'completeUserProfile');
 			Route::put('/users', 'updateUserDetails');
 			Route::patch('/users/password', 'changePassword');
 			Route::post('/users/image', 'uploadUserImage');

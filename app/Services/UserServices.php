@@ -104,4 +104,10 @@ class UserServices
     $currentUser->last_seen = now();
     $currentUser->save();
   }
+
+  public function completeUserProfile($data, $currentUser){
+    $data['profile_complete'] = 1;
+    $currentUser->update($data);
+    return new UserResource($currentUser->fresh());
+  }
 }

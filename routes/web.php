@@ -44,6 +44,7 @@ Route::middleware("auth")->group(function () {
 	//===== AccountCOntroller =====
 	Route::post('/change-password', [AccountController::class, 'changePassword']);
 	Route::post('/users/update', [AccountController::class, 'updateUser']);
+	Route::put('/users/complete-profile', [AccountController::class, 'completeUserProfile']);
 	Route::post('/users/lastseen', [AccountController::class, 'updateLastSeen']);
 	Route::post('/users/image', [AccountController::class, 'uploadPhoto']);
 	//===== PROPERTIES ROUTE =====

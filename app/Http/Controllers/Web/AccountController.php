@@ -4,11 +4,9 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\BaseController;
-use App\Models\User;
 use App\Services\AuthService;
 use App\Services\GeneralDataService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -123,6 +121,10 @@ class AccountController extends BaseController
 	public function idVerifyRequest(Request $request)
 	{
 		return $this->apiController->IdVerificationRequest($request);
+	}
+
+	public function completeUserProfile(Request $request){
+		return $this->apiController->completeUserProfile($request);
 	}
 
 }

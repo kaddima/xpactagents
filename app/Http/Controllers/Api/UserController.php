@@ -21,6 +21,12 @@ class UserController extends BaseController
 		$this->generalDataService = $generalDataService;
 	}
 
+	public function completeUserProfile(Request $request){
+		$data = $this->validate($request,ValidationRules::completeProfileRules());
+		$user = $this->userServices->completeUserProfile($data, $request->user());
+		return $this->sendResponse($user, "User profile completed");
+	}
+
 	public function getuserDetails(Request $request, $user_id)
 	{
 		$currentUser = null;

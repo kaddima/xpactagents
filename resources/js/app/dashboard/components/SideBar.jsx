@@ -111,18 +111,6 @@ const Sidebar = () => {
 						</div>
 					))}
 				</div>
-				{currentUser.is_admin == 1 && <div className="">
-					<a
-						href={`/admin/dashboard`}
-						onClick={handleCloseSideBar}
-						className={`flex space-x-2 items-center py-2 mt-1 pl-5 text-sm font-semibold 
-							hover:bg-slate-100 dark:hover:bg-slate-800 relative`}>
-						<span className='text-xl'><MdDashboard /></span>
-						<div>
-							<p>Admin Dashboard</p>
-						</div>
-					</a>
-				</div>}
 				<div className='w-full cursor-pointer'>
 					<a onClick={() => {
 						Axios.post('/logout').then(data => {

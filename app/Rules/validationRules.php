@@ -37,6 +37,20 @@ class ValidationRules
       'address' => 'string',
     ];
   }
+  public static function completeProfileRules()
+  {
+    return [
+      'first_name' => 'required|min:3',
+      'last_name' => 'required|min:3',
+      'gender' => ["required", new CaseInsensitiveIn(["male", "female", "other"])],
+      'state' => 'required',
+      'whatsapp' => 'nullable|regex:/^[\+]?[0-9]{11}$/',
+      'lga' => 'required',
+      'phone' => 'regex:/^[\+]?[0-9]{11}$/',
+      'dob' => 'required|date',
+      'address' => 'required',
+    ];
+  }
 
   public static function loginRules()
   {
