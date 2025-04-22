@@ -53,8 +53,8 @@ const Login = () => {
 			if (data.data.userInfo.is_agent == 1 && data.data.userInfo.is_admin != 1) {
 				location.href = '/dashboard'
 				return
-			} else if (data.data.userInfo.is_admin == 1) {
-				location.href = '/admin/dashboard'
+			} if (data.data.userInfo.is_admin == 1) {
+				location.href = '/admins/dashboard'
 				return
 			}
 

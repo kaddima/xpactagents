@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\MessageController;
 use App\Http\Controllers\AdmsController;
 use App\Http\Controllers\Web\AdminUserController;
 use App\Http\Controllers\Web\AuthenticationController;
+use Illuminate\Support\Facades\Artisan;
 
 /*
 |--------------------------------------------------------------------------
@@ -136,4 +137,18 @@ Route::view('/app/{path?}', 'app.main')->where('path', '.*');
 
 Route::get('/properties', [ListingController::class, 'getProperties']);
 Route::get('/properties/search', [ListingController::class, 'getProperties']);
-Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);;
+Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);
+
+Route::get('/clear-cache', function(){
+	Artisan::call('cache:clear');
+	Artisan::call('route:clear');
+	
+	return 'clear';
+});
+//this should run basic setups like migration and seeding
+Route::get('/basic/setup', function(){
+	Artisan::call("migrate");
+	Artisan::call("db:seed");
+
+	return "Migration and seeding successful";
+});

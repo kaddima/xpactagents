@@ -47,14 +47,12 @@ const Question = ({ propertyDetails }) => {
 			.finally(() => {
 				hideLoading()
 			})
-
-
 	}
 
 	return (
 		<div>
 			<div className='mt-5 relative'>
-				<div className='absolute z-[10] inset-0 transition translate-x-[2000pxt] dark:bg-main-dark-bg bg-white opacity-90' id='q-submitted'>
+				<div className='absolute z-[10] inset-0 transition translate-x-[2000px] dark:bg-main-dark-bg bg-white opacity-90' id='q-submitted'>
 					<div className='flex flex-col justify-center h-full w-full px-5'>
 						<div>
 							<FaRegCheckCircle size={34} className='text-green-600' />
@@ -139,8 +137,6 @@ const Question = ({ propertyDetails }) => {
 						</FormProvider>
 					</div>
 				</div>
-
-
 			</div>
 		</div>
 	)
