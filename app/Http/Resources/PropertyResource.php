@@ -29,7 +29,7 @@ class PropertyResource extends JsonResource
 			'amount' => $this->amount,
 			'state' => $this->state,
 			'lga' => $this->lga,
-			'other_category'=> $this->other_category,
+			'other_category' => $this->other_category,
 			'property_type' => $this->property_type,
 			'category' => $this->category,
 			'address' => $this->address,
@@ -38,6 +38,7 @@ class PropertyResource extends JsonResource
 			'published' => $this->published,
 			'property_fact' => $this->property_fact,
 			'amenities' => $this->amenities,
+			'is_sold' => $this->is_sold
 		];
 	}
 
@@ -50,7 +51,7 @@ class PropertyResource extends JsonResource
 	public function toArray($request)
 	{
 		$images = $this->propertyImages;
-		
+
 		// Common property data
 		$propertyData = $this->transformPropertyData();
 

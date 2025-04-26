@@ -75,7 +75,7 @@ const PropertyCard = ({ data: v, listState = false }) => {
 	};
 
 	return (
-		<div className="max-h-[400px] relative">
+		<div className={`max-h-[400px] relative ${v?.is_sold == 1 ? "opacity-80" : ""}`}>
 
 			{v.published == 0 && <div className='absolute top-5 left-2 px-1 bg-theme-color
 			 rounded text-white text-[10px] uppercase font-bold'>
@@ -91,8 +91,13 @@ const PropertyCard = ({ data: v, listState = false }) => {
 				<FaHeart size={24} className={`${isFavorite ? 'text-pink-400' : 'text-white'} transition`} />
 			</div>
 
-			<div className='h-[200px]'>
+			<div className='h-[200px] relative'>
 				<img src={v.images} alt="" className="w-full h-full object-cover" />
+				{v.is_sold && v.is_sold == 1 && <div className='absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 '>
+					<div className='bg-red-800 py-1 px-5 rounded-md opacity-70'>
+						<h1 className='uppercase text-2xl font-extrabold tracking-widest'>sold </h1>
+					</div>
+				</div>}
 			</div>
 			<div className="px-3 ">
 				<div className='border-b dark:border-b-slate-800 py-2'>

@@ -17,6 +17,7 @@ import Axios from '../../utility/axios';
 import { hideLoading, showLoading } from '../../utility/loading';
 import States from '../components/PropertySearch/States';
 import errorHandler from '../../utility/errorHandler';
+import ToggleSwitch from '../components/ToggleSwitch';
 
 const EditProperty = () => {
 
@@ -105,8 +106,21 @@ const EditProperty = () => {
 		}).finally(() => {
 			hideLoading()
 		})
+	}
 
+	const onPropertysold = (property_id, soldStatus) => {
+		showLoading()
 
+		Axios.put(`/properties/${property_id}`, { is_sold: soldStatus == 1 ? 0 : 1 }).then(data => {
+			toast('Changed successful', { type: 'success' })
+			setPropertyDetails(prev => {
+				return { ...prev, is_sold: prev.is_sold == 1 ? 0 : 1 }
+			})
+		}).catch(e => {
+			errorHandler(e)
+		}).finally(() => {
+			hideLoading()
+		})
 	}
 
 	// Get property details
@@ -124,31 +138,21 @@ const EditProperty = () => {
 	}, [])
 
 	return (
-		<div className='relative  '>
-			<div className='w-11/12 mx-auto'>
-				<div className=''>
+		<div className='relative'>
+			<div className='w-11/12 mx-auto pb-5'>
+				<div className='pb-5'>
 					<div className='pt-5 md:flex justify-between items-center'>
 						<div>
 							<h1 className='text-2xl font-bold'>Edit Property</h1>
 							<p className='text-xs'>This page modifies your listings</p>
 						</div>
-
-						<button onClick={(e) => {
-							let publishStatus = e.target.getAttribute("data-status")
-							onPublished(propertyDetails.id, publishStatus)
-						}}
-							data-status={propertyDetails.published == 0 ? "true" : "false"}
-							className={`border-[2px] ${propertyDetails.published == 1 ?
-								'border-green-600' :
-								'border-red-600'} text-xs px-5 transition py-2 rounded-md 
-						 	hover:bg-theme-color hover:text-white mt-3 md:mt-0`}>
-							{propertyDetails.published == 1 ? 'Unpublish' : 'Publish'} this property
-						</button>
-
+						<div>
+							<img src="" alt="" />
+						</div>
 					</div>
 
 					<div className='mt-10'>
-						{/* Propeerty nme */}
+						{/* Propeerty name */}
 						<div>
 							<h1 className='text-xl md:text-4xl capitalize pb-5'>{propertyName}</h1>
 						</div>
@@ -196,7 +200,6 @@ const EditProperty = () => {
 									images={propertyDetails.images}
 									setFn={setPropertyImage}
 									closePhotoManager={setShowPhotoManager} />
-
 							</>}
 
 						</div>
@@ -249,9 +252,9 @@ const EditProperty = () => {
 
 										<div>
 											<label htmlFor="" className='block'>Property category</label>
-											<select name="property_category" 
-											{...register('category', { required: "Please choose the property category" })} 
-											className='form-select bg-transparent border w-full dark:border-slate-800'    >
+											<select name="property_category"
+												{...register('category', { required: "Please choose the property category" })}
+												className='form-select bg-transparent border w-full dark:border-slate-800'    >
 												<option value="">Choose property type</option>
 												<option value="sell">For sell</option>
 												<option value="rent">For rent</option>
@@ -354,10 +357,8 @@ const EditProperty = () => {
 										</>)}
 
 										<div>
-											{/* <button className='rounded w-full py-2 bg-green-600 text-white uppercase font-semibold text-sm'>
-                                            {property_id ? "Update" : "Create"}
-                                        </button> */}
-											<div className={`fixed bottom-5 right-5 text-sm z-[300]`}>
+
+											<div className={`text-sm z-[300]`}>
 												<div className='flex items-center gap-3'>
 													<button type='submit' className='bg-theme-color text-white py-2 px-4 rounded'>
 														Update
@@ -366,11 +367,7 @@ const EditProperty = () => {
 												</div>
 											</div>
 										</div>
-
-
 									</div>
-
-
 								</div>
 
 								<div className='md:w-2/5'>
@@ -461,11 +458,47 @@ const EditProperty = () => {
 									</div>
 								</div>
 							</div>
-
 						</form>
-
 					</div>
 
+				</div>
+
+				<div className='mt-5 border-opacity-80 rounded-md'>
+					<div>
+						<div>
+							<h1 className='text-xl font-bold'>Property Configuration</h1>
+							<span className='text-xs'>customize this property's attributes using the toggle switch</span>
+						</div>
+
+						<div className='mt-3'>
+							<ul className='space-y-3 text-sm'>
+								<li className='border-b dark:border-b-slate-800 border-b-slate-400 py-1'>
+									<div className='md:flex justify-between items-center'>
+										<p>Publish this property</p>
+										<button onClick={(e) => {
+											let publishStatus = e.target.getAttribute("data-status")
+											onPublished(propertyDetails.id, publishStatus)
+										}}
+											data-status={propertyDetails.published == 0 ? "true" : "false"}
+											className={`border-[2px] ${propertyDetails.published == 1 ?
+												'border-green-600' :
+												'border-red-600'} text-xs px-5 transition py-2 rounded-md 
+						 	hover:bg-theme-color hover:text-white mt-3 md:mt-0`}>
+											{propertyDetails.published == 1 ? 'Unpublish' : 'Publish'} this property
+										</button>
+									</div>
+								</li>
+								<li>
+									<div className='md:flex justify-between items-center'>
+										<p>Mark this property as sold</p>
+										<ToggleSwitch
+											onChange={() => { onPropertysold(propertyDetails?.id, propertyDetails?.is_sold) }}
+											checkState={propertyDetails && propertyDetails.is_sold == 1 ? true : false} />
+									</div>
+								</li>
+							</ul>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

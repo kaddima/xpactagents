@@ -84,6 +84,7 @@ class ValidationRules
       'bathrooms' => 'nullable|integer|min:1', // Bathrooms should be a non-negative integer
       'toilets' => 'nullable|integer|min:1', // Toilets should be a non-negative integer
       'description' => 'nullable|string', // Optional description
+      'is_sold' => 'nullable|integer|min:0|max:1',
       'duration' => ['nullable', 'string', new CaseInsensitiveIn(['month', 'day', 'year', 'week'])], // Limited options for duration
       'lga' => $isUpdate ? 'nullable|string|max:255' : 'required|string|max:255', // Optional LGA
       'category' => $isUpdate ? ['nullable', 'string', 'max:255', new CaseInsensitiveIn(['sell', 'rent', 'land', 'short_let'])] :
