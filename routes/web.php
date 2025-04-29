@@ -9,6 +9,8 @@ use App\Http\Controllers\AdmsController;
 use App\Http\Controllers\Web\AdminUserController;
 use App\Http\Controllers\Web\AuthenticationController;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Response;
 
 /*
 |--------------------------------------------------------------------------
@@ -139,14 +141,33 @@ Route::get('/properties', [ListingController::class, 'getProperties']);
 Route::get('/properties/search', [ListingController::class, 'getProperties']);
 Route::get('/properties/{id}', [ListingController::class, 'propertyDetails']);
 
-Route::get('/clear-cache', function(){
+Route::get('/clear-cache', function () {
 	Artisan::call('cache:clear');
 	Artisan::call('route:clear');
-	
+
 	return 'clear';
 });
+
+//since symlink wont work for shared hosting we improvise
+if (env('ENABLE_STORAGE_ROUTE', false)) {
+	Route::get('/storage/{path}', function ($path) {
+		$fullPath = storage_path("app/public/{$path}");
+
+		if (
+			!File::exists($fullPath) ||
+			!str_starts_with(realpath($fullPath), realpath(storage_path('app/public')))
+		) {
+			abort(404);
+		}
+
+		return Response::file($fullPath, [
+			'Cache-Control' => 'public, max-age=86400',
+		]);
+	})->where('path', '.*');
+}
+
 //this should run basic setups like migration and seeding
-Route::get('/basic/setup', function(){
+Route::get('/basic/setup', function () {
 	Artisan::call("migrate");
 	Artisan::call("db:seed");
 
